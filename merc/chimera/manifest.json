@@ -1,0 +1,10 @@
+{
+	"name": "Chimera",
+	"version": "1.0",
+	"author": "Kavavuvi",
+	"files": {
+        "chimera.dll": "_HALOCE\\",
+        "strings.dll": "_HALOCE\\",
+        "chimera.ini": "_HALOCE\\"
+	}
+}

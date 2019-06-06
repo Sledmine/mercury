@@ -1,2 +1,2 @@
 # Mercury
-Package manager for Halo CE
+Package manager for Halo Custom Edition

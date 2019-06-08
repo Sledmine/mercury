@@ -4,18 +4,29 @@ Mecury: Package Manager for Halo Custom Edition
 
 Commands available:
 
-install     Look and search for packages hosted in Mercury repos to download and install in the game.
-            TAKES:
-            
-            <packageName> <subPackageName> (optional)
-            
+install : Search for packages hosted in Mercury repos to download and install into the game.
+            <package> [<subpackage>]
 
-remove      Delete previously installed packages in the game.
+    list    : List and show info about all the previously installed packages in the game.
+            <package> -- use "all" to show all the installed packages.
 
-update      Update an existent package in the game.
+    merc    : Manually install a specified .merc package.
+            <mercPath>
 
-mitosis     Create a new instance of Halo Custom Edition with only neccesary base files to run.
+    remove  : Delete previously installed package, subpackage in the game.
+            <package> [<subpackage>]
 
-config      Define critical Mercury parameters as package installation path.
+    update  : Update an existent package in the game.
+            <package>
 
-version     Throw version and related info about Mercury.
+    mitosis : Create a new instance of Halo Custom Edition with only neccesary base files to run.
+            <instanceName>
+
+    config  : Define critical Mercury parameters as package installation path.
+            <field> <value> - in case of 'HaloCE' field you can give the name of mitosised Halo Custom Edition instance.
+
+    setup   : Set all the needed values to introduce Mercury into Windows OS.
+
+    version : Throw version and related info about Mercury.]]
+
+luastaticf mercury.lua lib/fdownload.lua lib/registry.lua lib/utilis.lua C:\Users\Sledmine\Documents\Herramientas\cmder\bin\luajit.a -IC:\Users\Sledmine\Documents\Herramientas\cmder\bin\csrc\luajit\src\src

@@ -175,7 +175,7 @@ function download(packageLabel)
             end
         end
     else
-        print("ERROR '"..c[1].."' uknown error...")
+        print("ERROR '"..tostring(c[1]).."' uknown error...")
     end
 end
 

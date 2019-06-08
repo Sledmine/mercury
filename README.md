@@ -18,4 +18,4 @@ Is a console program that allows you to download all kind of tools, addons, mods
 - LuaPower distribution
 - LuaJIT environment
 - MSYS
-- MinGW-W64
+- MinGW

@@ -12,8 +12,11 @@ Is a console program that allows you to download all kind of tools, addons, mods
  - Manually install .merc packages in one click.
  - Every other cool thing that we can type in the keyboard.
  
+ ### Install Mercury
+ To download and use Mercury in your computer you have to download Windows binaries usually located in the "bin" folder and run Mercury.exe in your favorite command prompt.
+ 
  ### Building Mercury
- To build Mercury using this repo you need to install in order couple of things to being able to create a Linux or Windows binarie executable:
+ To build Mercury using this repo you need to install in order couple of things to being able to create a  Windows binary executable:
  
 - LuaPower distribution
 - LuaJIT environment

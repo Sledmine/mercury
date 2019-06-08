@@ -1,14 +1,18 @@
 -----------------------------------------------------------------------------
--- Little program to download files from URLs
--- LuaSocket sample files
--- Author: Diego Nehab
+-- FDownload: Library to download files from repo host
+-- Editor: Sledmine
+-- Original Author: Diego Nehab
+-- Version: 1.0
 -----------------------------------------------------------------------------
+
 local socket = require("socket")
 local http = require("socket.http")
 local https = require("socket.https")
 local ftp = require("socket.ftp")
 local url = require("socket.url")
 local ltn12 = require("ltn12")
+
+local _M = {}
 
 -- formats a number of seconds into human readable form
 function nicetime(s)
@@ -87,15 +91,7 @@ function stats(size)
     end
 end
 
--- determines the size of a http file
-function gethttpssize(u)
-    local r, c, h = http.request {method = "HEAD", url = u}
-    if c == 200 then
-        return tonumber(h["content-length"])
-    end
-end
-
--- determines the size of a http file
+-- determines the size of a https file
 function gethttpssize(u)
     local r, c, h = https.request {method = "HEAD", url = u}
     if c == 200 then
@@ -103,22 +99,34 @@ function gethttpssize(u)
     end
 end
 
+-- determines the size of a http file
+function gethttpsize(u)
+    local r, c, h = http.request {method = "HEAD", url = u}
+    if c == 200 then
+        return tonumber(h["content-length"])
+    end
+end
 
--- downloads a file using the http protocol
+-- downloads a file using the https protocol
 function getbyhttps(u, file)
     local save = ltn12.sink.file(file or io.stdout)
     -- only print feedback if output is not stdout
     if file then save = ltn12.sink.chain(stats(gethttpssize(u)), save) end
-    local r, c, h, s = https.request {url = u, sink = save }
-    if c ~= 200 then io.stderr:write(s or c, "\n") end
+    local r, c, h, s = http.request {url = u, sink = save }
+    if c ~= 200 then --io.stderr:write(s or c, "\n")
+    end
+    return r, c, h ,s
 end
 
+-- downloads a file using the http protocol
 function getbyhttp(u, file)
     local save = ltn12.sink.file(file or io.stdout)
     -- only print feedback if output is not stdout
     if file then save = ltn12.sink.chain(stats(gethttpsize(u)), save) end
     local r, c, h, s = http.request {url = u, sink = save }
-    if c ~= 200 then io.stderr:write(s or c, "\n") end
+    if c ~= 200 then --io.stderr:write(s or c, "\n")
+    end
+    return r, c, h ,s
 end
 
 -- downloads a file using the ftp protocol
@@ -147,14 +155,11 @@ function get(u, name)
     local fout = name and io.open(name, "wb")
     local scheme = getscheme(u)
     if scheme == "ftp" then getbyftp(u, fout)
-    elseif scheme == "http" then getbyhttp(u, fout)
-    elseif scheme == "https" then getbyhttps(u, fout)
+    elseif scheme == "http" then return getbyhttp(u, fout)
+    elseif scheme == "https" then return getbyhttps(u, fout)
     else print("unknown scheme" .. scheme) end
 end
 
--- main program
-arg = arg or {}
-if #arg < 1 then
-    io.write("Usage:\n  lua get.lua <remote-url> [<local-file>]\n")
-    os.exit(1)
-else get(arg[1], arg[2]) end
+_M.get = get
+
+return _M

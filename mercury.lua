@@ -17,7 +17,7 @@ local cjson = require "cjson"
 -- Global variables definition.
 
 local _mercuryVersion = "1.0"
-local host = "http://mercury.shadowmods.net/repo" -- URL for the main repo (example: http://lua.repo.net/)
+local host = "https://mercury.shadowmods.net/repo" -- URL for the main repo (example: http://lua.repo.net/)
 local librarianPath = "librarian.php?pkg=" -- Path for master librarian index
 
 -- Global function creation.

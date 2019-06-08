@@ -175,7 +175,7 @@ function download(packageLabel)
             end
         end
     else
-        print("ERROR '"..c.."' uknown error...")
+        print("ERROR '"..c[1].."' uknown error...")
     end
 end
 
@@ -213,7 +213,7 @@ local function printUsage()
     print([[
     usage: mercury <action> <params>
 
-    PARAMETERS INSIDE "[]" CAN BE OPTIONAL!!!
+    PARAMETERS INSIDE "[]" ARE OPTIONAL!!!
 
     install : Search for packages hosted in Mercury repos to download and install into the game.
             <package> [<subpackage>]

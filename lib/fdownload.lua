@@ -7,7 +7,7 @@
 
 local socket = require("socket")
 local http = require("socket.http")
-local https = require("socket.https")
+local https = require("ssl.https")
 local ftp = require("socket.ftp")
 local url = require("socket.url")
 local ltn12 = require("ltn12")
@@ -112,7 +112,7 @@ function getbyhttps(u, file)
     local save = ltn12.sink.file(file or io.stdout)
     -- only print feedback if output is not stdout
     if file then save = ltn12.sink.chain(stats(gethttpssize(u)), save) end
-    local r, c, h, s = http.request {url = u, sink = save }
+    local r, c, h, s = https.request {url = u, sink = save }
     if c ~= 200 then --io.stderr:write(s or c, "\n")
     end
     return r, c, h ,s

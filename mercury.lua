@@ -138,33 +138,40 @@ function download(packageLabel)
         if (h["content-length"] == "0") then
             print("\nWARNING!!!: '"..packageLabel.."' package not found in Mercury repository.")
         else
-            print("\nSuccess! Package '"..packageLabel.."' found in Mercury repo, parsing meta data....")
-            local packageJSON = cjson.decode(utilis.readFileToString(_TEMP..packageHandle))
-            if (packageJSON ~= {}) then
-                if (packageSplit[2] == nil) then
-                    packageVersion = packageJSON.version
-                end
-                print("\n["..packageName.." | Version = '"..packageVersion.."']\nStarting download...\n")
-                print("Running subpackage tree...\n")
-                if (packageJSON.repo == nil) then -- Repo is the main Mercury repo, read file URL to download subpackages
-                    for k,v in pairs (packageJSON.paths) do
-                        local subpackageURL = host.."/"..v
-                        local subpackageSplit = utilis.explode("/", v)
-                        local subpackageFile = utilis.arrayPop(subpackageSplit)
-                        print("Downloading '"..subpackageFile.."' subpackage...\n")
-                        local downloadOutput = _TEMP.._REPOPATH.."\\downloaded\\"..subpackageFile
-                        local r, c, h, s = fdownload.get(subpackageURL, downloadOutput) 
-                        if (c == 200) then
-                            print("\n'"..packageLabel.."-"..v.."' has been succesfully downloaded.\n\nStarting installation process now...\n")
-                            install(downloadOutput)
-                        else
-                            print("\nERROR!!!: '"..v.."' is not more available in the repo as subpackage...\n")
-                        end
+            local packageFile = utilis.readFileToString(_TEMP..packageHandle)
+            if (packageFile ~= "") then
+                local packageJSON = cjson.decode(utilis.readFileToString(_TEMP..packageHandle))
+                if (packageJSON ~= {}) then
+                    print("\nSuccess! Package '"..packageLabel.."' found in Mercury repo, parsing meta data....")
+                    if (packageSplit[2] == nil) then
+                        packageVersion = packageJSON.version
                     end
-                else -- Repo is an external URL, get it to download package from it
-                    -- Insert awesome code here
-                    print("WARNING!!: This package is hosted in an external server different from the Mercury official repo.")
+                    print("\n["..packageName.." | Version = '"..packageVersion.."']\nStarting download...\n")
+                    print("Running subpackage tree...\n")
+                    if (packageJSON.repo == nil) then -- Repo is the main Mercury repo, read file URL to download subpackages
+                        if (packageJSON.paths ~= nil) then
+                            for k,v in pairs (packageJSON.paths) do
+                                local subpackageURL = host.."/"..v
+                                local subpackageSplit = utilis.explode("/", v)
+                                local subpackageFile = utilis.arrayPop(subpackageSplit)
+                                print("Downloading '"..subpackageFile.."' subpackage...\n")
+                                local downloadOutput = _TEMP.._REPOPATH.."\\downloaded\\"..subpackageFile
+                                local r, c, h, s = fdownload.get(subpackageURL, downloadOutput) 
+                                if (c == 200) then
+                                    print("\n'"..packageLabel.."-"..v.."' has been succesfully downloaded.\n\nStarting installation process now...\n")
+                                    install(downloadOutput)
+                                else
+                                    print("\nERROR!!!: '"..v.."' is not more available in the repo as subpackage...\n")
+                                end
+                            end
+                        end
+                    else
+                        print("\nERROR!!!: The specified package is not in this repository.\n")
+                    end
                 end
+            else
+                --print("\nERROR!!: Repository is online but the response is in a unrecognized format, this can be caused by a server error or an outdated Mercury version.")
+                print("\nWARNING!!!: '"..packageLabel.."' package not found in Mercury repository.")
             end
         end
     else

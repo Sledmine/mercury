@@ -8,7 +8,6 @@ local _M = {}
 
 local lfs = require "lfs"
 local fs = require "fs"
-local zip = require "minizip"
 local inspect = require "inspect"
 local path = require "path"
 
@@ -72,32 +71,7 @@ local function isFile(filepath)
     return true
 end
 
-local function depackageMerc(mercFile, outputPath)
-    z = zip.open(mercFile, "r")
-    --print(inspect(z:get_global_info()))
-    z:first_file()
-    for i = 1,z:get_global_info().entries do
-        --print(inspect(z:get_file_info()))
-        local fileName = z:get_file_info().filename
-        if (path.ext(fileName) == nil) then
-            print("Creating folder: '"..fileName.."'")
-            createFolder(outputPath.."\\"..fileName)
-        else
-            if (fileName ~= "manifest.json") then
-                print("Depacking '"..fileName.."'...")
-            end
-            local file = io.open(outputPath.."\\"..fileName, "wb")
-            file:write(z:extract(fileName))
-            file:close()
-        end
-        z:next_file()
-    end
-    z:close()
-    local dir,file,ext = splitPath(mercFile)
-    print("\nSuccesfully depacked "..file..".merc...\n")
-end
-
-function explode(divider, string) -- Created by: http://richard.warburton.it
+local function explode(divider, string) -- Created by: http://richard.warburton.it
     if (divider == nil or divider == '') then return 1 end
     local position, array = 0, {}
     for st, sp in function() return string.find(string, divider, position, true) end do
@@ -108,7 +82,7 @@ function explode(divider, string) -- Created by: http://richard.warburton.it
     return array
 end
 
-function arrayPop(array)
+local function arrayPop(array)
     return array[#array]
 end
 
@@ -120,7 +94,6 @@ _M.deleteFile = deleteFile
 _M.copyFile = copyFile
 _M.fileExist = fileExist
 _M.isFile = isFile
-_M.depackageMerc = depackageMerc
 _M.splitPath = splitPath
 _M.explode = explode
 _M.arrayPop = arrayPop

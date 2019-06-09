@@ -6,13 +6,16 @@
 
 -- Required libraries implementation.
 
+-- Local libraries
 local fdownload = require "lib.fdownload"
 local utilis = require "lib.utilis"
 local registry = require "lib.registry"
 
+-- Global libraries
 local inspect = require "inspect"
 local path = require "path"
 local cjson = require "cjson"
+local zip = require "minizip"
 
 -- Global variables definition.
 
@@ -22,7 +25,7 @@ local librarianPath = "librarian.php?pkg=" -- Path for master librarian index
 
 -- Global function creation.
 
-function createEnvironment() -- Setup environment to work, store data, temp files, etc.
+function createEnvironment(folders) -- Setup environment to work, store data, temp files, etc.
     _SOURCEFOLDER = lfs.currentdir()
     _APPDATA = os.getenv("APPDATA")
     _TEMP = os.getenv("TEMP")
@@ -34,18 +37,20 @@ function createEnvironment() -- Setup environment to work, store data, temp file
             _HALOCE = registryPath.values["EXE Path"]["value"]
         end
     end
-    _REPOPATH = "\\mercury\\packages"
-    _MERC_EXTENSION = ".merc"
-    envFolders = {
-        _APPDATA.."\\Mercury",
-        _APPDATA.."\\Mercury\\installed",
-        _TEMP.._REPOPATH,
-        _TEMP.._REPOPATH.."\\downloaded",
-        _TEMP.._REPOPATH.."\\depacked"
-    }
-    for i = 1,#envFolders do
-        --print("\nCreating folder: "..envFolders[i])
-        utilis.createFolder(envFolders[i])
+    if (folders) then
+        _REPOPATH = "\\mercury\\packages"
+        _MERC_EXTENSION = ".merc"
+        envFolders = {
+            _APPDATA.."\\Mercury",
+            _APPDATA.."\\Mercury\\installed",
+            _TEMP.._REPOPATH,
+            _TEMP.._REPOPATH.."\\downloaded",
+            _TEMP.._REPOPATH.."\\depacked"
+        }
+        for i = 1,#envFolders do
+            --print("\nCreating folder: "..envFolders[i])
+            utilis.createFolder(envFolders[i])
+        end
     end
 end
 
@@ -74,6 +79,32 @@ function list()
     print("WARNING!!!: There are not any installed package using Mercury...yet.")
 end
 
+local function depackageMerc(mercFile, outputPath)
+    z = zip.open(mercFile, "r")
+    --print(inspect(z:get_global_info()))
+    z:first_file()
+    for i = 1,z:get_global_info().entries do
+        --print(inspect(z:get_file_info()))
+        local fileName = z:get_file_info().filename
+        if (utilis.isFile(fileName) == nil) then
+            print("Creating folder: '"..fileName.."'")
+            utilis.createFolder(outputPath.."\\"..fileName)
+        else
+            if (fileName ~= "manifest.json") then
+                print("Depacking '"..fileName.."'...")
+            end
+            print(outputPath.."\\"..fileName)
+            local file = io.open(outputPath.."\\"..fileName, "wb")
+            file:write(z:extract(fileName))
+            file:close()
+        end
+        z:next_file()
+    end
+    z:close()
+    local dir,file,ext = utilis.splitPath(mercFile)
+    print("\nSuccesfully depacked "..file..".merc...\n")
+end
+
 local function install(mercPackage)
     local mercPath, mercName, mercExtension = utilis.splitPath(mercPackage)
     local mercFullName = mercPath.."\\"..mercName.._MERC_EXTENSION
@@ -81,7 +112,7 @@ local function install(mercPackage)
         print("Trying to depackage '"..mercName.."'.merc...\n")
         local depackageFolder = _TEMP.._REPOPATH.."\\depacked\\"..mercName
         utilis.createFolder(depackageFolder)
-        utilis.depackageMerc(mercFullName, depackageFolder)
+        depackageMerc(mercFullName, depackageFolder)
         local mercJSON = cjson.decode(utilis.readFileToString(depackageFolder.."\\manifest.json"))
         print("Dispatching package files...")
         for k,v in pairs(mercJSON) do
@@ -246,8 +277,9 @@ function printVersion()
 end
 
 -- Main program functionality.
-
-createEnvironment()
+createEnvironment(false)
+destroyEnvironment() -- Destroy previous environment in case something ended wrong
+createEnvironment(true)
 print(tostring("\nWorking folder: '".._SOURCEFOLDER.."'."))
 print(tostring("\nCurrent Halo CE Path: '".._HALOCE.."' change it using 'mercury config'.\n"))
 if (#arg == 0) then

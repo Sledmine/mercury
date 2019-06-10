@@ -118,9 +118,18 @@ local function install(mercPackage)
         for k,v in pairs(mercJSON) do
             packageLabel = k
         end
-        for k,v in pairs (mercJSON[packageLabel].files) do
-            print("Installing '"..k.."'...")
-            utilis.copyFile(depackageFolder.."\\"..k, string.gsub(v, "_HALOCE", _HALOCE, 1))
+        for file,path in pairs(mercJSON[packageLabel].files) do
+            local outputPath = string.gsub(path, "_HALOCE", _HALOCE, 1)
+            print("Installing '"..file.."'...")
+            print("Output: '"..outputPath..file.."'...")
+            if (utilis.fileExist(outputPath..file)) then
+                print("There is an existing file with the same name, renaming it to .bak for restoring purposes.")
+                local result, desc, error = utilis.move(outputPath..file, outputPath..file..".bak")
+                if (result) then
+                    print("Succesfully created backup for: "..file)
+                end
+            end
+            utilis.copyFile(depackageFolder.."\\"..file, string.gsub(path, "_HALOCE", _HALOCE, 1))
         end
         print("\n'"..mercName..".merc' Installed succesfully!!")
         local installedPackages = {}

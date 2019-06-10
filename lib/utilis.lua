@@ -41,7 +41,12 @@ local function writeStringToFile(file, text)
 end
 
 local function createFolder(folderName)
-    os.execute('if not exist "'..folderName..'" ( mkdir "'..folderName..'" )')
+    --os.execute('if not exist "'..folderName..'" ( mkdir "'..folderName..'" )')
+    return fs.mkdir(folderName, true)
+end
+
+local function move(inputPath, outputPath)
+    return fs.move(inputPath, outputPath)
 end
 
 local function deleteFolder(folderName, withFiles)
@@ -53,7 +58,8 @@ local function deleteFolder(folderName, withFiles)
 end
 
 local function deleteFile(filePath)
-    os.execute('del "'..filePath..'"')
+    --os.execute('del "'..filePath..'"')
+    return fs.remove(filePath)
 end
 
 local function copyFile(filePath, outputPath)
@@ -90,6 +96,7 @@ _M.readFileToString = readFileToString
 _M.writeStringToFile = writeStringToFile
 _M.createFolder = createFolder
 _M.deleteFolder = deleteFolder
+_M.move = move
 _M.deleteFile = deleteFile
 _M.copyFile = copyFile
 _M.fileExist = fileExist

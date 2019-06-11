@@ -81,10 +81,8 @@ end
 
 local function depackageMerc(mercFile, outputPath)
     z = zip.open(mercFile, "r")
-    --print(inspect(z:get_global_info()))
     z:first_file()
     for i = 1,z:get_global_info().entries do
-        --print(inspect(z:get_file_info()))
         local fileName = z:get_file_info().filename
         if (utilis.isFile(fileName) == nil) then
             print("Creating folder: '"..fileName.."'")
@@ -93,7 +91,7 @@ local function depackageMerc(mercFile, outputPath)
             if (fileName ~= "manifest.json") then
                 print("Depacking '"..fileName.."'...")
             end
-            print(outputPath.."\\"..fileName)
+            --print(outputPath.."\\"..fileName)
             local file = io.open(outputPath.."\\"..fileName, "wb")
             file:write(z:extract(fileName))
             file:close()
@@ -126,31 +124,57 @@ local function install(mercPackage)
                 print("There is an existing file with the same name, renaming it to .bak for restoring purposes.")
                 local result, desc, error = utilis.move(outputPath..file, outputPath..file..".bak")
                 if (result) then
-                    print("Succesfully created backup for: "..file)
+                    print("Succesfully created backup for: '"..file.."'")
+                else
+                    print("Error at trying to create a backup for: '"..file.."' aborting installation now!!!")
+                    print("\n'ERROR: "..mercName..".merc' installation encountered one or more problems!!")
+                    return false
                 end
             end
-            utilis.copyFile(depackageFolder.."\\"..file, string.gsub(path, "_HALOCE", _HALOCE, 1))
+            if (utilis.copyFile(depackageFolder.."\\"..file, string.gsub(path, "_HALOCE", _HALOCE, 1)..file) == true) then
+                print("File succesfully installed.\n")
+            else
+                print("Error at trying to install file: '"..file.."' aborting installation now!!!")
+                print("\n'ERROR: "..mercName..".merc' installation encountered one or more problems!!")
+                return false
+            end
         end
-        print("\n'"..mercName..".merc' Installed succesfully!!")
         local installedPackages = {}
         if (utilis.fileExist(_APPDATA.."\\mercury\\installed\\packages.json") == true) then
             installedPackages = cjson.decode(utilis.readFileToString(_APPDATA.."\\mercury\\installed\\packages.json"))
         end
         installedPackages[packageLabel] = mercJSON[packageLabel]
         utilis.writeStringToFile(_APPDATA.."\\mercury\\installed\\packages.json", cjson.encode(installedPackages))
+        print("\n'"..mercName..".merc' Installed succesfully!!")
+        return true
     else
         print("\nSpecified .merc package doesn't exist. ("..mercFullName..")")
     end
+    return false
 end
 
 local function remove(packageLabel)
     installedPackages = cjson.decode(utilis.readFileToString(_APPDATA.."\\mercury\\installed\\packages.json"))
     if (installedPackages[packageLabel] ~= nil) then
-        print("Removing package '"..packageLabel.."'...\n")
+        print("Removing package '"..packageLabel.."'...")
         for k,v in pairs(installedPackages[packageLabel].files) do
             local file = string.gsub(v..k, "_HALOCE", _HALOCE, 1)
-            print("Erasing file: '"..file.."'")
-            utilis.deleteFile(file)
+            print("\nTrying to erase file: '"..file.."'...")
+            local result, desc, error = utilis.deleteFile(file)
+            if (result) then
+                print("File erased succesfully.\nChecking for backup files...")
+                if (utilis.fileExist(file..".bak")) then
+                    print("Backup file found, restoring now...")
+                    utilis.move(file..".bak", file)
+                    if (utilis.fileExist(file)) then
+                        print("File succesfully restored.")
+                    else
+                        print("Error at trying to restore backup file...")
+                    end
+                else
+                    print("No backup found for this file.")
+                end
+            end
         end
         installedPackages[packageLabel] = nil
         utilis.writeStringToFile(_APPDATA.."\\mercury\\installed\\packages.json", cjson.encode(installedPackages))

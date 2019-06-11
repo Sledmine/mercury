@@ -62,8 +62,24 @@ local function deleteFile(filePath)
     return fs.remove(filePath)
 end
 
-local function copyFile(filePath, outputPath)
-    os.execute('copy "'..filePath..'" "'..outputPath..'"')
+local function copyFile(sourceFile, destinationFile)
+    if (sourceFile ~= nil and destinationFile ~= nil) then
+        if (fs.is(sourceFile) == false) then
+            print("Error: Specified source file does not exist!")
+            return false
+        end
+        local sourceF = io.open(sourceFile,"rb")
+        local destinationF = io.open(destinationFile,"wb")
+        if (sourceF ~= nil and destinationF ~= nil) then 
+            destinationF:write(sourceF:read("*a"))
+            io.close(sourceF)
+            io.close(destinationF)
+            return true
+        end
+        print("Error: One of the specified source or destination file can't be opened.")
+    end
+    print("Error: Trying to copy files, one of the specified paths is null.")
+    return false
 end
 
 local function fileExist(filePath)

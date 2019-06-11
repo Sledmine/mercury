@@ -145,7 +145,7 @@ local function install(mercPackage)
         end
         installedPackages[packageLabel] = mercJSON[packageLabel]
         utilis.writeStringToFile(_APPDATA.."\\mercury\\installed\\packages.json", cjson.encode(installedPackages))
-        print("\n'"..mercName..".merc' Installed succesfully!!")
+        print("\n'"..mercName..".merc' succesfully installed!!")
         return true
     else
         print("\nSpecified .merc package doesn't exist. ("..mercFullName..")")
@@ -159,7 +159,7 @@ local function remove(packageLabel)
         print("Removing package '"..packageLabel.."'...")
         for k,v in pairs(installedPackages[packageLabel].files) do
             local file = string.gsub(v..k, "_HALOCE", _HALOCE, 1)
-            print("\nTrying to erase file: '"..file.."'...")
+            print("\nTrying to erase: '"..file.."'...")
             local result, desc, error = utilis.deleteFile(file)
             if (result) then
                 print("File erased succesfully.\nChecking for backup files...")
@@ -174,11 +174,19 @@ local function remove(packageLabel)
                 else
                     print("No backup found for this file.")
                 end
+            else 
+                if (error == 2) then
+                    print("WARNING!!: File not found for erasing, probably misplaced or manually removed.")
+                else
+                    print("Error at trying to erase file, reason: '"..desc.."' aborting uninstalltion now!!!")
+                    return false
+                end
             end
         end
         installedPackages[packageLabel] = nil
         utilis.writeStringToFile(_APPDATA.."\\mercury\\installed\\packages.json", cjson.encode(installedPackages))
         print("\nSuccessfully removed '"..packageLabel.."' package.")
+        return true
     else
         print("Package '"..packageLabel.."' is not installed.")
     end
@@ -189,7 +197,7 @@ function download(packageLabel)
     local packageName = packageSplit[1]
     local packageVersion = packageSplit[2]
     if (searchPackage(packageName) == true) then
-        print("The package you are looking for is already installed in the game... if you need to reinstall it try to remove it or update it.")
+        print("The package you are looking for is already installed in the game... if you need to update/reinstall it try to remove it first.")
         return false
     end
     print("Looking for package '"..packageLabel.."' in Mercury repository...\n")
@@ -244,7 +252,7 @@ function download(packageLabel)
 end
 
 local function mitosis(name)
-    if (utilis.fileExist("mitosisList.json") == true) then
+    if (utilis.fileExist("data\\mitosis.json") == true) then
         local fileList
         local folderName = utilis.arrayPop(utilis.explode("\\", _HALOCE))
         local mitosisPath = utilis.explode(folderName, _HALOCE)[1]..name.."\\"
@@ -259,7 +267,7 @@ local function mitosis(name)
                 utilis.createFolder(mitosisPath..v)
             end
         end
-        print("Successfully mitosed '"..folderName.."'")
+        print("Successfully mitosised '"..folderName.."'")
     else
         print("There is not a mitosis filelist!")
     end

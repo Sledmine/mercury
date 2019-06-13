@@ -25,7 +25,7 @@ local librarianPath = "librarian.php?pkg=" -- Path for master librarian index
 
 -- Global function creation.
 
-function createEnvironment(folders) -- Setup environment to work, store data, temp files, etc.
+local function createEnvironment(folders) -- Setup environment to work, store data, temp files, etc.
     _SOURCEFOLDER = lfs.currentdir()
     _APPDATA = os.getenv("APPDATA")
     _TEMP = os.getenv("TEMP")
@@ -54,11 +54,11 @@ function createEnvironment(folders) -- Setup environment to work, store data, te
     end
 end
 
-function destroyEnvironment() -- Destroy environment previously created, temp folders, trash files, etc
+local function destroyEnvironment() -- Destroy environment previously created, temp folders, trash files, etc
     utilis.deleteFolder(_TEMP.."\\mercury\\", true)
 end
 
-function searchPackage(packageName)
+local function searchPackage(packageName)
     local installedPackages = {}
     if (utilis.fileExist(_APPDATA.."\\mercury\\installed\\packages.json") == true) then
         installedPackages = cjson.decode(utilis.readFileToString(_APPDATA.."\\mercury\\installed\\packages.json"))
@@ -69,7 +69,7 @@ function searchPackage(packageName)
     return false
 end
 
-function list()
+local function list()
     local installedPackages = {}
     if (utilis.fileExist(_APPDATA.."\\mercury\\installed\\packages.json") == true) then
         installedPackages = cjson.decode(utilis.readFileToString(_APPDATA.."\\mercury\\installed\\packages.json"))
@@ -135,7 +135,7 @@ local function install(mercPackage)
                 print("File succesfully installed.\n")
             else
                 print("Error at trying to install file: '"..file.."' aborting installation now!!!")
-                print("\n'ERROR: "..mercName..".merc' installation encountered one or more problems!!")
+                print("\n'ERROR: "..mercName..".merc' installation encountered one or more problems, aborting now!!")
                 return false
             end
         end
@@ -192,7 +192,7 @@ local function remove(packageLabel)
     end
 end
 
-function download(packageLabel)
+local function download(packageLabel)
     local packageSplit = utilis.explode("-", packageLabel)
     local packageName = packageSplit[1]
     local packageVersion = packageSplit[2]
@@ -313,7 +313,7 @@ local function printUsage()
     version : Throw version and related info about Mercury.]])
 end
 
-function printVersion() 
+local function printVersion() 
     print("Mercury: Package Manager for Halo Custom Edition\nVersion: ".._mercuryVersion.."\nGNU General Public License v3.0\nDeveloped by: Jerry Brick, Sledmine.")
 end
 

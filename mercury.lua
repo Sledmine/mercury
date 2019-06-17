@@ -33,8 +33,12 @@ local function createEnvironment(folders) -- Setup environment to work, store da
         _HALOCE = cjson.decode(utilis.readFileToString(_APPDATA.."\\mercury\\config.json")).HaloCE
     else
         local registryPath = registry.getkey("HKEY_LOCAL_MACHINE\\SOFTWARE\\WOW6432Node\\Microsoft\\Microsoft Games\\Halo CE")
+        local documentsPath = registry.getkey("HKEY_CURRENT_USER\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Explorer\\Shell Folders")
         if (registryPath ~= nil) then
             _HALOCE = registryPath.values["EXE Path"]["value"]
+        end
+        if (documentsPath ~= nil) then
+            _MYGAMES = documentsPath.values["Personal"]["value"].."\\My Games\\Halo CE"
         end
     end
     if (folders) then
@@ -55,7 +59,7 @@ local function createEnvironment(folders) -- Setup environment to work, store da
 end
 
 local function destroyEnvironment() -- Destroy environment previously created, temp folders, trash files, etc
-    utilis.deleteFolder(_TEMP.."\\mercury\\", true)
+    utilis.deleteFile(_TEMP.."\\mercury\\", true)
 end
 
 local function searchPackage(packageName)
@@ -69,12 +73,36 @@ local function searchPackage(packageName)
     return false
 end
 
-local function list()
+local function list(packageName, onlyNames, detailList)
     local installedPackages = {}
     if (utilis.fileExist(_APPDATA.."\\mercury\\installed\\packages.json") == true) then
-        installedPackages = cjson.decode(utilis.readFileToString(_APPDATA.."\\mercury\\installed\\packages.json"))
-        print(inspect(installedPackages))
-        return true
+        local installedPackagesFile = utilis.readFileToString(_APPDATA.."\\mercury\\installed\\packages.json")
+        if (installedPackagesFile ~= "") then
+            installedPackages = cjson.decode(utilis.readFileToString(_APPDATA.."\\mercury\\installed\\packages.json"))
+        else
+            utilis.deleteFile(_APPDATA.."\\mercury\\installed\\packages.json")
+            print("WARNING!!!: There are not any installed package using Mercury...yet.")
+        end
+        local printInfo = {}
+        if (packageName ~= "all") then
+            if (searchPackage(packageName)) then
+                printInfo[packageName].name = installedPackages[packageName].name
+                printInfo[packageName].author = installedPackages[packageName].author
+                printInfo[packageName].version = installedPackages[packageName].version
+            else
+                print("The specified package is not installed in the game, yet.")
+            end
+        else
+            printInfo = installedPackages
+        end
+        for key,value in pairs(printInfo) do
+            if (onlyNames) then
+                print(printInfo[key].name)
+            else
+                print("["..printInfo[key].name.."]\nAuthor: "..printInfo[key].author.."\nVersion: "..printInfo[key].version.."\n")
+            end
+        end
+        return false
     end
     print("WARNING!!!: There are not any installed package using Mercury...yet.")
 end
@@ -118,8 +146,13 @@ local function install(mercPackage)
         end
         for file,path in pairs(mercJSON[packageLabel].files) do
             local outputPath = string.gsub(path, "_HALOCE", _HALOCE, 1)
+            outputPath = string.gsub(outputPath, "_MYGAMES", _MYGAMES, 1)
             print("Installing '"..file.."'...")
             print("Output: '"..outputPath..file.."'...")
+            if (utilis.fileExist(outputPath) == false) then
+                print("Creating folder: "..outputPath)
+                utilis.createFolder(outputPath)
+            end
             if (utilis.fileExist(outputPath..file)) then
                 print("There is an existing file with the same name, renaming it to .bak for restoring purposes.")
                 local result, desc, error = utilis.move(outputPath..file, outputPath..file..".bak")
@@ -131,7 +164,7 @@ local function install(mercPackage)
                     return false
                 end
             end
-            if (utilis.copyFile(depackageFolder.."\\"..file, string.gsub(path, "_HALOCE", _HALOCE, 1)..file) == true) then
+            if (utilis.copyFile(depackageFolder.."\\"..file, outputPath..file) == true) then
                 print("File succesfully installed.\n")
             else
                 print("Error at trying to install file: '"..file.."' aborting installation now!!!")
@@ -159,6 +192,7 @@ local function remove(packageLabel)
         print("Removing package '"..packageLabel.."'...")
         for k,v in pairs(installedPackages[packageLabel].files) do
             local file = string.gsub(v..k, "_HALOCE", _HALOCE, 1)
+            file = string.gsub(file, "_MYGAMES", _MYGAMES, 1)
             print("\nTrying to erase: '"..file.."'...")
             local result, desc, error = utilis.deleteFile(file)
             if (result) then
@@ -174,11 +208,11 @@ local function remove(packageLabel)
                 else
                     print("No backup found for this file.")
                 end
-            else 
-                if (error == 2) then
+            else
+                if (error == 2 or error == 3) then
                     print("WARNING!!: File not found for erasing, probably misplaced or manually removed.")
                 else
-                    print("Error at trying to erase file, reason: '"..desc.."' aborting uninstalltion now!!!")
+                    print("Error at trying to erase file, reason: '"..desc.."' aborting uninstallation now!!!")
                     return false
                 end
             end
@@ -192,13 +226,15 @@ local function remove(packageLabel)
     end
 end
 
-local function download(packageLabel)
+local function download(packageLabel, forceInstallation)
     local packageSplit = utilis.explode("-", packageLabel)
     local packageName = packageSplit[1]
     local packageVersion = packageSplit[2]
-    if (searchPackage(packageName) == true) then
-        print("The package you are looking for is already installed in the game... if you need to update/reinstall it try to remove it first.")
-        return false
+    if (searchPackage(packageName)) then
+        if (forceInstallation ~= true) then
+            print("The package you are looking for is already installed in the game... if you need to update/reinstall it try to remove it first.")
+            return false
+        end
     end
     print("Looking for package '"..packageLabel.."' in Mercury repository...\n")
     local packageHandle = _REPOPATH.."\\"..packageLabel..".json" -- Path and Filename for the JSON file obtained from the server
@@ -285,28 +321,40 @@ local function printUsage()
     print([[
     usage: mercury <action> <params>
 
-    PARAMETERS INSIDE "[]" ARE OPTIONAL!!!
+    PARAMETERS INSIDE "[ ]" ARE OPTIONAL!!!
 
     install : Search for packages hosted in Mercury repos to download and install into the game.
-            <package> [<subpackage>]
+            <package> [<subpackage>] [<parameters>]
 
+            -f      Force installation, will remove old packages and erase existing backupfiles.
+
+            -nb     Avoid creation of backup files.
+            
     list    : List and show info about all the previously installed packages in the game.
-            <package> -- use "all" to show all the installed packages.
+            <package> [<parameters>] -- use "all" as package to show all the installed packages.
+ 
+            -l      Only shows package name.
+
+            -d      Print detailed info about the package.
 
     merc    : Manually install a specified .merc package.
             <mercPath>
 
     remove  : Delete previously installed package, subpackage in the game.
-            <package> [<subpackage>]
+            <package> [<subpackage>] [<parameters>]
+
+            -nb     Avoid restoration of backup files.
+            
+            -eb     This will erase previously created backup files of the package.
 
     update  : Update an existent package in the game.
-            <package>
+            <package> -- use "all" as package to update all the installed packages.
 
     mitosis : Create a new instance of Halo Custom Edition with only neccesary base files to run.
             <instanceName>
 
     config  : Define critical Mercury parameters as package installation path.
-            <field> <value> - in case of 'HaloCE' field you can give the name of mitosised Halo Custom Edition instance.
+            <field> <value> - in 'HaloCE' case field you can pass a name of mitosised Halo Custom Edition instance.
 
     setup   : Set all the needed values to introduce Mercury into Windows OS.
 
@@ -321,14 +369,22 @@ end
 createEnvironment(false)
 destroyEnvironment() -- Destroy previous environment in case something ended wrong
 createEnvironment(true)
-print(tostring("\nWorking folder: '".._SOURCEFOLDER.."'."))
-print(tostring("\nCurrent Halo CE Path: '".._HALOCE.."' change it using 'mercury config'.\n"))
+print(tostring("\nCurrent Working folder: '".._SOURCEFOLDER.."'."))
+print(tostring("Current Halo CE Path: '".._HALOCE.."' change it using 'mercury config'."))
+print(tostring("Current My Games Path: '".._MYGAMES.."' change it using 'mercury config'.\n"))
 if (#arg == 0) then
     printUsage()
 else
+    local parameters
     if (arg[1] == "install") then
         if (arg[2] ~= nil) then
-            download(arg[2])
+            if (arg[3] ~= nil) then
+                parameters = ""
+                for i = 3,#arg do
+                    parameters = arg[i]
+                end
+            end
+            download(arg[2], parameters)
         else
             printUsage()
         end
@@ -340,7 +396,18 @@ else
         end
     elseif (arg[1] == "list") then
         if (arg[2] ~= nil) then
-            list(arg[2])
+            local onlyNames
+            local detailList
+            if (arg[3] ~= nil) then
+                parameters = ""
+                for i = 3,#arg do
+                    parameters = arg[i]
+                end
+                if (string.find(parameters, "-l") ~= nil) then
+                    onlyNames = true
+                end
+            end
+            list(arg[2], onlyNames, detailList)
         else
             printUsage()
         end

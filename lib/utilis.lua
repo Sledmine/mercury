@@ -41,7 +41,6 @@ local function writeStringToFile(file, text)
 end
 
 local function createFolder(folderName)
-    --os.execute('if not exist "'..folderName..'" ( mkdir "'..folderName..'" )')
     return fs.mkdir(folderName, true)
 end
 
@@ -57,8 +56,10 @@ local function deleteFolder(folderName, withFiles)
     end
 end
 
-local function deleteFile(filePath)
-    --os.execute('del "'..filePath..'"')
+local function deleteFile(filePath, recursive)
+    if (recursive == true) then
+        return fs.remove(filePath, true)
+    end
     return fs.remove(filePath)
 end
 
@@ -76,7 +77,14 @@ local function copyFile(sourceFile, destinationFile)
             io.close(destinationF)
             return true
         end
+        if (sourceF == nil) then
+            print("Error in:"..sourceFile.."\nSource file can't be opened.")
+        end
+        if (destinationF == nil) then
+            print("Error in:"..destinationFile.."\nDestination file can't be opened.")
+        end
         print("Error: One of the specified source or destination file can't be opened.")
+        return false
     end
     print("Error: Trying to copy files, one of the specified paths is null.")
     return false

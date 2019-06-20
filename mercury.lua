@@ -199,8 +199,8 @@ function download(packageLabel, forceInstallation)
                     if (packageSplit[2] == nil) then
                         packageVersion = packageJSON.version
                     end
-                    print("\n\t"..packageName.." | Version = '"..packageVersion.."']\nStarting fetch process...\n")
-                    print("Running package tree...\n")
+                    print("\n["..packageName.." | Version = '"..packageVersion.."']\n")
+                    print("\nRunning package tree...\n")
                     if (packageJSON.repo == nil) then -- Repo is the main Mercury repo, read file URL to download subpackages
                         if (packageJSON.paths ~= nil) then
                             for k,v in pairs (packageJSON.paths) do

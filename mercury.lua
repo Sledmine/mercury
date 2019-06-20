@@ -99,7 +99,7 @@ local function list(packageName, onlyNames, detailList)
             if (onlyNames) then
                 print(printInfo[key].name)
             else
-                print("["..printInfo[key].name.."]\nAuthor: "..printInfo[key].author.."\nVersion: "..printInfo[key].version.."\n")
+                print("["..key.."]\nName: "..printInfo[key].name.."\nAuthor: "..printInfo[key].author.."\nVersion: "..printInfo[key].version.."\n")
             end
         end
         return false
@@ -131,7 +131,108 @@ local function depackageMerc(mercFile, outputPath)
     print("\nSuccesfully depacked "..file..".merc...\n")
 end
 
-local function install(mercPackage)
+local function remove(packageLabel)
+    installedPackages = cjson.decode(utilis.readFileToString(_APPDATA.."\\mercury\\installed\\packages.json"))
+    if (installedPackages[packageLabel] ~= nil) then
+        print("Removing package '"..packageLabel.."'...")
+        for k,v in pairs(installedPackages[packageLabel].files) do
+            local file = string.gsub(v..k, "_HALOCE", _HALOCE, 1)
+            file = string.gsub(file, "_MYGAMES", _MYGAMES, 1)
+            print("\nTrying to erase: '"..file.."'...")
+            local result, desc, error = utilis.deleteFile(file)
+            if (result) then
+                print("File erased succesfully.\nChecking for backup files...")
+                if (utilis.fileExist(file..".bak")) then
+                    print("Backup file found, restoring now...")
+                    utilis.move(file..".bak", file)
+                    if (utilis.fileExist(file)) then
+                        print("File succesfully restored.")
+                    else
+                        print("Error at trying to restore backup file...")
+                    end
+                else
+                    print("No backup found for this file.")
+                end
+            else
+                if (error == 2 or error == 3) then
+                    print("WARNING!!: File not found for erasing, probably misplaced or manually removed.")
+                else
+                    print("Error at trying to erase file, reason: '"..desc.."' aborting uninstallation now!!!")
+                    return false
+                end
+            end
+        end
+        installedPackages[packageLabel] = nil
+        utilis.writeStringToFile(_APPDATA.."\\mercury\\installed\\packages.json", cjson.encode(installedPackages))
+        print("\nSuccessfully removed '"..packageLabel.."' package.")
+        return true
+    else
+        print("Package '"..packageLabel.."' is not installed.")
+    end
+end
+
+function download(packageLabel, forceInstallation)
+    local packageSplit = utilis.explode("-", packageLabel)
+    local packageName = packageSplit[1]
+    local packageVersion = packageSplit[2]
+    if (searchPackage(packageName)) then
+        if (forceInstallation ~= true) then
+            print("The package you are looking for is already installed in the game... if you need to update/reinstall it try to remove it first.")
+            return false
+        end
+    end
+    print("Looking for package '"..packageLabel.."' in Mercury repository...\n")
+    local packageHandle = _REPOPATH.."\\"..packageLabel..".json" -- Path and Filename for the JSON file obtained from the server
+    print("Fetching package into librarian index...\n")
+    local r, c, h, s = fdownload.get(host.."/"..librarianPath..packageLabel, _TEMP.."\\"..packageHandle)
+    if (c == 404) then
+        print("\nERROR: Repository server can't be reached...")
+    elseif (c == 200) then
+        if (h["content-length"] == "0") then
+            print("\nWARNING!!!: '"..packageLabel.."' package not found in Mercury repository.")
+        else
+            local packageFile = utilis.readFileToString(_TEMP..packageHandle)
+            if (packageFile ~= "") then
+                local packageJSON = cjson.decode(utilis.readFileToString(_TEMP..packageHandle))
+                if (packageJSON ~= {}) then
+                    print("\nSuccess! Package '"..packageLabel.."' found in Mercury repo, parsing meta data....")
+                    if (packageSplit[2] == nil) then
+                        packageVersion = packageJSON.version
+                    end
+                    print("\n\t"..packageName.." | Version = '"..packageVersion.."']\nStarting fetch process...\n")
+                    print("Running package tree...\n")
+                    if (packageJSON.repo == nil) then -- Repo is the main Mercury repo, read file URL to download subpackages
+                        if (packageJSON.paths ~= nil) then
+                            for k,v in pairs (packageJSON.paths) do
+                                local subpackageURL = host.."/"..v
+                                local subpackageSplit = utilis.explode("/", v)
+                                local subpackageFile = utilis.arrayPop(subpackageSplit)
+                                print("Downloading '"..subpackageFile.."' subpackage...\n")
+                                local downloadOutput = _TEMP.._REPOPATH.."\\downloaded\\"..subpackageFile
+                                local r, c, h, s = fdownload.get(subpackageURL, downloadOutput) 
+                                if (c == 200) then
+                                    print("\n'"..packageLabel.."-"..v.."' has been succesfully downloaded.\n\nStarting installation process now...\n")
+                                    install(downloadOutput)
+                                else
+                                    print("\nERROR!!!: '"..v.."' is not more available in the repo or an error ocurred while downloading, try again later....\n")
+                                end
+                            end
+                        end
+                    else
+                        print("\nERROR!!!: The specified package is not in this repository.\n")
+                    end
+                end
+            else
+                --print("\nERROR!!: Repository is online but the response is in a unrecognized format, this can be caused by a server error or an outdated Mercury version.")
+                print("\nWARNING!!!: '"..packageLabel.."' package not found in Mercury repository.")
+            end
+        end
+    else
+        print("ERROR '"..tostring(c[1]).."' uknown error...")
+    end
+end
+
+function install(mercPackage)
     local mercPath, mercName, mercExtension = utilis.splitPath(mercPackage)
     local mercFullName = mercPath.."\\"..mercName.._MERC_EXTENSION
     if (utilis.fileExist(mercFullName) == true) then
@@ -178,113 +279,18 @@ local function install(mercPackage)
         end
         installedPackages[packageLabel] = mercJSON[packageLabel]
         utilis.writeStringToFile(_APPDATA.."\\mercury\\installed\\packages.json", cjson.encode(installedPackages))
+        if (mercJSON[packageLabel].dependencies ~= nil) then
+            print("Fetching required dependencies...")
+            for i,dependecyPackage in pairs(mercJSON[packageLabel].dependencies) do
+                download(dependecyPackage)
+            end
+        end
         print("\n'"..mercName..".merc' succesfully installed!!")
         return true
     else
         print("\nSpecified .merc package doesn't exist. ("..mercFullName..")")
     end
     return false
-end
-
-local function remove(packageLabel)
-    installedPackages = cjson.decode(utilis.readFileToString(_APPDATA.."\\mercury\\installed\\packages.json"))
-    if (installedPackages[packageLabel] ~= nil) then
-        print("Removing package '"..packageLabel.."'...")
-        for k,v in pairs(installedPackages[packageLabel].files) do
-            local file = string.gsub(v..k, "_HALOCE", _HALOCE, 1)
-            file = string.gsub(file, "_MYGAMES", _MYGAMES, 1)
-            print("\nTrying to erase: '"..file.."'...")
-            local result, desc, error = utilis.deleteFile(file)
-            if (result) then
-                print("File erased succesfully.\nChecking for backup files...")
-                if (utilis.fileExist(file..".bak")) then
-                    print("Backup file found, restoring now...")
-                    utilis.move(file..".bak", file)
-                    if (utilis.fileExist(file)) then
-                        print("File succesfully restored.")
-                    else
-                        print("Error at trying to restore backup file...")
-                    end
-                else
-                    print("No backup found for this file.")
-                end
-            else
-                if (error == 2 or error == 3) then
-                    print("WARNING!!: File not found for erasing, probably misplaced or manually removed.")
-                else
-                    print("Error at trying to erase file, reason: '"..desc.."' aborting uninstallation now!!!")
-                    return false
-                end
-            end
-        end
-        installedPackages[packageLabel] = nil
-        utilis.writeStringToFile(_APPDATA.."\\mercury\\installed\\packages.json", cjson.encode(installedPackages))
-        print("\nSuccessfully removed '"..packageLabel.."' package.")
-        return true
-    else
-        print("Package '"..packageLabel.."' is not installed.")
-    end
-end
-
-local function download(packageLabel, forceInstallation)
-    local packageSplit = utilis.explode("-", packageLabel)
-    local packageName = packageSplit[1]
-    local packageVersion = packageSplit[2]
-    if (searchPackage(packageName)) then
-        if (forceInstallation ~= true) then
-            print("The package you are looking for is already installed in the game... if you need to update/reinstall it try to remove it first.")
-            return false
-        end
-    end
-    print("Looking for package '"..packageLabel.."' in Mercury repository...\n")
-    local packageHandle = _REPOPATH.."\\"..packageLabel..".json" -- Path and Filename for the JSON file obtained from the server
-    print("Fetching package into librarian index...\n")
-    local r, c, h, s = fdownload.get(host.."/"..librarianPath..packageLabel, _TEMP.."\\"..packageHandle)
-    if (c == 404) then
-        print("\nERROR: Repository server can't be reached...")
-    elseif (c == 200) then
-        if (h["content-length"] == "0") then
-            print("\nWARNING!!!: '"..packageLabel.."' package not found in Mercury repository.")
-        else
-            local packageFile = utilis.readFileToString(_TEMP..packageHandle)
-            if (packageFile ~= "") then
-                local packageJSON = cjson.decode(utilis.readFileToString(_TEMP..packageHandle))
-                if (packageJSON ~= {}) then
-                    print("\nSuccess! Package '"..packageLabel.."' found in Mercury repo, parsing meta data....")
-                    if (packageSplit[2] == nil) then
-                        packageVersion = packageJSON.version
-                    end
-                    print("\n["..packageName.." | Version = '"..packageVersion.."']\nStarting download...\n")
-                    print("Running subpackage tree...\n")
-                    if (packageJSON.repo == nil) then -- Repo is the main Mercury repo, read file URL to download subpackages
-                        if (packageJSON.paths ~= nil) then
-                            for k,v in pairs (packageJSON.paths) do
-                                local subpackageURL = host.."/"..v
-                                local subpackageSplit = utilis.explode("/", v)
-                                local subpackageFile = utilis.arrayPop(subpackageSplit)
-                                print("Downloading '"..subpackageFile.."' subpackage...\n")
-                                local downloadOutput = _TEMP.._REPOPATH.."\\downloaded\\"..subpackageFile
-                                local r, c, h, s = fdownload.get(subpackageURL, downloadOutput) 
-                                if (c == 200) then
-                                    print("\n'"..packageLabel.."-"..v.."' has been succesfully downloaded.\n\nStarting installation process now...\n")
-                                    install(downloadOutput)
-                                else
-                                    print("\nERROR!!!: '"..v.."' is not more available in the repo as subpackage...\n")
-                                end
-                            end
-                        end
-                    else
-                        print("\nERROR!!!: The specified package is not in this repository.\n")
-                    end
-                end
-            else
-                --print("\nERROR!!: Repository is online but the response is in a unrecognized format, this can be caused by a server error or an outdated Mercury version.")
-                print("\nWARNING!!!: '"..packageLabel.."' package not found in Mercury repository.")
-            end
-        end
-    else
-        print("ERROR '"..tostring(c[1]).."' uknown error...")
-    end
 end
 
 local function mitosis(name)

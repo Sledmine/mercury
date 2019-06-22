@@ -1,4 +1,4 @@
-# Mercury 1.0 - Development Branch
+# Mercury 1.1 - Development Branch
 
 --- THIS IS NOT AN STABLE VERSION, THIS BRANCH IS CONSTANTLY UPDATED, USE MASTER BRANCH INSTEAD ---
 

@@ -1,7 +1,7 @@
 ------------------------------------------------------------------------------
 -- Mercury: Package Manager for Halo Custom Edition 
 -- Authors: JerryBrick, Sledmine
--- Version: 1.0
+-- Version: 1.1
 ------------------------------------------------------------------------------
 
 -- Required libraries implementation.
@@ -19,7 +19,7 @@ local zip = require "minizip"
 
 -- Global variables definition.
 
-local _mercuryVersion = "1.0"
+local _mercuryVersion = "1.1"
 local host = "https://mercury.shadowmods.net/repo" -- URL for the main repo (example: http://lua.repo.net/)
 local librarianPath = "librarian.php?pkg=" -- Path for master librarian index
 
@@ -29,16 +29,28 @@ local function createEnvironment(folders) -- Setup environment to work, store da
     _SOURCEFOLDER = lfs.currentdir()
     _APPDATA = os.getenv("APPDATA")
     _TEMP = os.getenv("TEMP")
+    _ARCH = os.getenv("PROCESSOR_ARCHITECTURE")
     if (utilis.fileExist("config.json")) then
         _HALOCE = cjson.decode(utilis.readFileToString(_APPDATA.."\\mercury\\config.json")).HaloCE
     else
-        local registryPath = registry.getkey("HKEY_LOCAL_MACHINE\\SOFTWARE\\WOW6432Node\\Microsoft\\Microsoft Games\\Halo CE")
+        local registryPath
+        if (_ARCH ~= "x86") then
+            registryPath = registry.getkey("HKEY_LOCAL_MACHINE\\SOFTWARE\\WOW6432Node\\Microsoft\\Microsoft Games\\Halo CE")
+        else
+            registryPath = registry.getkey("HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\Microsoft Games\\Halo CE")
+        end
         local documentsPath = registry.getkey("HKEY_CURRENT_USER\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Explorer\\Shell Folders")
         if (registryPath ~= nil) then
             _HALOCE = registryPath.values["EXE Path"]["value"]
+        else
+            print("\nError at trying to get Halo Custom Edition installation path, are you using a portable version (?)")
+            os.exit()
         end
         if (documentsPath ~= nil) then
             _MYGAMES = documentsPath.values["Personal"]["value"].."\\My Games\\Halo CE"
+        else
+            print("Error at trying to get 'My Documents' path...")
+            os.exit()
         end
     end
     if (folders) then
@@ -375,7 +387,8 @@ end
 createEnvironment(false)
 destroyEnvironment() -- Destroy previous environment in case something ended wrong
 createEnvironment(true)
-print(tostring("\nCurrent Working folder: '".._SOURCEFOLDER.."'."))
+print(tostring("\nWindows Architecture: ".._ARCH))
+print(tostring("Current Working folder: '".._SOURCEFOLDER.."'."))
 print(tostring("Current Halo CE Path: '".._HALOCE.."' change it using 'mercury config'."))
 print(tostring("Current My Games Path: '".._MYGAMES.."' change it using 'mercury config'.\n"))
 if (#arg == 0) then

@@ -9,7 +9,16 @@
     <div class="row justify-content-center" style="max-width: 100%;">
         <div class="justify-content-center">
             <img src="img/mercury.png" class="rounded mx-auto d-block" alt="Mercury Logo"/>
-            <h1 class="text-center">Mercury 1.0</h1>
+            <h1 class="text-center mb-1">Mercury 1.1</h1>
+            <h3 class="text-center mb-5">Gestor de paquetes de Halo Custom Edition</h3>
+            <h3>Cambios recientes:</h3>
+            <div class="text-justify alert alert-primary">
+                <p class="font-weight-bold">[1.1]</p>
+                <p>- Liberados binarios para Windows-x32</p>
+                <p>- Solucionado problema al obtener rutas del juego.</p>
+                <p class="font-weight-bold">[1.0]</p>
+                <p>- Lanzamiento inicial de Mercury-x64</p>
+            </div>
             <br/>
             <h3>¿Qué es Mercury?</h3>
             <p class="text-justify alert alert-info">Es un administrador de paquetes para Halo Custom Edition.</p>
@@ -21,24 +30,34 @@
             <p class="text-justify alert alert-info">Una versión de Halo Custom Edition 1.10 INSTALADA en nuestro PC (de preferencia nueva).</p>
             <h3>¿Cómo lo instalo?</h3>
             <div class="text-justify alert alert-info">
-                <p>1.- Descargar el siguiente archivo .zip</p>
-                <form method="get" action=https://mercury.shadowmods.net/release/1.0/Mercury1.0.zip>
-                        <button type="submit" class="btn btn-dark">Mercury1.0.zip</button>
+                <p>1.- Descargar la versión de Mercury para tu sistema operativo:</p>
+                <form method="get" action=https://mercury.shadowmods.net/release/1.1/Mercury1.1-x64.zip>
+                        <button type="submit" class="btn btn-dark">Mercury 1.1-Windows-x64</button>
+                </form>
+                <form class="mt-3" method="get" action=https://mercury.shadowmods.net/release/1.0/Mercury1.1-x32.zip>
+                    <button type="submit" class="btn btn-dark">Mercury1.1-Windows-x32</button>
                 </form>
                 <p class="mt-3">2.- Descomprimir el archivo en cualquier carpeta (de preferencia "Mis Documentos").</p>
-                <p class="mt-3">3.- Entrar a la carpeta llamada "Mercury1.0"</p>
+                <p class="mt-3">3.- Entrar a la carpeta anteriormente descomprimida llamada "Mercury1.1-x32" o "Mercury1.1-x64"</p>
                 <p class="mt-3">4.- Abrir una linea de comando con permisos de administrador en esa carpeta.</p>
             </div>
-            <h3>¿Cómo se usa?</h3>
+            <h3>¿Cómo se utiliza?</h3>
             <div class="text-justify alert alert-info">
                 <p>
                     Luego de abrir la linea de comando como administrador puedes usar los siguientes comandos:
                 </p>
                 <p class="font-weight-bold">mercury install</p>
+                <p>Con este comando puedes instalar paquetes en tu juego:</p>
+                <p>Ejemplo: mercury install hac2</p>
                 <p class="font-weight-bold">mercury remove</p>
+                <p>Desintala paquetes previamente instalados:</p>
+                <p>Ejemplo: mercury remove hac2</p>
                 <p class="font-weight-bold">mercury list</p>
+                <p>Lista información acerca de los paquetes instalados en el juego:</p>
+                <p>Ejemplo: mercury list all</p>
                 <p class="font-weight-bold">mercury version</p>
-                <p>Para obtener información acerca de ellos escribe "mercury" en la consola.</p>
+                <p>Arroja en consola la versión y la licencia de Mercury:</p>
+                <p class="font-weight-bold">Para obtener más información acerca de todos los comandos escribe "mercury" en la consola.</p>
             </div>
             <h3>¿Cómo descargo Flood 09?</h3>
             <div class="text-justify alert alert-info">

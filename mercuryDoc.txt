@@ -29,4 +29,8 @@ install : Search for packages hosted in Mercury repos to download and install in
 
     version : Throw version and related info about Mercury.]]
 
+x64
 luastaticf mercury.lua lib/fdownload.lua lib/registry.lua lib/utilis.lua C:\Users\Sledmine\Documents\Herramientas\cmder\bin\luajit.a -IC:\Users\Sledmine\Documents\Herramientas\cmder\bin\csrc\luajit\src\src
+
+x32
+luastaticf mercury.lua lib/fdownload.lua lib/registry.lua lib/utilis.lua C:\Users\Sledmine\Documents\Herramientas\cmder\bin32\luajit.a -IC:\Users\Sledmine\Documents\Herramientas\cmder\bin\csrc\luajit\src\src -m32

@@ -177,7 +177,7 @@ function download(packageLabel, forceInstallation)
     local packageVersion = packageSplit[2]
     if (searchPackage(packageName)) then
         if (forceInstallation ~= true) then
-            print("The package you are looking for is already installed in the game... if you need to update/reinstall it try to remove it first.")
+            print("The package '"..packageName.."' that you are looking for is already installed in the game... if you need to update/reinstall it try to remove it first.")
             return false
         end
     end

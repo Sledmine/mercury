@@ -1,4 +1,4 @@
-# Mercury 1.1 - Development Branch
+# Mercury 2.0 - Development Branch
 
 --- THIS IS NOT AN STABLE VERSION, THIS BRANCH IS CONSTANTLY UPDATED, USE MASTER BRANCH INSTEAD ---
 
@@ -21,6 +21,7 @@ Is a console program that allows you to download all kind of tools, addons, mods
 - LuaPower distribution
 - LuaJIT environment
 - LuaSec 0.8
+- ANSI Colors
 - OpenSSL 1.1.1c
 - MSYS
 - MinGW

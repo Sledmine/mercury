@@ -16,14 +16,15 @@ local inspect = require "inspect"
 local path = require "path"
 local cjson = require "cjson"
 local zip = require "minizip"
+local colors = require "ansicolors"
 
 -- Global variables definition.
 
-local _mercuryVersion = "1.1"
+local _mercuryVersion = "2.0"
 local host = "https://mercury.shadowmods.net/repo" -- URL for the main repo (example: http://lua.repo.net/)
 local librarianPath = "librarian.php?pkg=" -- Path for master librarian index
 
--- Global function creation.
+-- Global function creation.    
 
 local function createEnvironment(folders) -- Setup environment to work, store data, temp files, etc.
     _SOURCEFOLDER = lfs.currentdir()
@@ -189,8 +190,10 @@ function download(packageLabel, forceInstallation)
     local packageVersion = packageSplit[2]
     if (searchPackage(packageName)) then
         if (forceInstallation ~= true) then
-            print("The package '"..packageName.."' that you are looking for is already installed in the game... if you need to update/reinstall it try to remove it first.")
+            print(colors("%{red bright}WARNING!!!: %{reset}The package '"..packageName.."' that you are looking for is already installed in the game. If you need to update or reinstall try to remove it first.\n"))
             return false
+        else
+            remove(packageName)
         end
     end
     print("Looking for package '"..packageLabel.."' in Mercury repository...\n")
@@ -211,7 +214,7 @@ function download(packageLabel, forceInstallation)
                     if (packageSplit[2] == nil) then
                         packageVersion = packageJSON.version
                     end
-                    print("\n["..packageName.." | Version = '"..packageVersion.."']\n")
+                    print(colors("\n[ %{white bright}"..packageName.." | Version = '%{yellow bright}"..packageVersion.."%{reset}' ]"))
                     print("\nRunning package tree...\n")
                     if (packageJSON.repo == nil) then -- Repo is the main Mercury repo, read file URL to download subpackages
                         if (packageJSON.paths ~= nil) then
@@ -219,24 +222,24 @@ function download(packageLabel, forceInstallation)
                                 local subpackageURL = host.."/"..v
                                 local subpackageSplit = utilis.explode("/", v)
                                 local subpackageFile = utilis.arrayPop(subpackageSplit)
-                                print("Downloading '"..subpackageFile.."' subpackage...\n")
+                                print(colors("%{blue bright}Downloading %{white}'"..subpackageFile.."' package...\n"))
                                 local downloadOutput = _TEMP.._REPOPATH.."\\downloaded\\"..subpackageFile
                                 local r, c, h, s = fdownload.get(subpackageURL, downloadOutput) 
                                 if (c == 200) then
-                                    print("\n'"..packageLabel.."-"..v.."' has been succesfully downloaded.\n\nStarting installation process now...\n")
+                                    print(colors("%{green bright}\n'"..packageLabel.."-"..packageVersion.."' has been succesfully downloaded.\n\nStarting installation process now...\n"))
                                     install(downloadOutput)
                                 else
-                                    print("\nERROR!!!: '"..v.."' is not more available in the repo or an error ocurred while downloading, try again later....\n")
+                                    print(colors("%{red bright}\nERROR!!!: %{reset}An error ocurred while downloading '"..v.."'...\n"))
                                 end
                             end
                         end
                     else
-                        print("\nERROR!!!: The specified package is not in this repository.\n")
+                        print(colors("%{red bright}ERROR!!!: %{reset}The specified package is not in this repository.\n"))
                     end
                 end
             else
                 --print("\nERROR!!: Repository is online but the response is in a unrecognized format, this can be caused by a server error or an outdated Mercury version.")
-                print("\nWARNING!!!: '"..packageLabel.."' package not found in Mercury repository.")
+                print(colors("%{red bright}\nWARNING!!!: %{reset}'"..packageLabel.."' package not found in Mercury repository."))
             end
         end
     else
@@ -312,7 +315,7 @@ local function mitosis(name)
         local mitosisPath = utilis.explode(folderName, _HALOCE)[1]..name.."\\"
         utilis.createFolder(mitosisPath)
         print(mitosisPath)
-        fileList = cjson.decode(utilis.readFileToString("mitosisList.json"))
+        fileList = cjson.decode(utilis.readFileToString("data\\mitosis.json"))
         for i,v in pairs(fileList) do
             if (utilis.isFile(v) == true) then
                 utilis.copyFile(_HALOCE.."\\"..v, mitosisPath..v)
@@ -336,47 +339,47 @@ local function mercurySetup()
 end
 
 local function printUsage()
-    print([[
-    usage: mercury <action> <params>
+    print(colors([[
+    %{red bright}usage%{reset}: %{green}mercury %{reset}<action> <params>
 
-    PARAMETERS INSIDE "[ ]" ARE OPTIONAL!!!
+    %{yellow}PARAMETERS INSIDE "[ ]" ARE OPTIONAL!!!%{reset}
 
-    install : Search for packages hosted in Mercury repos to download and install into the game.
-            <package> [<subpackage>] [<parameters>]
+    %{blue bright}install%{reset} : Search for packages hosted in Mercury repos to download and install into the game.
+            <package> [<parameters>]
 
             -f      Force installation, will remove old packages and erase existing backupfiles.
 
             -nb     Avoid creation of backup files.
             
-    list    : List and show info about all the previously installed packages in the game.
+    %{blue bright}list%{reset}    : List and show info about all the previously installed packages in the game.
             <package> [<parameters>] -- use "all" as package to show all the installed packages.
  
             -l      Only shows package name.
 
             -d      Print detailed info about the package.
 
-    merc    : Manually install a specified .merc package.
+    %{blue bright}merc%{reset}    : Manually install a specified .merc package.
             <mercPath>
 
-    remove  : Delete previously installed package, subpackage in the game.
-            <package> [<subpackage>] [<parameters>]
+    %{blue bright}remove%{reset}  : Delete previously installed package, subpackage in the game.
+            <package> [<parameters>]
 
             -nb     Avoid restoration of backup files.
             
             -eb     This will erase previously created backup files of the package.
 
-    update  : Update an existent package in the game.
+    %{blue bright}update%{reset}  : Update an existent package in the game.
             <package> -- use "all" as package to update all the installed packages.
 
-    mitosis : Create a new instance of Halo Custom Edition with only neccesary base files to run.
+    %{blue bright}mitosis%{reset} : Create a new instance of Halo Custom Edition with only neccesary base files to run.
             <instanceName>
 
-    config  : Define critical Mercury parameters as package installation path.
+    %{blue bright}config%{reset}  : Define critical Mercury parameters as package installation path.
             <field> <value> - in 'HaloCE' case field you can pass a name of mitosised Halo Custom Edition instance.
 
-    setup   : Set all the needed values to introduce Mercury into Windows OS.
+    %{blue bright}setup%{reset}   : Set all the needed values to introduce Mercury into Windows OS.
 
-    version : Throw version and related info about Mercury.]])
+    %{blue bright}version%{reset} : Throw version and related info about Mercury.]]))
 end
 
 local function printVersion() 
@@ -387,10 +390,12 @@ end
 createEnvironment(false)
 destroyEnvironment() -- Destroy previous environment in case something ended wrong
 createEnvironment(true)
-print(tostring("\nWindows Architecture: ".._ARCH))
-print(tostring("Current Working folder: '".._SOURCEFOLDER.."'."))
-print(tostring("Current Halo CE Path: '".._HALOCE.."' change it using 'mercury config'."))
-print(tostring("Current My Games Path: '".._MYGAMES.."' change it using 'mercury config'.\n"))
+print()
+print(tostring(colors("\n%{white bright}[ Mercury - Package Manager | Version: %{reset}%{yellow bright}".._mercuryVersion.." %{white}]")))
+print(tostring(colors("\n%{yellow bright}Detected Windows architecture: %{white}".._ARCH)))
+print(tostring(colors("%{yellow bright}Current Working folder: %{white}'".._SOURCEFOLDER.."'.")))
+print(tostring(colors("%{yellow bright}Current Halo CE path: %{white}'".._HALOCE.."'")))
+print(tostring(colors("%{yellow bright}Current My Games path: %{white}'".._MYGAMES.."'\n")))
 if (#arg == 0) then
     printUsage()
 else

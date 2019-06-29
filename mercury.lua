@@ -1,7 +1,7 @@
 ------------------------------------------------------------------------------
 -- Mercury: Package Manager for Halo Custom Edition 
 -- Authors: JerryBrick, Sledmine
--- Version: 1.1
+-- Version: 2.0
 ------------------------------------------------------------------------------
 
 -- Required libraries implementation.

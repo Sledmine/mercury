@@ -1,0 +1,8 @@
+# Source files
+# ============
+*.lua       text
+
+# Luadoc output
+# =============
+*.html      text diff=html
+*.css       text diff=css

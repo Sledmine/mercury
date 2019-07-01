@@ -1,6 +1,4 @@
-# Mercury 2.0 - Development Branch
-
---- THIS IS NOT AN STABLE VERSION, THIS BRANCH IS CONSTANTLY UPDATED, USE MASTER BRANCH INSTEAD ---
+# Mercury 2.0
 
 ### What is Mercury?
 Is a console program that allows you to download all kind of tools, addons, mods, extensions, etc and install it directly into your game, everything you need in one place being downloaded in the pure Linux style, basically a package manager for Halo Custom Edition.

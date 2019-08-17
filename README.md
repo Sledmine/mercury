@@ -1,6 +1,5 @@
-#![MercuryLogo](https://i.imgur.com/DQlGBy9.png)  
 
-# Mercury 2.0 - Development Branch
+# Mercury 2.0 - Development Branch ![MercuryLogo](https://i.imgur.com/4BoDBJ9.png)  
 
 -- THIS IS NOT AN STABLE BRANCH USE MASTER BRANCH INSTEAD --
 

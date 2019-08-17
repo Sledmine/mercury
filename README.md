@@ -22,7 +22,7 @@ Is a console program that allows you to download all kind of tools, addons, mods
 - LuaPower distribution
 - LuaJIT environment
 - LuaSec 0.8
-- ANSI Colors
+- Lua ANSI Colors
 - OpenSSL 1.1.1c
 - MSYS
 - MinGW

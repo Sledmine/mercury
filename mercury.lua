@@ -21,8 +21,9 @@ local colors = require "ansicolors"
 -- Global variables definition.
 
 local _mercuryVersion = "2.0"
-local host = "https://mercury.shadowmods.net/repo" -- URL for the main repo (example: http://lua.repo.net/)
-local librarianPath = "librarian.php?pkg=" -- Path for master librarian index
+local host = "https://mercury.shadowmods.net" -- URL for the main repo (example: http://lua.repo.net/)
+local protocol = "http://"
+local librarianPath = "librarian.php?package=" -- Path for master librarian index
 
 -- Global function creation.    
 
@@ -58,8 +59,8 @@ local function createEnvironment(folders) -- Setup environment to work, store da
         _REPOPATH = "\\mercury\\packages"
         _MERC_EXTENSION = ".merc"
         envFolders = {
-            _APPDATA.."\\Mercury",
-            _APPDATA.."\\Mercury\\installed",
+            _MYGAMES.."\\mercury",
+            _MYGAMES.."\\mercury\\installed",
             _TEMP.._REPOPATH,
             _TEMP.._REPOPATH.."\\downloaded",
             _TEMP.._REPOPATH.."\\depacked"
@@ -117,7 +118,7 @@ local function list(packageName, onlyNames, detailList)
         end
         return false
     end
-    print("WARNING!!!: There are not any installed package using Mercury...yet.")
+    print(colors("%{red bright}WARNING!!!: %{reset}There are not any installed package using Mercury...yet."))
 end
 
 local function depackageMerc(mercFile, outputPath)
@@ -144,47 +145,19 @@ local function depackageMerc(mercFile, outputPath)
     print("\nSuccesfully depacked "..file..".merc...\n")
 end
 
-local function remove(packageLabel)
-    installedPackages = cjson.decode(utilis.readFileToString(_APPDATA.."\\mercury\\installed\\packages.json"))
-    if (installedPackages[packageLabel] ~= nil) then
-        print("Removing package '"..packageLabel.."'...")
-        for k,v in pairs(installedPackages[packageLabel].files) do
-            local file = string.gsub(v..k, "_HALOCE", _HALOCE, 1)
-            file = string.gsub(file, "_MYGAMES", _MYGAMES, 1)
-            print("\nTrying to erase: '"..file.."'...")
-            local result, desc, error = utilis.deleteFile(file)
-            if (result) then
-                print("File erased succesfully.\nChecking for backup files...")
-                if (utilis.fileExist(file..".bak")) then
-                    print("Backup file found, restoring now...")
-                    utilis.move(file..".bak", file)
-                    if (utilis.fileExist(file)) then
-                        print("File succesfully restored.")
-                    else
-                        print("Error at trying to restore backup file...")
-                    end
-                else
-                    print("No backup found for this file.")
-                end
-            else
-                if (error == 2 or error == 3) then
-                    print("WARNING!!: File not found for erasing, probably misplaced or manually removed.")
-                else
-                    print("Error at trying to erase file, reason: '"..desc.."' aborting uninstallation now!!!")
-                    return false
-                end
-            end
-        end
-        installedPackages[packageLabel] = nil
-        utilis.writeStringToFile(_APPDATA.."\\mercury\\installed\\packages.json", cjson.encode(installedPackages))
-        print("\nSuccessfully removed '"..packageLabel.."' package.")
-        return true
+function update(packageLabel)
+    local packageSplit = utilis.explode("-", packageLabel)
+    local packageName = packageSplit[1]
+    local packageVersion = packageSplit[2]
+    if (searchPackage(packageName)) then
+        
     else
-        print("Package '"..packageLabel.."' is not installed.")
+        print(colors("%{red bright}WARNING!!!: %{reset}The package '"..packageName.."' that you are looking for is NOT installed in the game. Try to get it using mercury install.\n"))
+        return false
     end
 end
 
-function download(packageLabel, forceInstallation)
+function download(packageLabel, forceInstallation, noBackups)
     local packageSplit = utilis.explode("-", packageLabel)
     local packageName = packageSplit[1]
     local packageVersion = packageSplit[2]
@@ -193,7 +166,7 @@ function download(packageLabel, forceInstallation)
             print(colors("%{red bright}WARNING!!!: %{reset}The package '"..packageName.."' that you are looking for is already installed in the game. If you need to update or reinstall try to remove it first.\n"))
             return false
         else
-            remove(packageName)
+            remove(packageName, true)
         end
     end
     print("Looking for package '"..packageLabel.."' in Mercury repository...\n")
@@ -201,7 +174,7 @@ function download(packageLabel, forceInstallation)
     print("Fetching package into librarian index...\n")
     local r, c, h, s = fdownload.get(host.."/"..librarianPath..packageLabel, _TEMP.."\\"..packageHandle)
     if (c == 404) then
-        print("\nERROR: Repository server can't be reached...")
+        print(colors("\n%{red bright}\nERROR!!!: %{reset}Repository server can't be reached..."))
     elseif (c == 200) then
         if (h["content-length"] == "0") then
             print("\nWARNING!!!: '"..packageLabel.."' package not found in Mercury repository.")
@@ -219,7 +192,7 @@ function download(packageLabel, forceInstallation)
                     if (packageJSON.repo == nil) then -- Repo is the main Mercury repo, read file URL to download subpackages
                         if (packageJSON.paths ~= nil) then
                             for k,v in pairs (packageJSON.paths) do
-                                local subpackageURL = host.."/"..v
+                                local subpackageURL = protocol..v
                                 local subpackageSplit = utilis.explode("/", v)
                                 local subpackageFile = utilis.arrayPop(subpackageSplit)
                                 print(colors("%{blue bright}Downloading %{white}'"..subpackageFile.."' package...\n"))
@@ -243,15 +216,15 @@ function download(packageLabel, forceInstallation)
             end
         end
     else
-        print("ERROR '"..tostring(c[1]).."' uknown error...")
+        print(colors("%{red bright}\nERROR!!!: %{reset}'"..tostring(c[1]).."' uknown error..."))
     end
 end
 
-function install(mercPackage)
+function install(mercPackage, noBackups)
     local mercPath, mercName, mercExtension = utilis.splitPath(mercPackage)
     local mercFullName = mercPath.."\\"..mercName.._MERC_EXTENSION
     if (utilis.fileExist(mercFullName) == true) then
-        print("Trying to depackage '"..mercName.."'.merc...\n")
+        print("Trying to depackage '"..mercName..".merc'...\n")
         local depackageFolder = _TEMP.._REPOPATH.."\\depacked\\"..mercName
         utilis.createFolder(depackageFolder)
         depackageMerc(mercFullName, depackageFolder)
@@ -269,14 +242,24 @@ function install(mercPackage)
                 print("Creating folder: "..outputPath)
                 utilis.createFolder(outputPath)
             end
-            if (utilis.fileExist(outputPath..file)) then
-                print("There is an existing file with the same name, renaming it to .bak for restoring purposes.")
+            if (utilis.fileExist(outputPath..file) and noBackups ~= true) then
+                print(colors("%{yellow bright}WARNING!!!: %{reset}There is an existing file with the same name, renaming it to .bak for restoring purposes."))
                 local result, desc, error = utilis.move(outputPath..file, outputPath..file..".bak")
                 if (result) then
                     print("Succesfully created backup for: '"..file.."'")
                 else
-                    print("Error at trying to create a backup for: '"..file.."' aborting installation now!!!")
-                    print("\n'ERROR: "..mercName..".merc' installation encountered one or more problems!!")
+                    print(colors("%{red bright}\nERROR!!!: %{reset}Error at trying to create a backup for: '"..file.."' aborting installation now!!!"))
+                    print(colors("\n%{red bright}\nERROR!!!: %{reset}'"..mercName..".merc' installation encountered one or more problems!!"))
+                    return false
+                end
+            elseif(utilis.fileExist(outputPath..file) and noBackups == true) then
+                print(colors("%{red bright}FORCED MODE: %{reset}Found file with the same name, erasing it for compatibilty purposes."))
+                local result, desc, error = utilis.deleteFile(outputPath..file)
+                if (result) then
+                    print(colors("%{green bright}OK!!!: %{reset}Succesfully deleted: '"..file.."'"))
+                else
+                    print(colors("%{red bright}\nERROR!!!: %{reset}Error at trying to erase file: '"..file.."', reason: '"..desc.. "' aborting installation now!!!"))
+                    print(colors("\n'%{red bright}ERROR!!!: %{reset}"..mercName..".merc' installation encountered one or more problems!!"))
                     return false
                 end
             end
@@ -295,17 +278,65 @@ function install(mercPackage)
         installedPackages[packageLabel] = mercJSON[packageLabel]
         utilis.writeStringToFile(_APPDATA.."\\mercury\\installed\\packages.json", cjson.encode(installedPackages))
         if (mercJSON[packageLabel].dependencies ~= nil) then
-            print("Fetching required dependencies...")
+            print("Fetching required dependencies...\n")
             for i,dependecyPackage in pairs(mercJSON[packageLabel].dependencies) do
                 download(dependecyPackage)
             end
         end
-        print("\n'"..mercName..".merc' succesfully installed!!")
+        print(colors("%{green}OK!!!: %{reset}Package '"..mercName..".merc' succesfully installed!!"))
         return true
     else
         print("\nSpecified .merc package doesn't exist. ("..mercFullName..")")
     end
     return false
+end
+
+function remove(packageLabel, forcedRemove, eraseBackups)
+    installedPackages = cjson.decode(utilis.readFileToString(_APPDATA.."\\mercury\\installed\\packages.json"))
+    if (installedPackages[packageLabel] ~= nil) then
+        print("Removing package '"..packageLabel.."'...")
+        for k,v in pairs(installedPackages[packageLabel].files) do
+            local file = string.gsub(v..k, "_HALOCE", _HALOCE, 1)
+            file = string.gsub(file, "_MYGAMES", _MYGAMES, 1)
+            print(colors("\n%{blue bright}Trying to erase: %{reset}'"..file.."'..."))
+            local result, desc, error = utilis.deleteFile(file)
+            if (result) then
+                print(colors("%{green bright}OK!!!: %{reset}File erased succesfully.\n\nChecking for backup files...\n"))
+                if (utilis.fileExist(file..".bak") and eraseBackups ~= true) then
+                    print("Backup file found, RESTORING now...")
+                    utilis.move(file..".bak", file)
+                    if (utilis.fileExist(file)) then
+                        print(colors("%{green bright}OK!!!: %{reset}File succesfully restored."))
+                    else
+                        print("Error at trying to RESTORE backup file...")
+                    end
+                elseif (utilis.fileExist(file..".bak") and eraseBackups == true) then
+                    print(colors("%{red bright}ERASE BACKUPS ACTIVATED: %{reset}Backup file found, DELETING now..."))
+                    utilis.deleteFile(file..".bak")
+                    if (utilis.fileExist(file)) then
+                        print("Error at trying to DELETE backup file...")
+                    else
+                        print(colors("%{green bright}OK!!!: %{reset}File succesfully deleted."))
+                    end
+                else
+                    print("No backup found for this file.")
+                end
+            else
+                if (error == 2 or error == 3) then
+                    print(colors("%{yellow bright}WARNING!!: %{reset}File not found for erasing, probably misplaced or manually removed."))
+                else
+                    print("Error at trying to erase file, reason: '"..desc.."' aborting uninstallation now!!!")
+                    return false
+                end
+            end
+        end
+        installedPackages[packageLabel] = nil
+        utilis.writeStringToFile(_APPDATA.."\\mercury\\installed\\packages.json", cjson.encode(installedPackages))
+        print(colors("\n%{green bright}DONE!!: %{reset}Successfully %{yellow bright}removed %{reset}'"..packageLabel.."' package."))
+        return true
+    else
+        print("Package '"..packageLabel.."' is not installed.")
+    end
 end
 
 local function mitosis(name)
@@ -332,9 +363,9 @@ end
 
 local function mercurySetup()
     -- Create registry entries
-    registry.writevalue("HKEY_CLASSES_ROOT\\.merc", "", "REG_SZ", "Mercury Package")
+    --[[registry.writevalue("HKEY_CLASSES_ROOT\\.merc", "", "REG_SZ", "Mercury Package")
     registry.writevalue("HKEY_CLASSES_ROOT\\.merc\\DefaultIcon", "", "REG_SZ", "\"".._SOURCEFOLDER.."\\assets\\icons\\package.ico\",0")
-    registry.writevalue("HKEY_CLASSES_ROOT\\.merc\\shell\\open\\command", "", "REG_SZ", "\"".._SOURCEFOLDER.."\\mercury.exe\" merc %1")
+    registry.writevalue("HKEY_CLASSES_ROOT\\.merc\\shell\\open\\command", "", "REG_SZ", "\"".._SOURCEFOLDER.."\\mercury.exe\" merc %1")]]
     print("Mercury Successfully setup!")
 end
 
@@ -344,13 +375,20 @@ local function printUsage()
 
     %{yellow}PARAMETERS INSIDE "[ ]" ARE OPTIONAL!!!%{reset}
 
-    %{blue bright}install%{reset} : Search for packages hosted in Mercury repos to download and install into the game.
+    %{blue bright}install%{reset}   : Search for packages hosted in Mercury repos to download and install into the game.
             <package> [<parameters>]
 
             -f      Force installation, will remove old packages and erase existing backupfiles.
 
             -nb     Avoid creation of backup files.
             
+    %{blue bright}remove%{reset}    : Delete previously installed packages in the game.
+            <package> [<parameters>]
+
+            -nb     Avoid restoration of backup files.
+            
+            -eb     This will erase previously created backup files of the package.
+
     %{blue bright}list%{reset}    : List and show info about all the previously installed packages in the game.
             <package> [<parameters>] -- use "all" as package to show all the installed packages.
  
@@ -360,13 +398,6 @@ local function printUsage()
 
     %{blue bright}merc%{reset}    : Manually install a specified .merc package.
             <mercPath>
-
-    %{blue bright}remove%{reset}  : Delete previously installed package, subpackage in the game.
-            <package> [<parameters>]
-
-            -nb     Avoid restoration of backup files.
-            
-            -eb     This will erase previously created backup files of the package.
 
     %{blue bright}update%{reset}  : Update an existent package in the game.
             <package> -- use "all" as package to update all the installed packages.
@@ -390,7 +421,6 @@ end
 createEnvironment(false)
 destroyEnvironment() -- Destroy previous environment in case something ended wrong
 createEnvironment(true)
-print()
 print(tostring(colors("\n%{white bright}[ Mercury - Package Manager | Version: %{reset}%{yellow bright}".._mercuryVersion.." %{white}]")))
 print(tostring(colors("\n%{yellow bright}Detected Windows architecture: %{white}".._ARCH)))
 print(tostring(colors("%{yellow bright}Current Working folder: %{white}'".._SOURCEFOLDER.."'.")))
@@ -400,25 +430,54 @@ if (#arg == 0) then
     printUsage()
 else
     local parameters
-    if (arg[1] == "install") then
+    if (arg[1] == "install") then -- INSTALL Command
         if (arg[2] ~= nil) then
+            local forceInstallation
+            local noBackups
             if (arg[3] ~= nil) then
                 parameters = ""
                 for i = 3,#arg do
-                    parameters = arg[i]
+                    parameters = parameters..arg[i]
+                end
+                if (string.find(parameters, "-f") ~= nil) then
+                    forceInstallation = true
+                end
+                if (string.find(parameters, "-nb") ~= nil) then
+                    noBackups = true
                 end
             end
-            download(arg[2], parameters)
+            download(arg[2], forceInstallation, noBackups)
         else
             printUsage()
         end
-    elseif (arg[1] == "remove") then
+    elseif (arg[1] == "remove") then -- REMOVE Command
         if (arg[2] ~= nil) then
-            remove(arg[2])
+            local forcedRemove
+            local noBackups
+            local eraseBackups
+            if (arg[3] ~= nil) then
+                parameters = ""
+                for i = 3,#arg do
+                    parameters = parameters..arg[i]
+                end
+                if (string.find(parameters, "-eb") ~= nil) then
+                    eraseBackups = true
+                end
+                if (string.find(parameters, "-nb") ~= nil) then
+                    noBackups = true
+                end
+            end
+            remove(arg[2], forcedRemove, noBackups, eraseBackups)
         else
             printUsage()
         end
-    elseif (arg[1] == "list") then
+    elseif (arg[1] == "update") then  -- UPDATE Command
+        if (arg[2] ~= nil) then
+            update(arg[2])
+        else
+            printUsage()
+        end
+    elseif (arg[1] == "list") then -- LIST Command
         if (arg[2] ~= nil) then
             local onlyNames
             local detailList

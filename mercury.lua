@@ -33,7 +33,7 @@ local function createEnvironment(folders) -- Setup environment to work, store da
     _TEMP = os.getenv("TEMP")
     _ARCH = os.getenv("PROCESSOR_ARCHITECTURE")
     if (utilis.fileExist("config.json")) then
-        _HALOCE = cjson.decode(utilis.readFileToString(_APPDATA.."\\mercury\\config.json")).HaloCE
+        _HALOCE = cjson.decode(utilis.readFileToString(_MYGAMES.."\\mercury\\config.json")).HaloCE
     else
         local registryPath
         if (_ARCH ~= "x86") then
@@ -49,11 +49,7 @@ local function createEnvironment(folders) -- Setup environment to work, store da
             os.exit()
         end
         if (documentsPath ~= nil) then
-            _MYGAMES = documentsPath.values["Personal"]["value"].."\\My Games\\Halo CE"
-            if (utilis.fileExist(_APPDATA.."\\mercury\\installed\\packages.json")) then -- Migrate older installed packages.json to My Games folder
-                x,y,z = utilis.move(_APPDATA.."\\mercury\\installed\\packages.json", _MYGAMES.."\\mercury\\installed\\packages.json")
-                print(inspect(x,y,z))
-            end
+            _MYGAMES = documentsPath.values["Personal"]["value"].."\\My Games\\Halo CE" 
         else
             print("Error at trying to get 'My Documents' path...")
             os.exit()
@@ -73,6 +69,16 @@ local function createEnvironment(folders) -- Setup environment to work, store da
             --print("\nCreating folder: "..envFolders[i])
             utilis.createFolder(envFolders[i])
         end
+        if (utilis.fileExist(_APPDATA.."\\mercury\\installed\\packages.json")) then -- Migrate older installed packages.json to My Games folder
+            print(colors("\n%{yellow bright}WARNING!!!: Found installed packages json in older path, migrating them to My Games folder now!!!"))
+            local result, desc, error = utilis.move(_APPDATA.."\\mercury\\installed\\packages.json", _MYGAMES.."\\mercury\\installed\\packages.json")
+            if (result) then
+                utilis.deleteFolder(_APPDATA.."\\mercury\\", true)
+                print(colors("%{green bright}SUCCESS!!!: %{reset}Installed packages succesfully migrated to My Games folder."))
+            else
+                print(colors("%{red bright}ERROR!!!: %{reset}Error at trying to migrate packages json: "..desc.."."))
+            end
+        end
     end
 end
 
@@ -82,8 +88,8 @@ end
 
 local function searchPackage(packageName)
     local installedPackages = {}
-    if (utilis.fileExist(_APPDATA.."\\mercury\\installed\\packages.json") == true) then
-        installedPackages = cjson.decode(utilis.readFileToString(_APPDATA.."\\mercury\\installed\\packages.json"))
+    if (utilis.fileExist(_MYGAMES.."\\mercury\\installed\\packages.json") == true) then
+        installedPackages = cjson.decode(utilis.readFileToString(_MYGAMES.."\\mercury\\installed\\packages.json"))
         if (installedPackages[packageName] ~= nil) then
             return true
         end
@@ -93,13 +99,13 @@ end
 
 local function list(packageName, onlyNames, detailList)
     local installedPackages = {}
-    if (utilis.fileExist(_APPDATA.."\\mercury\\installed\\packages.json") == true) then
-        local installedPackagesFile = utilis.readFileToString(_APPDATA.."\\mercury\\installed\\packages.json")
+    if (utilis.fileExist(_MYGAMES.."\\mercury\\installed\\packages.json") == true) then
+        local installedPackagesFile = utilis.readFileToString(_MYGAMES.."\\mercury\\installed\\packages.json")
         if (installedPackagesFile ~= "") then
-            installedPackages = cjson.decode(utilis.readFileToString(_APPDATA.."\\mercury\\installed\\packages.json"))
+            installedPackages = cjson.decode(utilis.readFileToString(_MYGAMES.."\\mercury\\installed\\packages.json"))
         else
-            utilis.deleteFile(_APPDATA.."\\mercury\\installed\\packages.json")
-            print("WARNING!!!: There are not any installed package using Mercury...yet.")
+            utilis.deleteFile(_MYGAMES.."\\mercury\\installed\\packages.json")
+            print(colors("%{red bright}WARNING!!!: %{reset}There are not any installed package using Mercury...yet."))
         end
         local printInfo = {}
         if (packageName ~= "all") then
@@ -276,11 +282,11 @@ function install(mercPackage, noBackups)
             end
         end
         local installedPackages = {}
-        if (utilis.fileExist(_APPDATA.."\\mercury\\installed\\packages.json") == true) then
-            installedPackages = cjson.decode(utilis.readFileToString(_APPDATA.."\\mercury\\installed\\packages.json"))
+        if (utilis.fileExist(_MYGAMES.."\\mercury\\installed\\packages.json") == true) then
+            installedPackages = cjson.decode(utilis.readFileToString(_MYGAMES.."\\mercury\\installed\\packages.json"))
         end
         installedPackages[packageLabel] = mercJSON[packageLabel]
-        utilis.writeStringToFile(_APPDATA.."\\mercury\\installed\\packages.json", cjson.encode(installedPackages))
+        utilis.writeStringToFile(_MYGAMES.."\\mercury\\installed\\packages.json", cjson.encode(installedPackages))
         if (mercJSON[packageLabel].dependencies ~= nil) then
             print("Fetching required dependencies...\n")
             for i,dependecyPackage in pairs(mercJSON[packageLabel].dependencies) do
@@ -296,7 +302,7 @@ function install(mercPackage, noBackups)
 end
 
 function remove(packageLabel, forcedRemove, eraseBackups)
-    installedPackages = cjson.decode(utilis.readFileToString(_APPDATA.."\\mercury\\installed\\packages.json"))
+    installedPackages = cjson.decode(utilis.readFileToString(_MYGAMES.."\\mercury\\installed\\packages.json"))
     if (installedPackages[packageLabel] ~= nil) then
         print("Removing package '"..packageLabel.."'...")
         for k,v in pairs(installedPackages[packageLabel].files) do
@@ -335,7 +341,7 @@ function remove(packageLabel, forcedRemove, eraseBackups)
             end
         end
         installedPackages[packageLabel] = nil
-        utilis.writeStringToFile(_APPDATA.."\\mercury\\installed\\packages.json", cjson.encode(installedPackages))
+        utilis.writeStringToFile(_MYGAMES.."\\mercury\\installed\\packages.json", cjson.encode(installedPackages))
         print(colors("\n%{green bright}DONE!!: %{reset}Successfully %{yellow bright}removed %{reset}'"..packageLabel.."' package."))
         return true
     else

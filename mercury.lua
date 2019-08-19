@@ -50,6 +50,10 @@ local function createEnvironment(folders) -- Setup environment to work, store da
         end
         if (documentsPath ~= nil) then
             _MYGAMES = documentsPath.values["Personal"]["value"].."\\My Games\\Halo CE"
+            if (utilis.fileExist(_APPDATA.."\\mercury\\installed\\packages.json")) then -- Migrate older installed packages.json to My Games folder
+                x,y,z = utilis.move(_APPDATA.."\\mercury\\installed\\packages.json", _MYGAMES.."\\mercury\\installed\\packages.json")
+                print(inspect(x,y,z))
+            end
         else
             print("Error at trying to get 'My Documents' path...")
             os.exit()
@@ -163,7 +167,7 @@ function download(packageLabel, forceInstallation, noBackups)
     local packageVersion = packageSplit[2]
     if (searchPackage(packageName)) then
         if (forceInstallation ~= true) then
-            print(colors("%{red bright}WARNING!!!: %{reset}The package '"..packageName.."' that you are looking for is already installed in the game. If you need to update or reinstall try to remove it first.\n"))
+            print(colors("%{red bright}WARNING!!!: %{reset}The package '"..packageName.."' that you are looking for is already installed in the game.\n"))
             return false
         else
             remove(packageName, true)

@@ -1,5 +1,5 @@
 -----------------------------------------------------------------------------
--- FDownload: Library to download files from repo host
+-- FDownload: Library to download files using ftp, http, https
 -- Editor: Sledmine
 -- Original Author: Diego Nehab
 -- Version: 1.0
@@ -7,7 +7,7 @@
 
 local socket = require("socket")
 local http = require("socket.http")
-local https = require("ssl.https")
+local https = require("socket.https")
 local ftp = require("socket.ftp")
 local url = require("socket.url")
 local ltn12 = require("ltn12")

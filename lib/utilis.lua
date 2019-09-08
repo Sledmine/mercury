@@ -27,14 +27,14 @@ local function splitPath(pathName)
     return dir, filename, ext
 end
 
-local function readFileToString(file)
+local function fileToString(file)
     local f = assert(io.open(file, "rb"))
     local content = f:read("*all")
     f:close()
     return content
 end
 
-local function writeStringToFile(file, text)
+local function stringToFile(file, text)
     local f = assert(io.open(file, "w"))
     local content = f:write(text)
     f:close()
@@ -90,6 +90,10 @@ local function copyFile(sourceFile, destinationFile)
     return false
 end
 
+local function folderExist(folderPath)
+    return fs.is(folderPath)
+end
+
 local function fileExist(filePath)
     return fs.is(filePath)
 end
@@ -116,8 +120,8 @@ local function arrayPop(array)
     return array[#array]
 end
 
-_M.readFileToString = readFileToString
-_M.writeStringToFile = writeStringToFile
+_M.fileToString = fileToString
+_M.stringToFile = stringToFile
 _M.createFolder = createFolder
 _M.deleteFolder = deleteFolder
 _M.move = move
@@ -128,5 +132,6 @@ _M.isFile = isFile
 _M.splitPath = splitPath
 _M.explode = explode
 _M.arrayPop = arrayPop
+_M.folderExist = folderExist
 
 return _M

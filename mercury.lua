@@ -1,83 +1,91 @@
 ------------------------------------------------------------------------------
 -- Mercury: Package Manager for Halo Custom Edition 
 -- Authors: JerryBrick, Sledmine
--- Version: 2.1
+-- Version: 3.0
 ------------------------------------------------------------------------------
 
 -- Required libraries implementation.
 
 -- Local libraries
-local fdownload = require "lib.fdownload"
-local utilis = require "lib.utilis"
-local registry = require "lib.registry"
+local fdownload = require "Mercury.lib.fdownload"
+local utilis = require "Mercury.lib.utilis"
 
 -- Global libraries
 local inspect = require "inspect"
 local path = require "path"
-local cjson = require "cjson"
+local json = require "cjson"
 local zip = require "minizip"
 local colors = require "ansicolors"
+local registry = require "registry"
+
+-- Required global enviroment variables.
+local _TEMP = os.getenv("TEMP")
+
+-- In code constant definition.
+local _MERCURY_VERSION = 3.0
+local _MERC_EXTENSION = ".merc"
 
 -- Global variables definition.
 
-local _mercuryVersion = "2.1"
+local config = {}
 local host = "https://mercury.shadowmods.net" -- URL for the main repo (example: http://lua.repo.net/)
-local protocol = "http://"
+local protocol = "https://"
 local librarianPath = "librarian.php?" -- Path for master librarian index
 
 -- Global function creation.    
 
-local function createEnvironment(folders) -- Setup environment to work, store data, temp files, etc.
+local function getGameRegistryPath()
+    local registryPath
+    if (_ARCH ~= "x86") then
+        registryPath = registry.getkey("HKEY_LOCAL_MACHINE\\SOFTWARE\\WOW6432Node\\Microsoft\\Microsoft Games\\Halo CE")
+    else
+        registryPath = registry.getkey("HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\Microsoft Games\\Halo CE")
+    end
+    local documentsPath = registry.getkey("HKEY_CURRENT_USER\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Explorer\\Shell Folders")
+    if (registryPath ~= nil) then
+        _HALOCE = registryPath.values["EXE Path"]["value"]
+    else
+        print("\nError at trying to get Halo Custom Edition installation path, are you using a portable version (?)")
+        os.exit()
+    end
+    if (documentsPath ~= nil) then
+        _MYGAMES = documentsPath.values["Personal"]["value"].."\\My Games\\Halo CE" 
+    else
+        print("Error at trying to get 'My Documents' path...")
+        os.exit()
+    end
+end
+
+local function getEnvironment() -- Setup environment to work, store data, temp files, etc.
     _SOURCEFOLDER = lfs.currentdir()
     _APPDATA = os.getenv("APPDATA")
-    _TEMP = os.getenv("TEMP")
     _ARCH = os.getenv("PROCESSOR_ARCHITECTURE")
-    if (utilis.fileExist("config.json")) then
-        _HALOCE = cjson.decode(utilis.readFileToString(_MYGAMES.."\\mercury\\config.json")).HaloCE
-    else
-        local registryPath
-        if (_ARCH ~= "x86") then
-            registryPath = registry.getkey("HKEY_LOCAL_MACHINE\\SOFTWARE\\WOW6432Node\\Microsoft\\Microsoft Games\\Halo CE")
-        else
-            registryPath = registry.getkey("HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\Microsoft Games\\Halo CE")
-        end
-        local documentsPath = registry.getkey("HKEY_CURRENT_USER\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Explorer\\Shell Folders")
-        if (registryPath ~= nil) then
-            _HALOCE = registryPath.values["EXE Path"]["value"]
-        else
-            print("\nError at trying to get Halo Custom Edition installation path, are you using a portable version (?)")
-            os.exit()
-        end
-        if (documentsPath ~= nil) then
-            _MYGAMES = documentsPath.values["Personal"]["value"].."\\My Games\\Halo CE" 
-        else
-            print("Error at trying to get 'My Documents' path...")
-            os.exit()
+    getGameRegistryPath()
+    _MERCURY_CONFIG = _MYGAMES.."\\mercury\\config.json"
+    if (utilis.fileExist(_MERCURY_CONFIG)) then
+        config = json.decode(utilis.fileToString(_MERCURY_CONFIG))
+        if (config.HaloCE) then
+            _HALOCE = config.HaloCE
         end
     end
-    if (folders) then
-        _REPOPATH = "\\mercury\\packages"
-        _MERC_EXTENSION = ".merc"
-        envFolders = {
-            _MYGAMES.."\\mercury",
-            _MYGAMES.."\\mercury\\installed",
-            _TEMP.._REPOPATH,
-            _TEMP.._REPOPATH.."\\downloaded",
-            _TEMP.._REPOPATH.."\\depacked"
-        }
-        for i = 1,#envFolders do
-            --print("\nCreating folder: "..envFolders[i])
-            utilis.createFolder(envFolders[i])
-        end
-        if (utilis.fileExist(_APPDATA.."\\mercury\\installed\\packages.json")) then -- Migrate older installed packages.json to My Games folder
-            print(colors("\n%{yellow bright}WARNING!!!: Found installed packages json in older path, migrating them to My Games folder now!!!"))
-            local result, desc, error = utilis.move(_APPDATA.."\\mercury\\installed\\packages.json", _MYGAMES.."\\mercury\\installed\\packages.json")
-            if (result) then
-                utilis.deleteFolder(_APPDATA.."\\mercury\\", true)
-                print(colors("%{green bright}SUCCESS!!!: %{reset}Installed packages succesfully migrated to My Games folder."))
-            else
-                print(colors("%{red bright}ERROR!!!: %{reset}Error at trying to migrate packages json: "..tostring(desc).."."))
-            end
+    _ENVFOLDERS = {
+    _MYGAMES.."\\mercury",
+    _HALOCE.."\\mercury\\installed",
+    _TEMP.."\\mercury\\packages",
+    _TEMP.."\\mercury\\packages\\downloaded",
+    _TEMP.."\\mercury\\packages\\depacked"}
+    for i = 1,#_ENVFOLDERS do
+        utilis.createFolder(_ENVFOLDERS[i])
+    end
+    if (utilis.fileExist(_APPDATA.."\\mercury\\installed\\packages.json") or utilis.fileExist(_MYGAMES.."\\mercury\\installed\\packages.json")) then -- Migrate older installed packages.json to Halo CE folder
+        print(colors("\n%{yellow bright}WARNING!!!: Found installed packages json in older path, migrating them to Halo Custom Edition folder now!!!"))
+        local result, desc, error = utilis.move(_APPDATA.."\\mercury\\installed\\packages.json" or _MYGAMES.."\\mercury\\installed\\packages.json", _HALOCE.."\\mercury\\installed\\packages.json")
+        if (result) then
+            utilis.deleteFolder(_APPDATA.."\\mercury\\", true)
+            utilis.deleteFolder(_MYGAMES.."\\mercury\\installed", true)
+            print(colors("%{green bright}SUCCESS!!!: %{reset}Installed json packages succesfully migrated to Halo Custom Edition folder."))
+        else
+            print(colors("%{red bright}ERROR!!!: %{reset}Error at trying to migrate packages json, reason: "..tostring(desc).."."))
         end
     end
 end
@@ -88,8 +96,8 @@ end
 
 local function searchPackage(packageName)
     local installedPackages = {}
-    if (utilis.fileExist(_MYGAMES.."\\mercury\\installed\\packages.json") == true) then
-        installedPackages = cjson.decode(utilis.readFileToString(_MYGAMES.."\\mercury\\installed\\packages.json"))
+    if (utilis.fileExist(_HALOCE.."\\mercury\\installed\\packages.json") == true) then
+        installedPackages = json.decode(utilis.fileToString(_HALOCE.."\\mercury\\installed\\packages.json"))
         if (installedPackages[packageName] ~= nil) then
             return true
         end
@@ -99,17 +107,18 @@ end
 
 local function list(packageName, onlyNames, detailList)
     local installedPackages = {}
-    if (utilis.fileExist(_MYGAMES.."\\mercury\\installed\\packages.json") == true) then
-        local installedPackagesFile = utilis.readFileToString(_MYGAMES.."\\mercury\\installed\\packages.json")
+    if (utilis.fileExist(_HALOCE.."\\mercury\\installed\\packages.json") == true) then
+        local installedPackagesFile = utilis.fileToString(_HALOCE.."\\mercury\\installed\\packages.json")
         if (installedPackagesFile ~= "") then
-            installedPackages = cjson.decode(utilis.readFileToString(_MYGAMES.."\\mercury\\installed\\packages.json"))
+            installedPackages = json.decode(installedPackagesFile)
         else
-            utilis.deleteFile(_MYGAMES.."\\mercury\\installed\\packages.json")
-            print(colors("%{red bright}WARNING!!!: %{reset}There are not any installed package using Mercury...yet."))
+            utilis.deleteFile(_HALOCE.."\\mercury\\installed\\packages.json")
+            print(colors("%{red bright}WARNING!!!: %{reset}There are not any installed packages using Mercury...yet."))
         end
         local printInfo = {}
         if (packageName ~= "all") then
             if (searchPackage(packageName)) then
+                printInfo[packageName] = {}
                 printInfo[packageName].name = installedPackages[packageName].name
                 printInfo[packageName].author = installedPackages[packageName].author
                 printInfo[packageName].version = installedPackages[packageName].version
@@ -128,7 +137,7 @@ local function list(packageName, onlyNames, detailList)
         end
         return false
     end
-    print(colors("%{red bright}WARNING!!!: %{reset}There are not any installed package using Mercury...yet."))
+    print(colors("%{red bright}WARNING!!!: %{reset}There are not any installed packages using Mercury...yet."))
 end
 
 local function depackageMerc(mercFile, outputPath)
@@ -176,11 +185,11 @@ function download(packageLabel, forceInstallation, noBackups)
             print(colors("%{red bright}WARNING!!!: %{reset}The package '"..packageName.."' that you are looking for is already installed in the game.\n"))
             return false
         else
-            remove(packageName, true)
+            remove(packageName, true, true)
         end
     end
     print("Looking for package '"..packageLabel.."' in Mercury repository...\n")
-    local packageHandle = _REPOPATH.."\\"..packageLabel..".json" -- Path and Filename for the JSON file obtained from the server
+    local packageHandle = "\\mercury\\packages\\"..packageLabel..".json" -- Path and Filename for the JSON file obtained from the server
     print("Fetching package into librarian index...\n")
     local packageURL = host.."/"..librarianPath.."package="..packageName
     if (packageVersion ~= nil) then
@@ -193,9 +202,9 @@ function download(packageLabel, forceInstallation, noBackups)
         if (h["content-length"] == "0") then
             print("\nWARNING!!!: '"..packageLabel.."' package not found in Mercury repository.")
         else
-            local packageFile = utilis.readFileToString(_TEMP..packageHandle)
+            local packageFile = utilis.fileToString(_TEMP..packageHandle)
             if (packageFile ~= "") then
-                local packageJSON = cjson.decode(utilis.readFileToString(_TEMP..packageHandle))
+                local packageJSON = json.decode(utilis.fileToString(_TEMP..packageHandle))
                 if (packageJSON ~= {}) then
                     print("\nSuccess! Package '"..packageLabel.."' found in Mercury repo, parsing meta data....")
                     if (packageSplit[2] == nil) then
@@ -210,7 +219,7 @@ function download(packageLabel, forceInstallation, noBackups)
                                 local subpackageSplit = utilis.explode("/", v)
                                 local subpackageFile = utilis.arrayPop(subpackageSplit)
                                 print(colors("%{blue bright}Downloading %{white}'"..subpackageFile.."' package...\n"))
-                                local downloadOutput = _TEMP.._REPOPATH.."\\downloaded\\"..subpackageFile
+                                local downloadOutput = _TEMP.."\\mercury\\packages\\downloaded\\"..subpackageFile
                                 local r, c, h, s = fdownload.get(subpackageURL, downloadOutput) 
                                 if (c == 200) then
                                     print(colors("%{green bright}\n'"..packageLabel.."-"..packageVersion.."' has been succesfully downloaded.\n\nStarting installation process now...\n"))
@@ -239,15 +248,15 @@ function install(mercPackage, noBackups)
     local mercFullName = mercPath.."\\"..mercName.._MERC_EXTENSION
     if (utilis.fileExist(mercFullName) == true) then
         print("Trying to depackage '"..mercName..".merc'...\n")
-        local depackageFolder = _TEMP.._REPOPATH.."\\depacked\\"..mercName
+        local depackageFolder = _TEMP.."\\mercury\\packages\\depacked\\"..mercName
         utilis.createFolder(depackageFolder)
         depackageMerc(mercFullName, depackageFolder)
-        local mercJSON = cjson.decode(utilis.readFileToString(depackageFolder.."\\manifest.json"))
+        local merjson = json.decode(utilis.fileToString(depackageFolder.."\\manifest.json"))
         print("Dispatching package files..\n")
-        for k,v in pairs(mercJSON) do
+        for k,v in pairs(merjson) do
             packageLabel = k
         end
-        for file,path in pairs(mercJSON[packageLabel].files) do
+        for file,path in pairs(merjson[packageLabel].files) do
             local outputPath = string.gsub(path, "_HALOCE", _HALOCE, 1)
             outputPath = string.gsub(outputPath, "_MYGAMES", _MYGAMES, 1)
             print("Installing '"..file.."'...")
@@ -286,14 +295,14 @@ function install(mercPackage, noBackups)
             end
         end
         local installedPackages = {}
-        if (utilis.fileExist(_MYGAMES.."\\mercury\\installed\\packages.json") == true) then
-            installedPackages = cjson.decode(utilis.readFileToString(_MYGAMES.."\\mercury\\installed\\packages.json"))
+        if (utilis.fileExist(_HALOCE.."\\mercury\\installed\\packages.json")) then
+            installedPackages = json.decode(utilis.fileToString(_HALOCE.."\\mercury\\installed\\packages.json"))
         end
-        installedPackages[packageLabel] = mercJSON[packageLabel]
-        utilis.writeStringToFile(_MYGAMES.."\\mercury\\installed\\packages.json", cjson.encode(installedPackages))
-        if (mercJSON[packageLabel].dependencies ~= nil) then
+        installedPackages[packageLabel] = merjson[packageLabel]
+        utilis.stringToFile(_HALOCE.."\\mercury\\installed\\packages.json", json.encode(installedPackages))
+        if (merjson[packageLabel].dependencies ~= nil) then
             print("Fetching required dependencies...\n")
-            for i,dependecyPackage in pairs(mercJSON[packageLabel].dependencies) do
+            for i,dependecyPackage in pairs(merjson[packageLabel].dependencies) do
                 download(dependecyPackage)
             end
         end
@@ -305,8 +314,8 @@ function install(mercPackage, noBackups)
     return false
 end
 
-function remove(packageLabel, forcedRemove, eraseBackups)
-    installedPackages = cjson.decode(utilis.readFileToString(_MYGAMES.."\\mercury\\installed\\packages.json"))
+function remove(packageLabel, noBackups, eraseBackups)
+    installedPackages = json.decode(utilis.fileToString(_HALOCE.."\\mercury\\installed\\packages.json"))
     if (installedPackages[packageLabel] ~= nil) then
         print("Removing package '"..packageLabel.."'...")
         for k,v in pairs(installedPackages[packageLabel].files) do
@@ -316,7 +325,7 @@ function remove(packageLabel, forcedRemove, eraseBackups)
             local result, desc, error = utilis.deleteFile(file)
             if (result) then
                 print(colors("%{green bright}OK!!!: %{reset}File erased succesfully.\n\nChecking for backup files...\n"))
-                if (utilis.fileExist(file..".bak") and eraseBackups ~= true) then
+                if (utilis.fileExist(file..".bak") and noBackups ~= true) then
                     print("Backup file found, RESTORING now...")
                     utilis.move(file..".bak", file)
                     if (utilis.fileExist(file)) then
@@ -333,7 +342,7 @@ function remove(packageLabel, forcedRemove, eraseBackups)
                         print(colors("%{green bright}OK!!!: %{reset}File succesfully deleted."))
                     end
                 else
-                    print("No backup found for this file.")
+                    print("No backup is going to be restored for this file.")
                 end
             else
                 if (error == 2 or error == 3) then
@@ -345,7 +354,7 @@ function remove(packageLabel, forcedRemove, eraseBackups)
             end
         end
         installedPackages[packageLabel] = nil
-        utilis.writeStringToFile(_MYGAMES.."\\mercury\\installed\\packages.json", cjson.encode(installedPackages))
+        utilis.stringToFile(_HALOCE.."\\mercury\\installed\\packages.json", json.encode(installedPackages))
         print(colors("\n%{green bright}DONE!!: %{reset}Successfully %{yellow bright}removed %{reset}'"..packageLabel.."' package."))
         return true
     else
@@ -353,23 +362,47 @@ function remove(packageLabel, forcedRemove, eraseBackups)
     end
 end
 
-local function mitosis(name)
-    if (utilis.fileExist("data\\mitosis.json") == true) then
+local function set(instanceName)
+    if (instanceName == "default") then
+        getGameRegistryPath()
+    end
+    local folderName = utilis.arrayPop(utilis.explode("\\", _HALOCE))
+    if (instanceName == "default") then
+        instanceName = folderName
+    end
+    local preGameFolder = utilis.explode(folderName, _HALOCE)[1]
+    local mitosisPath = preGameFolder..instanceName
+    if (utilis.folderExist(mitosisPath)) then
+        print("SUCCESS!!!: Setting current Halo Custom Edition instance to: "..instanceName)
+        config.HaloCE = mitosisPath
+        utilis.stringToFile(_MERCURY_CONFIG, json.encode(config))
+        return true
+    end
+    print("ERROR!!!: "..instanceName.." not found as an existent instance.")
+    return false
+end
+
+local function mitosis(instanceName)
+    if (utilis.fileExist(".\\data\\mitosis.json") == true) then
         local fileList
         local folderName = utilis.arrayPop(utilis.explode("\\", _HALOCE))
-        local mitosisPath = utilis.explode(folderName, _HALOCE)[1]..name.."\\"
+        local mitosisPath = utilis.explode(folderName, _HALOCE)[1]..instanceName.."\\"
         utilis.createFolder(mitosisPath)
         print(mitosisPath)
-        fileList = cjson.decode(utilis.readFileToString("data\\mitosis.json"))
+        fileList = json.decode(utilis.fileToString(".\\data\\mitosis.json"))
         for i,v in pairs(fileList) do
             if (utilis.isFile(v) == true) then
-                utilis.copyFile(_HALOCE.."\\"..v, mitosisPath..v)
                 print("Mitosising '"..v.."'")
+                if (utilis.copyFile(_HALOCE.."\\"..v, mitosisPath..v) == false) then
+                    print("Errir at mitosising: '"..v.."'!!!")
+                    return false
+                end
             else
                 utilis.createFolder(mitosisPath..v)
             end
         end
         print("Successfully mitosised '"..folderName.."'")
+        return true
     else
         print("There is not a mitosis filelist!")
     end
@@ -419,30 +452,34 @@ local function printUsage()
     %{blue bright}mitosis%{reset} : Create a new instance of Halo Custom Edition with only neccesary base files to run.
             <instanceName>
 
-    %{blue bright}config%{reset}  : Define critical Mercury parameters as package installation path.
-            <field> <value> - in 'HaloCE' case field you can pass a name of mitosised Halo Custom Edition instance.
-
-    %{blue bright}setup%{reset}   : Set all the needed values to introduce Mercury into Windows OS.
+    %{blue bright}set%{reset}  : Define Mercury current Halo Custom Edition instance to work.
+            <instanceName> -- Use "default" to use the default Halo Custom Edition path of the game.
 
     %{blue bright}version%{reset} : Throw version and related info about Mercury.]]))
 end
 
+-- %{blue bright}setup%{reset}   : Set all the needed values to introduce Mercury into Windows OS.
+
 local function printVersion() 
-    print("Mercury: Package Manager for Halo Custom Edition\nVersion: ".._mercuryVersion.."\nGNU General Public License v3.0\nDeveloped by: Jerry Brick, Sledmine.")
+    print("Mercury: Package Manager for Halo Custom Edition\nVersion: ".._MERCURY_VERSION.."\nGNU General Public License v3.0\nDeveloped by: Jerry Brick, Sledmine.")
 end
 
 -- Main program functionality.
-createEnvironment(false)
-destroyEnvironment() -- Destroy previous environment in case something ended wrong
-createEnvironment(true)
-print(tostring(colors("\n%{white bright}[ Mercury - Package Manager | Version: %{reset}%{yellow bright}".._mercuryVersion.." %{white}]")))
-print(tostring(colors("\n%{yellow bright}Detected Windows architecture: %{white}".._ARCH)))
-print(tostring(colors("%{yellow bright}Current Working folder: %{white}'".._SOURCEFOLDER.."'.")))
-print(tostring(colors("%{yellow bright}Current Halo CE path: %{white}'".._HALOCE.."'")))
-print(tostring(colors("%{yellow bright}Current My Games path: %{white}'".._MYGAMES.."'\n")))
+destroyEnvironment()
+getEnvironment()
 if (#arg == 0) then
     printUsage()
+    print(tostring(colors("\n%{white bright}[ Mercury - Package Manager | Version: %{reset}%{yellow bright}".._MERCURY_VERSION.." %{white}]")))
+    print(tostring(colors("\n%{yellow bright}Detected Windows architecture: %{white}".._ARCH)))
+    print(tostring(colors("%{yellow bright}Current Working folder: %{white}'".._SOURCEFOLDER.."'.")))
+    print(tostring(colors("%{yellow bright}Current Halo CE path: %{white}'".._HALOCE.."'")))
+    print(tostring(colors("%{yellow bright}Current My Games path: %{white}'".._MYGAMES.."'\n")))
 else
+    print(tostring(colors("\n%{white bright}[ Mercury - Package Manager | Version: %{reset}%{yellow bright}".._MERCURY_VERSION.." %{white}]")))
+    print(tostring(colors("\n%{yellow bright}Detected Windows architecture: %{white}".._ARCH)))
+    print(tostring(colors("%{yellow bright}Current Working folder: %{white}'".._SOURCEFOLDER.."'.")))
+    print(tostring(colors("%{yellow bright}Current Halo CE path: %{white}'".._HALOCE.."'")))
+    print(tostring(colors("%{yellow bright}Current My Games path: %{white}'".._MYGAMES.."'\n")))
     local parameters
     if (arg[1] == "install") then -- INSTALL Command
         if (arg[2] ~= nil) then
@@ -466,7 +503,6 @@ else
         end
     elseif (arg[1] == "remove") then -- REMOVE Command
         if (arg[2] ~= nil) then
-            local forcedRemove
             local noBackups
             local eraseBackups
             if (arg[3] ~= nil) then
@@ -481,7 +517,7 @@ else
                     noBackups = true
                 end
             end
-            remove(arg[2], forcedRemove, noBackups, eraseBackups)
+            remove(arg[2], noBackups, eraseBackups)
         else
             printUsage()
         end
@@ -522,11 +558,14 @@ else
         end
     elseif (arg[1] == "version") then
         printVersion()
-    elseif (arg[1] == "setup") then
-        mercurySetup()
+    elseif (arg[1] == "set") then
+        if (arg[2] ~= nil) then
+            set(arg[2])
+        else
+            printUsage()
+        end
     else
         print("'"..arg[1].."' is not an available action...")
     end
 end
-
 destroyEnvironment()

@@ -17,7 +17,26 @@ Is a console program that allows you to download all kind of tools, addons, mods
 To download and use Mercury in your computer you have to download Windows binaries usually located in the "bin" folder and run Mercury.exe in your favorite command prompt.
 
 ### Using Mercury
-You can run Mercury in any kind of terminal and see the available commands to use.
+You can run Mercury in any kind of terminal, calling the Mercury executable will show available commands and their respective description, in anycase here is a complete documentation to use Mercury.
+
+For documentation purposes, every parameter inse **[]** is an optional parameter.
+
+The sintaxis for every command is being triggered calling "mercury" before every command, example:
+```
+mercury <command> <parameters> [<sub-parameters>]
+```
+Using a real command example:
+```
+mercury install chimera
+```
+In some commands you can pass sub params to cause little modifications in the behaviour of the command:
+```
+mercury remove opensauce -eb
+```
+
+### List of available commands
+- install <packageName> <params>
+This command can download and install any package from our repository 
 
 ### Building Mercury
 To build Mercury using this repo you need to install couple of things to being able to create a  Windows binary executable:

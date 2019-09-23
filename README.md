@@ -19,7 +19,7 @@ To download and use Mercury in your computer you have to download Windows binari
 ### Using Mercury
 You can run Mercury in any kind of terminal, calling the Mercury executable will show available commands and their respective description, in anycase here is a complete documentation to use Mercury.
 
-For documentation purposes, every parameter inse **[]** is an optional parameter.
+Every parameter inside **[ ]** is an optional parameter.
 
 The sintaxis for every command is being triggered calling "mercury" before every command, example:
 ```
@@ -35,11 +35,22 @@ mercury remove opensauce -eb
 ```
 
 ### List of available commands
+
 - install <packageName> <params>
-This command can download and install any package from our repository 
+<br>
+This command can download and install any package from our repository, you can request any version of the desired package, use "-" after the package name to specify the version you want to request, if the version is not given, the most recent version will be downloaded.
+
+Example for specific version:
+```
+mercury install luablam-2.0
+```
+Example for most recent version:
+```
+mercury install luablam
+```
 
 ### Building Mercury
-To build Mercury using this repo you need to install couple of things to being able to create a  Windows binary executable:
+To build Mercury using this repo you need to install couple of things to being able to create a Windows binary executable:
  
 - LuaPower distribution
 - LuaSec

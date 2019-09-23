@@ -6,7 +6,7 @@
 ### What is Mercury?
 Is a console program that allows you to download all kind of tools, addons, mods, extensions and install it directly into your game, everything you need in one place being downloaded in the pure Linux style, basically a package manager for Halo Custom Edition.
 
-### What i can do with it?
+### What can i do with it?
  - Get access into our package repository and download the latest or the oldest version of your favorite packages.
  - Upgrade to a newer version of your favorite addon or simple uninstall it.
  - Manually install .merc packages by command line or by clicking on it.

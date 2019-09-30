@@ -36,7 +36,7 @@ mercury remove opensauce -eb
 
 ### List of available commands
 
-#### install
+## install
 This command can download and install any package from our repository, you can request any version of the desired package using "-" after the package name to specify the version you want to request, if the version is not given, the most recent version will be downloaded.
 
 Request specific version:

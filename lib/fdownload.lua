@@ -109,24 +109,38 @@ end
 
 -- downloads a file using the https protocol
 function getbyhttps(u, file)
+    local d
+    -- create a function to redirect data in case of not giving an output file
+    local function redirect(input) d = input end
     local save = ltn12.sink.file(file or io.stdout)
-    -- only print feedback if output is not stdout
-    if file then save = ltn12.sink.chain(stats(gethttpssize(u)), save) end
-    local r, c, h, s = https.request {url = u, sink = save }
-    if c ~= 200 then --io.stderr:write(s or c, "\n")
+    -- save data to file if it was specified otherway return it as string
+    if file then
+        save = ltn12.sink.chain(stats(gethttpssize(u)), save)
+    else
+        save = redirect
     end
-    return r, c, h ,s
+    local r, c, h, s = https.request {url = u, sink = save }
+    --[[if c ~= 200 then io.stderr:write(s or c, "\n")
+    end]]
+    return r, c, h, s, d
 end
 
 -- downloads a file using the http protocol
 function getbyhttp(u, file)
+    local d
+    -- create a function to redirect data in case of not giving an output file
+    local function redirect(input) d = input end
     local save = ltn12.sink.file(file or io.stdout)
-    -- only print feedback if output is not stdout
-    if file then save = ltn12.sink.chain(stats(gethttpsize(u)), save) end
-    local r, c, h, s = http.request {url = u, sink = save }
-    if c ~= 200 then --io.stderr:write(s or c, "\n")
+    -- save data to file if it was specified otherway return it as string
+    if file then
+        save = ltn12.sink.chain(stats(gethttpsize(u)), save)
+    else
+        save = redirect
     end
-    return r, c, h ,s
+    local r, c, h, s = http.request {url = u, sink = save }
+    --[[if c ~= 200 then io.stderr:write(s or c, "\n")
+    end]]
+    return r, c, h, s
 end
 
 -- downloads a file using the ftp protocol

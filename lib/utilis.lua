@@ -4,14 +4,12 @@
 -- Version: 1.0
 ------------------------------------------------------------------------------
 
-local _M = {}
-
 local lfs = require "lfs"
 local fs = require "fs"
 local inspect = require "inspect"
 local path = require "path"
 
-local function splitPath(pathName)
+function splitPath(pathName)
     local dir
     local ext
     local filename 
@@ -27,28 +25,28 @@ local function splitPath(pathName)
     return dir, filename, ext
 end
 
-local function fileToString(file)
+function fileToString(file)
     local f = assert(io.open(file, "rb"))
     local content = f:read("*all")
     f:close()
     return content
 end
 
-local function stringToFile(file, text)
+function stringToFile(file, text)
     local f = assert(io.open(file, "w"))
     local content = f:write(text)
     f:close()
 end
 
-local function createFolder(folderName)
+function createFolder(folderName)
     return fs.mkdir(folderName, true)
 end
 
-local function move(inputPath, outputPath)
+function move(inputPath, outputPath)
     return fs.move(inputPath, outputPath)
 end
 
-local function deleteFolder(folderName, withFiles)
+function deleteFolder(folderName, withFiles)
     if (withFiles == true) then
         os.execute('rmdir /S /Q "'..folderName..'"')
     else
@@ -56,14 +54,14 @@ local function deleteFolder(folderName, withFiles)
     end
 end
 
-local function deleteFile(filePath, recursive)
+function deleteFile(filePath, recursive)
     if (recursive == true) then
         return fs.remove(filePath, true)
     end
     return fs.remove(filePath)
 end
 
-local function copyFile(sourceFile, destinationFile)
+function copyFile(sourceFile, destinationFile)
     if (sourceFile ~= nil and destinationFile ~= nil) then
         if (fs.is(sourceFile) == false) then
             print("Error: Specified source file does not exist!")
@@ -90,22 +88,22 @@ local function copyFile(sourceFile, destinationFile)
     return false
 end
 
-local function folderExist(folderPath)
-    return fs.is(folderPath)
+function folderExist(folderPath)
+    return fileExist(folderPath)
 end
 
-local function fileExist(filePath)
+function fileExist(filePath)
     return fs.is(filePath)
 end
 
-local function isFile(filepath)
+function isFile(filepath)
     if (path.ext(filepath) == nil) then
         return false
     end
     return true
 end
 
-local function explode(divider, string) -- Created by: http://richard.warburton.it
+function explode(divider, string) -- Created by: http://richard.warburton.it
     if (divider == nil or divider == '') then return 1 end
     local position, array = 0, {}
     for st, sp in function() return string.find(string, divider, position, true) end do
@@ -116,22 +114,6 @@ local function explode(divider, string) -- Created by: http://richard.warburton.
     return array
 end
 
-local function arrayPop(array)
+function arrayPop(array)
     return array[#array]
 end
-
-_M.fileToString = fileToString
-_M.stringToFile = stringToFile
-_M.createFolder = createFolder
-_M.deleteFolder = deleteFolder
-_M.move = move
-_M.deleteFile = deleteFile
-_M.copyFile = copyFile
-_M.fileExist = fileExist
-_M.isFile = isFile
-_M.splitPath = splitPath
-_M.explode = explode
-_M.arrayPop = arrayPop
-_M.folderExist = folderExist
-
-return _M

@@ -9,6 +9,22 @@ local _M = {}
 
 local registry = require "registry"
 
+-- Super function to print ASCII color strings and structures, tables and functions.
+function cprint(value)
+    if (type(value) ~= "string") then
+        print(inspect(value))
+    else
+        print(colors(value))
+    end
+end
+
+-- Debug print for testing purposes only
+function dprint(value)
+    if (_DEBUG_MODE and value) then
+        cprint(value)
+    end
+end
+
 local function getMyGamesPath()
     local documentsPath = registry.getkey("HKEY_CURRENT_USER\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Explorer\\Shell Folders")
     if (documentsPath ~= nil) then
@@ -73,6 +89,15 @@ end
             print(colors("%{red bright}ERROR!!!: %{reset}Error at trying to migrate packages json, reason: "..tostring(desc).."."))
         end
     end]]
+
+--[[ TODO STUFF: Global function creation.    
+local function mercurySetup()
+    -- Create registry entries
+    --[[registry.writevalue("HKEY_CLASSES_ROOT\\.merc", "", "REG_SZ", "Mercury Package")
+    registry.writevalue("HKEY_CLASSES_ROOT\\.merc\\DefaultIcon", "", "REG_SZ", "\"".._SOURCEFOLDER.."\\assets\\icons\\package.ico\",0")
+    registry.writevalue("HKEY_CLASSES_ROOT\\.merc\\shell\\open\\command", "", "REG_SZ", "\"".._SOURCEFOLDER.."\\mercury.exe\" merc %1")
+    print("Mercury Successfully setup!")
+end]]
 
 local function get() -- Setup environment to work, store data, temp files, etc.
     local _TEMP = os.getenv("TEMP")

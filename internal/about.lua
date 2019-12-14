@@ -50,7 +50,7 @@ local function printVersion()
     cprint("About Mercury:\nPackage Manager for Halo Custom Edition")
     cprint("GNU General Public License v3.0")
     cprint("Developed by Jerry Brick, Sledmine")
-    cprint("Lua rocks ma dudeee!\n")
+    cprint("Lua obviously... ma dudeee!\n")
 end
 
 _M.printUsage = printUsage

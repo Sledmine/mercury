@@ -8,132 +8,57 @@
 _MERCURY_VERSION = 3.0
 _MERC_EXTENSION = ".merc"
 
--- Super function to print ASCII color strings
-function cprint(text)
-    print(colors(text))
-end
-
 -- Global libraries
+argparse = require "argparse"
 inspect = require "inspect"
 colors = require "ansicolors"
 
 -- Local libraries
-local actions = require "Mercury.actions.mixer"
+local combiner = require "Mercury.actions.combiner"
 local mercury = require "Mercury.internal.about"
 
 -- Local function imports
 local environment = require "Mercury.config.environment"
 
--- Temp stuff
- config = {}
- host = "mercury.shadowmods.net" -- URL for the main repo (example: http://lua.repo.net/)
- protocol = "https://"
- librarianPath = "librarian.php?" -- Path for master librarian index
-
---[[ TODO STUFF: Global function creation.    
-local function mercurySetup()
-    -- Create registry entries
-    --[[registry.writevalue("HKEY_CLASSES_ROOT\\.merc", "", "REG_SZ", "Mercury Package")
-    registry.writevalue("HKEY_CLASSES_ROOT\\.merc\\DefaultIcon", "", "REG_SZ", "\"".._SOURCEFOLDER.."\\assets\\icons\\package.ico\",0")
-    registry.writevalue("HKEY_CLASSES_ROOT\\.merc\\shell\\open\\command", "", "REG_SZ", "\"".._SOURCEFOLDER.."\\mercury.exe\" merc %1")
-    print("Mercury Successfully setup!")
-end]]
-
--- Main program entry
-
 -- Get all environment variables
 environment.get()
-cprint("\n%{white bright}[ Mercury - Package Manager | Version: %{reset}%{yellow bright}" .. _MERCURY_VERSION .. " %{white}]\n")
-if (#arg == 0) then
-    mercury.printUsage()
-else
-    cprint("%{yellow bright}Current Halo CE path: %{white}'" .. _HALOCE .. "'")
-    cprint("%{yellow bright}Current My Games path: %{white}'" .. _MYGAMES .. "'\n")
-    local parameters
-    if (arg[1] == "install") then -- INSTALL Command
-        if (arg[2] ~= nil) then
-            local forceInstallation
-            local noBackups
-            if (arg[3] ~= nil) then
-                parameters = ""
-                for i = 3,#arg do
-                    parameters = parameters..arg[i]
-                end
-                if (string.find(parameters, "-f") ~= nil) then
-                    forceInstallation = true
-                end
-                if (string.find(parameters, "-nb") ~= nil) then
-                    noBackups = true
-                end
-            end
-            actions.download(arg[2], forceInstallation, noBackups)
-        else
-            printUsage()
-        end
-    elseif (arg[1] == "remove") then -- REMOVE Command
-        if (arg[2] ~= nil) then
-            local noBackups
-            local eraseBackups
-            if (arg[3] ~= nil) then
-                parameters = ""
-                for i = 3,#arg do
-                    parameters = parameters..arg[i]
-                end
-                if (string.find(parameters, "-eb") ~= nil) then
-                    eraseBackups = true
-                end
-                if (string.find(parameters, "-nb") ~= nil) then
-                    noBackups = true
-                end
-            end
-            actions.remove(arg[2], noBackups, eraseBackups)
-        else
-            printUsage()
-        end
-    elseif (arg[1] == "update") then  -- UPDATE Command
-        if (arg[2] ~= nil) then
-            actions.update(arg[2])
-        else
-            printUsage()
-        end
-    elseif (arg[1] == "list") then -- LIST Command
-        if (arg[2] ~= nil) then
-            local onlyNames
-            local detailList
-            if (arg[3] ~= nil) then
-                parameters = ""
-                for i = 3,#arg do
-                    parameters = arg[i]
-                end
-                if (string.find(parameters, "-l") ~= nil) then
-                    onlyNames = true
-                end
-            end
-            actions.list(arg[2], onlyNames, detailList)
-        else
-            printUsage()
-        end
-    elseif (arg[1] == "merc") then
-        if (arg[2] ~= nil) then
-            actions.install(arg[2])
-        else
-            printUsage()
-        end
-    elseif (arg[1] == "mitosis") then
-        if (arg[2] ~= nil) then
-            actions.mitosis(arg[2])
-        else
-            printUsage()
-        end
-    elseif (arg[1] == "version") then
-        mercury.printVersion()
-    elseif (arg[1] == "set") then
-        if (arg[2] ~= nil) then
-            actions.set(arg[2])
-        else
-            printUsage()
-        end
-    else
-        print("'"..arg[1].."' is not an available action...")
+cprint("\n%{white bright}Mercury - Package Manager, Version %{reset}%{yellow bright}" .. _MERCURY_VERSION .. "%{white}.\n")
+cprint("%{yellow bright}My Games path: %{white}'" .. _MYGAMES .. "'")
+cprint("%{yellow bright}Current Halo CE path: %{white}'" .. _HALOCE .. "'\n")
+
+-- Create argument parser with Mercury info
+local parser = argparse("mercury", "Package manager for Halo Custom Edition.", "Support mercury on: https://mercury.shadowmods.net/")
+
+-- Catch command name as "command" on the args object
+parser:command_target("command")
+parser:flag("-d --debug", "Run Mercury in debug mode.")
+
+-- Define commands behaivour and info
+local install = parser:command("install", "Download and install any package into the game.")
+install:description("Download and install any package from Mercury repository.")
+install:argument("packageName", "Name of the package you want to download.")
+install:argument("packageVersion", "Version of the package to retrieve."):args("?")
+install:flag("-f --force", "Will remove any package and replace any file before installing.")
+install:flag("-n --nobackups", "Avoid backup creation for any conflict package file.")
+
+-- Install action trigger
+install:action(function(args, name)
+    dprint(args)
+    if (args.debug) then
+        _DEBUG_MODE = true
+        cprint("\nMERCURY DEBUG: ON!!!!!")
     end
-end
+    -- (packageName, packageVersion, forceInstallation, noBackups)
+    combiner.install(args.packageName, args.packageVersion, args.force, args.nobackups)
+end)
+
+parser:command("remove", "Delete any currently installed package.")
+
+parser:command("list", "Show already installed packages on this game instance.")
+
+parser:command("mitosis", "Create a new game instance with only neccessary base files.")
+
+parser:flag("-v --version", "Get Mercury version and usefull info.")
+
+-- Override args array with parser ones
+local args = parser:parse()

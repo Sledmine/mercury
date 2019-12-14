@@ -166,12 +166,16 @@ end
 
 -- gets a file either by http or ftp, saving as <name>
 function get(u, name)
-    local fout = name and io.open(name, "wb")
-    local scheme = getscheme(u)
-    if scheme == "ftp" then getbyftp(u, fout)
-    elseif scheme == "http" then return getbyhttp(u, fout)
-    elseif scheme == "https" then return getbyhttps(u, fout)
-    else print("unknown scheme" .. scheme) end
+    if (u) then
+        local fout = name and io.open(name, "wb")
+        local scheme = getscheme(u)
+        if scheme == "ftp" then getbyftp(u, fout)
+        elseif scheme == "http" then return getbyhttp(u, fout)
+        elseif scheme == "https" then return getbyhttps(u, fout)
+        else print("unknown scheme" .. scheme) end
+    else
+        print("HTTP Get MUST have an URL to download from it!!!")
+    end
 end
 
 _M.get = get

@@ -103,6 +103,17 @@ function isFile(filepath)
     return true
 end
 
+function table.merge(t1, t2)
+    for k,v in ipairs(t2) do
+       table.insert(t1, v)
+    end 
+    return t1
+ end
+
+function foreach(t, f, ...)
+    for k,v in pairs(t) do f(v, ...) end
+end
+
 function explode(divider, string) -- Created by: http://richard.warburton.it
     if (divider == nil or divider == '') then return 1 end
     local position, array = 0, {}

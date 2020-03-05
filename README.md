@@ -51,9 +51,8 @@ mercury install luablam
 ### Building Mercury
 To build Mercury using this repo you need to install couple of things to being able to create a Windows binary executable:
  
-- LuaPower distribution
-- LuaSec
-- Lua ANSI Colors
-- OpenSSL
-- MSYS
-- MinGW
+- LuaPower distribution https://luapower.com/
+- LuaSec https://github.com/brunoos/luasec
+- Lua ANSI Colors https://github.com/kikito/ansicolors.lua
+- MSYS http://www.mingw.org/wiki/MSYS
+- MinGW http://mingw-w64.org/doku.php

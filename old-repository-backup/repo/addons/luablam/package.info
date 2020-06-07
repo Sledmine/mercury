@@ -1,0 +1,5 @@
+{
+	"codename": "luablam",
+	"name": "LuaBlam",
+	"description": "Library that helps simplify memory management as objects in scripting."
+}

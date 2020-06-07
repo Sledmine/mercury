@@ -7,11 +7,11 @@
 
 local _M = {}
 
-local registry = require "registry"
+local registry = require 'registry'
 
 -- Super function to print ASCII color strings and structures, tables and functions.
 function cprint(value)
-    if (type(value) ~= "string") then
+    if (type(value) ~= 'string') then
         print(inspect(value))
     else
         print(colors(value))
@@ -26,9 +26,9 @@ function dprint(value)
 end
 
 local function getMyGamesPath()
-    local documentsPath = registry.getkey("HKEY_CURRENT_USER\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Explorer\\Shell Folders")
+    local documentsPath = registry.getkey('HKEY_CURRENT_USER\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Explorer\\Shell Folders')
     if (documentsPath ~= nil) then
-        return documentsPath.values["Personal"]["value"].."\\My Games\\Halo CE"
+        return documentsPath.values['Personal']['value'] .. '\\My Games\\Halo CE'
     else
         print("Error at trying to get 'My Documents' path...")
         os.exit()
@@ -38,22 +38,21 @@ end
 
 local function getGamePath()
     local registryPath
-    local _ARCH = os.getenv("PROCESSOR_ARCHITECTURE")
-    if (_ARCH ~= "x86") then
-        registryPath = registry.getkey("HKEY_LOCAL_MACHINE\\SOFTWARE\\WOW6432Node\\Microsoft\\Microsoft Games\\Halo CE")
-    else
-        registryPath = registry.getkey("HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\Microsoft Games\\Halo CE")
+    local _ARCH = os.getenv('PROCESSOR_ARCHITECTURE')
+    registryPath = registry.getkey('HKEY_LOCAL_MACHINE\\SOFTWARE\\WOW6432Node\\Microsoft\\Microsoft Games\\Halo CE')
+    if (_ARCH == 'x86') then
+        registryPath = registry.getkey('HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\Microsoft Games\\Halo CE')
     end
     if (registryPath) then
-        return registryPath.values["EXE Path"]["value"]
+        return registryPath.values['EXE Path']['value']
     else
-        print("\nError at trying to get Halo Custom Edition installation path, are you using a portable version (?)")
+        print('\nError at trying to get Halo Custom Edition installation path, are you using a portable version (?)')
         os.exit()
     end
     return nil
 end
 
-    --[[
+--[[
     DUDE... I DID THIS THING???!
     
     _MERCURY_CONFIG = _MYGAMES.."\\mercury\\config.json"
@@ -64,8 +63,7 @@ end
         end
     end
     ]]
-
-    --[[
+--[[
         
     JESUS, THIS IS NOT OKKKK!!!!
 
@@ -89,7 +87,6 @@ end
             print(colors("%{red bright}ERROR!!!: %{reset}Error at trying to migrate packages json, reason: "..tostring(desc).."."))
         end
     end]]
-
 --[[ TODO STUFF: Global function creation.    
 local function mercurySetup()
     -- Create registry entries
@@ -98,30 +95,30 @@ local function mercurySetup()
     registry.writevalue("HKEY_CLASSES_ROOT\\.merc\\shell\\open\\command", "", "REG_SZ", "\"".._SOURCEFOLDER.."\\mercury.exe\" merc %1")
     print("Mercury Successfully setup!")
 end]]
-
 local function get() -- Setup environment to work, store data, temp files, etc.
-    local _TEMP = os.getenv("TEMP")
+    local _TEMP = os.getenv('TEMP')
     local _SOURCEFOLDER = lfs.currentdir()
-    local _APPDATA = os.getenv("APPDATA")
+    local _APPDATA = os.getenv('APPDATA')
     _HALOCE = getGamePath()
     _MYGAMES = getMyGamesPath()
-    _MERCURY_PACKAGES = _TEMP .. "\\mercury\\packages"
+    _MERCURY_PACKAGES = _TEMP .. '\\mercury\\packages'
     if (not folderExist(_MERCURY_PACKAGES)) then
         createFolder(_MERCURY_PACKAGES)
     end
-    _MERCURY_DOWNLOADS = _MERCURY_PACKAGES .. "\\downloaded"
+    _MERCURY_DOWNLOADS = _MERCURY_PACKAGES .. '\\downloaded'
     if (not folderExist(_MERCURY_DOWNLOADS)) then
         createFolder(_MERCURY_DOWNLOADS)
     end
-    _MERCURY_DEPACKED = _MERCURY_PACKAGES .. "\\depacked"
+    _MERCURY_DEPACKED = _MERCURY_PACKAGES .. '\\depacked'
     if (not folderExist(_MERCURY_DEPACKED)) then
         createFolder(_MERCURY_DEPACKED)
     end
-    _HALOCE_INSTALLED_PACKAGES = _HALOCE .. "\\mercury\\installed\\packges.json"
+    _MERCURY_INSTALLED = _HALOCE .. '\\mercury\\installed'
+    _HALOCE_INSTALLED_PACKAGES = _HALOCE .. '\\mercury\\installed\\packages.json'
 end
 
 local function destroyEnvironment() -- Destroy environment previously created, temp folders, trash files, etc
-    utilis.deleteFile(_TEMP.."\\mercury\\", true)
+    utilis.deleteFile(_TEMP .. '\\mercury\\', true)
 end
 
 _M.get = get

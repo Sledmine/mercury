@@ -4,96 +4,120 @@
 -- Version: 3.0
 ------------------------------------------------------------------------------
 
-local json = require "cjson"
+local json = require 'cjson'
 
-local fdownload = require "Mercury.lib.fdownload"
+local fdownload = require 'Mercury.lib.fdownload'
 
 -- URL for the main repo (example: http://lua.repo.net/)
-local host = "mercury.shadowmods.net"
-local protocol = "https://"
+local host = 'requiem.shadowmods.net'
+local protocol = 'https://'
 -- Path for master librarian index
-local librarianPath = "librarian.php?"
+local librarianPath = 'librarian.php?'
 
 local ERROR = {
     -- General errors
-    UNKOWN_ERROR = "Unknown error.",
+    UNKOWN_ERROR = 'Unknown error.',
     NO_REPOSITORY_SERVER = "Repository server can't be reached.",
     -- Package errors
-    PACKAGE_ALREADY_INSTALLED = "Desired package is already installed.",
-    PACKAGE_NOT_FOUND = "Package you are looking for is not in the Mercury repository.",
+    PACKAGE_ALREADY_INSTALLED = 'Desired package is already installed.',
+    PACKAGE_NOT_FOUND = 'Package you are looking for is not in the Mercury repository.',
     -- Dependency error
-    DEPENDENCY_ERROR = "There was a problem at downloading one or more dependiences.",
+    DEPENDENCY_ERROR = 'There was a problem at downloading one or more dependiences.',
     -- Merc errors
-    MERC_FILE_NOT_EXIST = "Previously downloaded merc file is not on the expected location.",
-    MERC_DOWNLOAD_ERROR = "An error ocurred at downloading merc file.",
+    MERC_FILE_NOT_EXIST = 'Previously downloaded merc file is not on the expected location.',
+    MERC_DOWNLOAD_ERROR = 'An error ocurred at downloading merc file.',
     -- No error.
-    SUCCESS = "OK."
+    SUCCESS = 'OK.'
 }
 
-local function downloadMerc(packageMetaData)
-    cprint("%{blue bright}Downloading %{white}'".. packageMetaData.name .."' package...")
-    local mercOutput = _MERCURY_DOWNLOADS .. "\\" .. packageMetaData.name .. ".merc"
+local function downloadMerc(packageMetadata)
+    cprint("%{blue bright}Downloading %{white}'" .. packageMetadata.name .. "' package...")
+    local mercOutput = _MERCURY_DOWNLOADS .. '\\' .. packageMetadata.label .. '.merc'
     dprint(mercOutput)
-    local result, errorCode, header, status = fdownload.get(protocol .. packageMetaData.URL, mercOutput)
+    local result, errorCode, header, status = fdownload.get(protocol .. packageMetadata.url, mercOutput)
     -- Merc file has been succesfully downloaded
     if (errorCode == 200) then
         if (fileExist(mercOutput)) then
-            cprint("%{green bright}\n'".. packageMetaData.name  .. "-" .. packageMetaData.version .."' has been succesfully downloaded.")
+            cprint(
+                "%{green bright}\n'" ..
+                    packageMetadata.name ..
+                        ', Version ' .. packageMetadata.version .. "' has been succesfully downloaded."
+            )
             return true, ERROR.SUCCESS, mercOutput
         else
-            cprint("%{red bright}\nERROR!!!:%{reset} Merc '" .. mercOutput .."' doesn't exist ...\n")
+            cprint("%{red bright}\nERROR!!!:%{reset} Merc '" .. mercOutput .. "' doesn't exist ...\n")
             return false, ERROR.MERC_FILE_NOT_EXIST
         end
     else
         -- An error ocurred at downloading merc file
-        cprint("%{red bright}\nWARNING!!!: " .. tostring(errorCode) .." %{reset}An error ocurred at downloading '" .. packageMetaData.URL .."'...\n")
+        cprint(
+            '%{red bright}\nWARNING!!!: ' ..
+                tostring(errorCode) .. " %{reset}An error ocurred at downloading '" .. packageMetadata.url .. "'...\n"
+        )
         return false, ERROR.MERC_DOWNLOAD_ERROR
     end
 end
 
-local function download(packageName, packageVersion)
+local function download(packageLabel, packageVersion)
     -- Path and Filename for the JSON file obtained from the server
-    cprint("Looking for package '" .. packageName .. "' in Mercury repository...")
+    cprint("Looking for package '" .. packageLabel .. "' in Mercury repository...")
     -- Making the request to the repository to get the json package
-    cprint("Fetching package into librarian index...")
-    local packageURL = protocol .. host .."/" .. librarianPath .. "package=" .. packageName
+    cprint('Fetching package into librarian index...')
+    local packageURL = protocol .. host .. '/' .. librarianPath .. 'package=' .. packageLabel
     if (packageVersion) then
-        packageURL = protocol .. host .."/" .. librarianPath .. "package=".. packageName .. "&version=" .. packageVersion
+        packageURL =
+            protocol .. host .. '/' .. librarianPath .. 'package=' .. packageLabel .. '&version=' .. packageVersion
     end
-    local result, errorCode, header, status, data = fdownload.get(packageURL)
+    local result, errorCode, header, status, data
+    if (_TEST_MODE) then
+        errorCode = 200
+        header = {['content-length'] = '1'}
+        data =
+            [[{
+            "name": "Mercury Package Test",
+            "label": "test",
+            "author": "Sled",
+            "version": "1.0",
+            "url": "localhost/mercury/test.merc"
+          }]]
+    else
+        result, errorCode, header, status, data = fdownload.get(packageURL)
+    end
     if (errorCode == 404) then
         cprint("\n%{red bright}\nERROR!!!: %{reset}Repository server can't be reached...")
         return false, ERROR.NO_REPOSITORY_SERVER
     elseif (errorCode == 200) then
-        if (header["content-length"] == "0") then
-            print("WARNING!!!: '" .. packageName .. "' package not found in Mercury repository.")
+        if (header['content-length'] == '0') then
+            print("WARNING!!!: '" .. packageLabel .. "' package not found in Mercury repository.")
             return false, ERROR.PACKAGE_NOT_FOUND
         else
-            local packageMetaData = json.decode(data)
-            dprint(packageMetaData)
-            if (packageMetaData ~= {}) then
-                -- JUST TESTING STUFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
-                if (packageName == "chimera") then
-                packageMetaData.dependencies = {
-                    {name = "dsoal"}
-                }
-                end
-                cprint("\n%{green bright}Gotcha! %{reset}Package '" .. packageName .. "' found in Mercury repo, parsing meta data....")
+            local packageMetadata = json.decode(data)
+            dprint(packageMetadata)
+            if (packageMetadata ~= {}) then
+                cprint(
+                    "\n%{green bright}Gotcha! %{reset}Package '" ..
+                        packageLabel .. "' found in Mercury repo, parsing meta data...."
+                )
                 if (not packageVersion) then
-                    packageVersion = packageMetaData.version
+                    packageVersion = packageMetadata.version
                 end
-                cprint("\n[ %{white bright}Package: %{yellow bright}" .. packageName .. "%{white bright} | Version = %{yellow bright}" .. packageVersion .. "%{reset} ]")
+                cprint(
+                    '\n[ %{white bright}Package: %{white bright}' ..
+                        packageLabel .. '%{white bright} | Version = %{white bright}' .. packageVersion .. '%{reset} ]'
+                )
                 local downloadedMercsList = {}
                 -- There is a .merc download for this merc file
-                if (packageMetaData.URL) then
-                    local downloadResult, error, mercPath = downloadMerc(packageMetaData)
+                if (packageMetadata.url) then
+                    local downloadResult, error, mercPath = downloadMerc(packageMetadata)
                     if (downloadResult) then
+                        dprint('Adding mercPath to the list!: ' .. mercPath)
                         table.insert(downloadedMercsList, mercPath)
                     end
                     -- Package has other packages as dependencies
-                    if (packageMetaData.dependencies) then
-                        for index, dependencyMetaData in pairs (packageMetaData.dependencies) do
-                            local dependencyResult, error, dependencyMercs = download(dependencyMetaData.name, dependencyMetaData.version)
+                    if (packageMetadata.dependencies and #packageMetadata.dependencies > 0) then
+                        for index, dependencyMetaData in pairs(packageMetadata.dependencies) do
+                            local dependencyResult, error, dependencyMercs =
+                                download(dependencyMetaData.name, dependencyMetaData.version)
                             if (dependencyResult) then
                                 table.merge(downloadedMercsList, dependencyMercs)
                             else
@@ -103,17 +127,20 @@ local function download(packageName, packageVersion)
                     end
                     return true, ERROR.SUCCESS, downloadedMercsList
                 else
-                    cprint("%{red bright}ERROR!!!: %{reset}The specified package is not in this repository.\n")
+                    cprint('%{red bright}ERROR!!!: %{reset}The specified package is not in this repository.\n')
                     return false, ERROR.PACKAGE_NOT_FOUND
                 end
             else
                 --print("\nERROR!!: Repository is online but the response is in a unrecognized format, this can be caused by a server error or an outdated Mercury version.")
-                cprint("%{red bright}\nWARNING!!!: %{reset}'"..packageName.."' package not found in Mercury repository.")
+                cprint(
+                    "%{red bright}\nWARNING!!!: %{reset}'" ..
+                        packageLabel .. "' package not found in Mercury repository."
+                )
                 return false, ERROR.PACKAGE_NOT_FOUND
             end
         end
     else
-        cprint("%{red bright}\nERROR!!!: %{reset}'"..tostring(errorCode).."' uknown error...")
+        cprint("%{red bright}\nERROR!!!: %{reset}'" .. tostring(errorCode) .. "' uknown error...")
         return false, ERROR.UNKOWN_ERROR
     end
 end

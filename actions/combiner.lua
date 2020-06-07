@@ -6,32 +6,40 @@
 
 local _M = {}
 
-require "Mercury.lib.utilis"
+require 'Mercury.lib.utilis'
 
-local search = require "Mercury.actions.search"
-local list = require "Mercury.actions.list"
-local download = require "Mercury.actions.download"
-local insert = require "Mercury.actions.insert"
-local depackage = require "Mercury.actions.depackage"
-local remove = require "Mercury.actions.remove"
-local mitosis = require "Mercury.actions.mitosis"
-local set = require "Mercury.actions.set"
+local search = require 'Mercury.actions.search'
+local list = require 'Mercury.actions.list'
+local download = require 'Mercury.actions.download'
+local insert = require 'Mercury.actions.insert'
+local depackage = require 'Mercury.actions.depackage'
+local remove = require 'Mercury.actions.remove'
+local mitosis = require 'Mercury.actions.mitosis'
+local set = require 'Mercury.actions.set'
 
-local install = function (packageName, packageVersion, forceInstallation, noBackups)
-    if (search(packageName)) then
+local install = function(packageLabel, packageVersion, forceInstallation, noBackups)
+    if (search(packageLabel)) then
         if (forceInstallation) then
-            remove(packageName, true, true)
+            remove(packageLabel, true, true)
         else
-            cprint("%{red bright}WARNING!!!: %{reset}Package '" .. packageName .. "' is already installed.\n")
+            cprint("%{red bright}WARNING!!!: %{reset}Package '" .. packageLabel .. "' is ALREADY installed.\n")
             return false
         end
     end
-    local success, description, downloadedMercs = download(packageName, packageVersion)
+    local success, description, downloadedMercs = download(packageLabel, packageVersion)
     if (not success) then
-        cprint("\n%{red bright}ERROR!!!! %{reset}Error at trying to install '" .. packageName .. "', " .. tostring(description))
-        
+        cprint(
+            "\n%{red bright}ERROR!!!! %{reset}Error at trying to install '" ..
+                packageLabel .. "', " .. tostring(description)
+        )
     else
-        foreach(downloadedMercs, insert, noBackups)
+        local installationResults = foreach(downloadedMercs, insert, noBackups)
+        for k, v in pairs(installationResults) do
+            if (not v) then
+                cprint("\n%{red bright}ERROR!!!! %{reset}Error at installing files for '" .. packageLabel .. "'")
+            end
+        end
+        cprint("%{green bright}SUCCESS!!: %{reset}Package '" .. packageLabel .. "' succesfully installed!!")
     end
     return success
 end

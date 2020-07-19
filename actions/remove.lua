@@ -5,7 +5,7 @@
 ------------------------------------------------------------------------------
 
 local json = require 'cjson'
-local search = require 'mercury.actions.search'
+local search = require 'Mercury.actions.search'
 
 local function remove(packageLabel, noBackups, eraseBackups)
     if (search(packageLabel)) then

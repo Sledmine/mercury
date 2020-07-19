@@ -26,6 +26,7 @@ local modules = {
     "inspect.lua",
     "ssl.lua",
     "glue.lua",
+    "minizip*.lua",
     -- Project libs
     "mercury.lua",
     "registry.lua",

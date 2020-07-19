@@ -23,3 +23,4 @@ Some libraries and tools are needed too:
 These libraries are already included in the repository but you can check their own repository if needed:
 - [argparse](https://github.com/luarocks/argparse)
 - [registry](https://github.com/Tieske/registry)
+- [middleclass](https://github.com/kikito/middleclass)

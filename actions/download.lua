@@ -10,8 +10,8 @@ local fdownload = require "Mercury.lib.fdownload"
 local PackageMetadata = require "Mercury.entities.packageMetadata"
 
 -- URL for the main repo (example: http://lua.repo.net/)
-repositoryHost = "localhost"
-httpProtocol = "http://"
+repositoryHost = repositoryHost or "mercury.shadowmods.net"
+httpProtocol = httpProtocol or "http://"
 
 -- Path for master librarian index
 local librarianPath = "packages?"

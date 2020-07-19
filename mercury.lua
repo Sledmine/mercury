@@ -42,11 +42,14 @@ install:action(function(args, name)
     dprint(args)
     if (args.debug) then
         _DEBUG_MODE = true
-        dprint("\nMERCURY DEBUG: ON!!!!!")
+        cprint("Debug mode enabled.")
     end
     if (args.test) then
         _TEST_MODE = true
-        dprint("\nMERCURY TEST: ON!!!!!")
+        -- Override respository connection data
+        repositoryHost = "localhost:3000"
+        httpProtocol = "http://"
+        cprint("Test mode enabled.")
     end
     -- (packageLabel, packageVersion, forceInstallation, noBackups)
     combiner.install(args.packageLabel, args.packageVersion, args.force, args.nobackups)

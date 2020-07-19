@@ -5,14 +5,14 @@
             "package": "test",
             "author": "Sled",
             "version": "1.0",
-            "url": "https://mercury.shadowmods.net/repository/test.merc"
+            "url": "http://localhost/test.merc"
         },
         {
-            "name": "Test 2",
-            "package": "test2",
+            "name": "Test Fail",
+            "package": "testfail",
             "author": "Sled",
             "version": "1.0",
-            "url": "localhost/mercury/test.merc"
+            "url": "http://localhost/testfail.merc"
         }
     ]
 }

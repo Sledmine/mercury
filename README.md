@@ -13,7 +13,7 @@ Is a console program that allows you to download all kind of tools, addons, mods
 To download and use Mercury in your computer you have to download Windows binaries from the releases tab or from the official site.
 
 ### Building Mercury
-Mercury uses [LuaPower](https://luapower.com) as the base of the project, this is needed to get the needed amount of libraries and files to bundle/compile the code in this repository.
+Mercury uses [LuaPower](https://luapower.com) as the base of the project, this is needed to get the required amount of libraries and files to bundle/compile the code in this repository.
 
 Some libraries and tools are needed too:
 - [LuaSec](https://github.com/brunoos/luasec)

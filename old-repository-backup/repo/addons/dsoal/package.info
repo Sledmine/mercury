@@ -1,5 +1,0 @@
-{
-	"codename": "dsoal",
-	"name": "Direct Sound OpenAL",
-	"description": "Restores EAX sound and hardware acceleration."
-}

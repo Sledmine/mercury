@@ -1,9 +1,0 @@
-{
-	"dsoal": "Direct Sound OpenAL - Restaura sonido EAX y aceleración por hardware.",
-	"calc": "Creative ALChemy - Restaura sonido EAX y aceleración por hardware.",
-	"hrp": "Halo Rich Presence - Agrega Rich Presence en Discord, muestra en qué servidor y qué mapa estás jugando.",
-	"chimera": "Chimera - Interpolación de fotogramas, scripting Lua y arreglos para el juego.",
-	"hac2": "Halo Anticheat 2 - Servidores favoritos, paquetes de medallas, correciones para el juego.",
-	"luablam": "LuaBlam - Libreria que ayuda a simplificar manejo de memoria como objetos en scripting.",
-	"f09": "Flood 09 - Firefight multijugador basado en Sector 09 para hasta 5 jugadores estilo ODST."
-}

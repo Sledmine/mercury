@@ -16,7 +16,6 @@ To download and use Mercury in your computer you have to download Windows binari
 Mercury uses [LuaPower](https://luapower.com) as the base of the project, this is needed to get the required amount of libraries and files to bundle/compile the code in this repository.
 
 Some libraries and tools are needed too:
-- [LuaSec](https://github.com/brunoos/luasec)
 - [MSYS](http://www.mingw.org/wiki/MSYS)
 - [MinGW](http://mingw-w64.org/doku.php)
 

@@ -1,14 +1,14 @@
 {
     "packages": [
         {
-            "name": "Mercury Package Test",
+            "name": "Test",
             "package": "test",
             "author": "Sled",
             "version": "1.0",
             "url": "localhost/mercury/test.merc"
         },
         {
-            "name": "Mercury Package Test 2",
+            "name": "Test 2",
             "package": "test2",
             "author": "Sled",
             "version": "1.0",

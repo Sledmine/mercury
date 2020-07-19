@@ -38,15 +38,17 @@ local DESCRIPTION = {
 ---@param packageMeta packageMetadata
 local function downloadMerc(packageMeta)
     cprint("Downloading '" .. packageMeta.name .. "' package...")
-    local mercOutput = _MERCURY_DOWNLOADS .. "\\" .. packageMeta.label .. ".merc"
-    dprint("Mercury file output: " .. mercOutput)
+    local packageName = packageMeta.name
+    local packageVersion = packageMeta.version
     local mercUrl = httpProtocol .. packageMeta.url
+    local mercOutput = _MERCURY_DOWNLOADS .. "\\" .. packageMeta.package .. ".merc"
+    dprint("Mercury url: " .. mercUrl)
+    dprint("Mercury output: " .. mercOutput)
     local result, errorCode, header, status = fdownload.get(mercUrl, mercOutput)
     -- Merc file has been succesfully downloaded
     if (errorCode == 200) then
         if (fileExist(mercOutput)) then
-            cprint(packageMeta.name .. ", Version " .. packageMeta.version ..
-                       "' has been downloaded.")
+            cprint(packageName .. ", Version " .. packageVersion .. "' has been downloaded.")
             return true, DESCRIPTION.SUCCESS, mercOutput
         else
             dprint("ERROR!!!: Merc '" .. mercOutput .. "' doesn't exist ...\n")
@@ -68,7 +70,8 @@ local function download(packageLabel, packageVersion)
     local repositoryUrl = httpProtocol .. repositoryHost .. "/" .. librarianPath
     local packageRequestUrl = repositoryUrl .. "package=" .. packageLabel
     if (packageVersion) then
-        packageRequestUrl = repositoryUrl .. "package=" .. packageLabel .. "&version=" .. packageVersion
+        packageRequestUrl = repositoryUrl .. "package=" .. packageLabel .. "&version=" ..
+                                packageVersion
     end
     dprint("URL: " .. packageRequestUrl)
     local result, errorCode, headers, status, responseData = fdownload.get(packageRequestUrl)
@@ -79,6 +82,7 @@ local function download(packageLabel, packageVersion)
             return false, DESCRIPTION.PACKAGE_NOT_FOUND
         else
             if (responseData) then
+                dprint("Response data:" .. responseData)
                 ---@type packageMetadata
                 local packageMeta = PackageMetadata:new(responseData)
                 if (not packageVersion) then
@@ -86,12 +90,14 @@ local function download(packageLabel, packageVersion)
                 end
                 print("[ Package: " .. packageLabel .. " | Version = " .. packageVersion .. " ]\n")
                 local downloadedFiles = {}
-                -- There is a .merc download url for this package
+                -- There is a merc file download url for this package
                 if (packageMeta.url) then
-                    local downloadResult, errorString, mercPath = downloadMerc(packageMeta)
+                    local downloadResult, errorDescription, mercPath = downloadMerc(packageMeta)
                     if (downloadResult) then
                         dprint("Appending " .. mercPath)
                         table.insert(downloadedFiles, mercPath)
+                    else
+                        return downloadResult, errorDescription
                     end
                     -- Package has other packages as dependencies
                     if (packageMeta.dependencies and #packageMeta.dependencies > 0) then

@@ -22,6 +22,7 @@ end
 function dprint(value)
     if (_DEBUG_MODE and value) then
         cprint(value)
+        print("\n")
     end
 end
 

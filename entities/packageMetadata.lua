@@ -11,7 +11,7 @@ local class = require("middleclass")
 local packageMetadata = class("packageMetadata")
 
 function packageMetadata:initialize(jsonString)
-    local properties = json.decode(jsonString or "{}")
+    local properties = json.decode(jsonString or "{}")[1]
     ---@type string
     self.name = properties.name
     ---@type string

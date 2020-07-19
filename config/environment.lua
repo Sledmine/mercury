@@ -21,7 +21,14 @@ function cprint(value)
     if (type(value) ~= "string") then
         print(inspect(value))
     else
-        print(value)
+        local colorText = string.gsub(value, "Done,", "[92mDone[0m,")
+        colorText = string.gsub(colorText, "Downloading", "[94mDownloading[0m")
+        colorText = string.gsub(colorText, "Looking", "[94mLooking[0m")
+        colorText = string.gsub(colorText, "Error,", "[91mError[0m,")
+        colorText = string.gsub(colorText, "Warning,", "[93mWarning[0m,")
+        colorText = string.gsub(colorText, "Unpacking", "[93mUnpacking[0m")
+        colorText = string.gsub(colorText, "Installing", "[93mInstalling[0m")
+        print(colorText)
     end
 end
 
@@ -82,7 +89,8 @@ function environment.get() -- Setup environment to work, store data, temp files,
     local _APPDATA = os.getenv("APPDATA")
     _HALOCE = getGamePath()
     _MYGAMES = getMyGamesPath()
-    _MERCURY_PACKAGES = _TEMP .. "\\mercury\\packages"
+    _MERCURY_TEMP = _TEMP .. "\\mercury"
+    _MERCURY_PACKAGES = _MERCURY_TEMP .. "\\packages"
     if (not folderExist(_MERCURY_PACKAGES)) then
         createFolder(_MERCURY_PACKAGES)
     end
@@ -100,7 +108,7 @@ end
 
 -- Destroy environment previously created, temp folders, trash files, etc
 function environment.destroy()
-    utilis.deleteFile(_TEMP .. "\\mercury\\", true)
+    deleteFile(_MERCURY_TEMP .. "\\mercury\\", true)
 end
 
 return environment

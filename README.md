@@ -32,5 +32,9 @@ test everything in your local environment, some unit testing will be added soon.
 ### Mocking Librarian Server
 You can run an mock of a librarian server using [json-server](https://github.com/typicode/json-server) and the command below:
 ```
-json-server -w tests\librarian.json -p 80
+json-server -w tests\librarian.json
+```
+or
+```
+server.cmd
 ```

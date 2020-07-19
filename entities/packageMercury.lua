@@ -34,7 +34,7 @@ function packageMercury:initialize(jsonString)
     ---@type string
     self.name = properties.name
     ---@type string
-    self.package = properties.package
+    self.label = properties.label
     ---@type string
     self.author = properties.author
     ---@type number
@@ -46,7 +46,7 @@ end
 function packageMercury:getProperties()
     return {
         name = self.name,
-        package = self.package,
+        label = self.label,
         author = self.author,
         version = self.version,
         files = self.files,

@@ -1,0 +1,1 @@
+luajit Mercury\bundle.lua

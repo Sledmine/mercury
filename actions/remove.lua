@@ -16,10 +16,10 @@ local function remove(packageLabel, noBackups, eraseBackups)
             file = string.gsub(file, "_MYGAMES", _MYGAMES, 1)
 
             -- Start erasing proccess
-            cprint("\nTrying to erase: '" .. file .. "'...")
+            cprint("Trying to erase: '" .. file .. "'...")
             local result, desc, error = deleteFile(file)
             if (result) then
-                cprint("OK!!!: File erased succesfully.\nChecking for backup files...")
+                cprint("OK!!!: File erased succesfully.Checking for backup files...")
                 if (fileExist(file .. ".bak") and not noBackups) then
                     print("Backup file found, RESTORING now...")
                     move(file .. ".bak", file)
@@ -56,7 +56,7 @@ local function remove(packageLabel, noBackups, eraseBackups)
         cprint("Successfully removed '" .. packageLabel .. "' package.")
         return true
     end
-    cprint("WARNING!!!: Package '" .. packageLabel .. "' is NOT installed.\n")
+    cprint("WARNING!!!: Package '" .. packageLabel .. "' is NOT installed.")
     return false
 end
 

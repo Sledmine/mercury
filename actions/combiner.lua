@@ -21,23 +21,22 @@ local install = function(packageLabel, packageVersion, forceInstallation, noBack
         if (forceInstallation) then
             remove(packageLabel, true, true)
         else
-            cprint("Package '" .. packageLabel .. "' is ALREADY installed.\n")
+            cprint("Warning, package '" .. packageLabel .. "' is already installed.")
             return false
         end
     end
     local success, description, downloadedMercs = download(packageLabel, packageVersion)
     if (not success) then
-        cprint("Error at trying to install '" .. packageLabel .. "', " .. tostring(description))
+        cprint("Error, at trying to install '" .. packageLabel .. "', " .. tostring(description))
     else
         local installationResults = foreach(downloadedMercs, insert, forceInstallation, noBackups)
         for k, v in pairs(installationResults) do
             if (not v) then
-                cprint("Error at installing files for '" .. packageLabel .. "'")
-                cprint("Error at trying to install '" .. packageLabel .. "'")
+                cprint("Error, at trying to install '" .. packageLabel .. "' package.")
                 return false
             end
         end
-        cprint("Package '" .. packageLabel .. "' succesfully installed!!")
+        cprint("Done, package '" .. packageLabel .. "' succesfully installed!")
     end
     return success
 end

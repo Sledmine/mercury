@@ -22,7 +22,7 @@ test_PackageMercury = {}
 
 function test_PackageMercury:setUp()
     self.jsonString = [[{
-        "package": "test",
+        "label": "test",
         "name": "Mercury Test Package",
         "version": "1.0",
         "author": "Sled",
@@ -32,11 +32,11 @@ function test_PackageMercury:setUp()
         }
     }]]
     self.expectedEntity = {
-        package = "test",
+        label = "test",
         name = "Mercury Test Package",
         version = 1.0,
         author = "Sled",
-        filles = {
+        files = {
             ["test.txt"] = _HALOCE .. "\\MERCURY_TEST\\",
             ["test2.txt"] = _HALOCE .. "\\MERCURY_TEST\\",
         },
@@ -47,7 +47,12 @@ end
 function test_PackageMercury:test_EntityConstructor()
     ---@type packageMercury
     local packageInstance = PackageMercury:new(self.jsonString)
-    lu.assertItemsEquals(packageInstance:getProperties(), self.expectedEntity)
+    local packageProperties = packageInstance:getProperties()
+    lu.assertEquals(packageProperties.author, self.expectedEntity.author)
+    lu.assertEquals(packageProperties.label, self.expectedEntity.label)
+    lu.assertEquals(packageProperties.version, self.expectedEntity.version)
+    lu.assertEquals(packageProperties.name, self.expectedEntity.name)
+    lu.assertEquals(packageProperties.files, self.expectedEntity.files)
 end
 
 local function runTests()

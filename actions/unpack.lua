@@ -2,8 +2,8 @@ local zip = require 'minizip'
 
 local function unpack(mercFile, outputPath)
     local dir, file, ext = splitPath(mercFile)
-    print("Unpacking " .. file .. "...")
-    dprint('mercFile: ' .. mercFile .. '\noutputPath: ' .. outputPath)
+    cprint("Unpacking " .. file .. "...")
+    dprint('mercFile: ' .. mercFile .. 'outputPath: ' .. outputPath)
     mercZip = zip.open(mercFile, 'r')
 
     -- Set current file as first file
@@ -44,10 +44,10 @@ local function unpack(mercFile, outputPath)
 
     
     if (fileCount == entries) then
-        cprint(file .. " has been depacked!\n")
+        cprint("Done, " .. file .. " has been unpacked!")
         return true
     end
-    cprint("\nERROR!!!: An error ocurred at depacking '" .. mercFile .. "'...\n")
+    cprint("An error ocurred at depacking '" .. mercFile .. "'!")
     return false
 end
 

@@ -20,6 +20,9 @@ local environment = require "Mercury.config.environment"
 -- Get all environment variables and configurations
 environment.get()
 
+-- Cleanup
+environment.destroy()
+
 -- Create argument parser with Mercury info
 local parser = argparse("mercury", "Package manager for Halo Custom Edition.",
                         "Support mercury on: https://mercury.shadowmods.net")
@@ -42,14 +45,14 @@ install:action(function(args, name)
     dprint(args)
     if (args.debug) then
         _DEBUG_MODE = true
-        cprint("Debug mode enabled.")
+        cprint("Warning, Debug mode enabled.")
     end
     if (args.test) then
         _TEST_MODE = true
         -- Override respository connection data
         repositoryHost = "localhost:3000"
         httpProtocol = "http://"
-        cprint("Test mode enabled.")
+        cprint("Warning, Test mode enabled.")
     end
     -- (packageLabel, packageVersion, forceInstallation, noBackups)
     combiner.install(args.packageLabel, args.packageVersion, args.force, args.nobackups)
@@ -78,10 +81,10 @@ end)
 -- "Version command"
 local version = parser:command("version", "Get Mercury version and usefull info.")
 version:action(function(args, name)
-    cprint("\nMercury - Package Manager, Version " .. _MERCURY_VERSION .. ".")
-    cprint("Licensed in GNU General Public License v3.0\n")
+    cprint("Mercury - Package Manager, Version " .. _MERCURY_VERSION .. ".")
+    cprint("Licensed in GNU General Public License v3.0")
     cprint("My Games path: '" .. _MYGAMES .. "'")
-    cprint("Current Halo CE path: '" .. _HALOCE .. "'\n")
+    cprint("Current Halo CE path: '" .. _HALOCE .. "'")
 end)
 
 -- Show commands information if no args

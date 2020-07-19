@@ -21,7 +21,7 @@ function packageMetadata:initialize(jsonString)
     ---@type string
     self.name = properties.name
     ---@type string
-    self.package = properties.package
+    self.label = properties.label
     ---@type string
     self.author = properties.author
     ---@type number

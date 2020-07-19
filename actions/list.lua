@@ -30,7 +30,7 @@ local function listPackages(packageName, onlyNames, detailList)
             if (onlyNames) then
                 print(printInfo[key].name)
             else
-                print("["..key.."]\nName: "..printInfo[key].name.."\nAuthor: "..printInfo[key].author.."\nVersion: "..printInfo[key].version.."\n")
+                print("["..key.."]Name: "..printInfo[key].name.."Author: "..printInfo[key].author.."Version: "..printInfo[key].version.."")
             end
         end
         return false

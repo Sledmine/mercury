@@ -3,11 +3,10 @@
 -- Authors: Sledmine
 -- Version: 1.0
 ------------------------------------------------------------------------------
-
-local lfs = require 'lfs'
-local fs = require 'fs'
-local inspect = require 'inspect'
-local path = require 'path'
+local lfs = require "lfs"
+local fs = require "fs"
+local inspect = require "inspect"
+local path = require "path"
 
 function splitPath(pathName)
     local dir
@@ -17,23 +16,23 @@ function splitPath(pathName)
         dir = path.dir(pathName)
     end
     if (path.ext(pathName) ~= nil) then
-        ext = '.' .. path.ext(pathName)
+        ext = "." .. path.ext(pathName)
     end
     if (path.file(pathName) ~= nil and ext ~= nil) then
-        filename = string.gsub(path.file(pathName), '.' .. path.ext(pathName), '', 1)
+        filename = string.gsub(path.file(pathName), "." .. path.ext(pathName), "", 1)
     end
     return dir, filename, ext
 end
 
 function fileToString(file)
-    local f = assert(io.open(file, 'rb'))
-    local content = f:read('*all')
+    local f = assert(io.open(file, "rb"))
+    local content = f:read("*all")
     f:close()
     return content
 end
 
 function stringToFile(file, text)
-    local f = assert(io.open(file, 'w'))
+    local f = assert(io.open(file, "w"))
     local content = f:write(text)
     f:close()
 end
@@ -48,9 +47,9 @@ end
 
 function deleteFolder(folderName, withFiles)
     if (withFiles == true) then
-        os.execute('rmdir /S /Q "' .. folderName .. '"')
+        os.execute("rmdir /S /Q \"" .. folderName .. "\"")
     else
-        os.execute('rmdir "' .. folderName .. '"')
+        os.execute("rmdir \"" .. folderName .. "\"")
     end
 end
 
@@ -64,28 +63,28 @@ end
 function copyFile(sourceFile, destinationFile)
     if (sourceFile ~= nil and destinationFile ~= nil) then
         if (fs.is(sourceFile) == false) then
-            print('Copy file error, specified source does not exist!')
-            print(sourceFile .. "\n")
+            print("Copy file error, specified source does not exist!")
+            print(sourceFile)
             return false
         end
-        local sourceF = io.open(sourceFile, 'rb')
-        local destinationF = io.open(destinationFile, 'wb')
+        local sourceF = io.open(sourceFile, "rb")
+        local destinationF = io.open(destinationFile, "wb")
         if (sourceF ~= nil and destinationF ~= nil) then
-            destinationF:write(sourceF:read('*a'))
+            destinationF:write(sourceF:read("*a"))
             io.close(sourceF)
             io.close(destinationF)
             return true
         end
         if (sourceF == nil) then
-            print('Error in:' .. sourceFile .. "\nSource file can't be opened.")
+            print("Error in: " .. sourceFile .. ", Source file can't be opened.")
         end
         if (destinationF == nil) then
-            print('Error in:' .. destinationFile .. "\nDestination file can't be opened.")
+            print("Error in:" .. destinationFile .. ", Destination file can't be opened.")
         end
         print("Error: One of the specified source or destination file can't be opened.")
         return false
     end
-    print('Error: Trying to copy files, one of the specified paths is null.')
+    print("Error: Trying to copy files, one of the specified paths is null.")
     return false
 end
 
@@ -120,7 +119,7 @@ function foreach(t, f, ...)
 end
 
 function explode(divider, string) -- Created by: http://richard.warburton.it
-    if (divider == nil or divider == '') then
+    if (divider == nil or divider == "") then
         return 1
     end
     local position, array = 0, {}

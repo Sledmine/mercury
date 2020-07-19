@@ -1,18 +1,20 @@
 {
     "packages": [
         {
-            "name": "Test",
             "package": "test",
+            "name": "Test",
+            "label": "test",
             "author": "Sled",
             "version": "1.0",
-            "url": "http://localhost/test.merc"
+            "url": "http://localhost/mercury/test.merc"
         },
         {
-            "name": "Test Fail",
             "package": "testfail",
+            "name": "Test Fail",
+            "label": "testfail",
             "author": "Sled",
             "version": "1.0",
-            "url": "http://localhost/testfail.merc"
+            "url": "http://localhost/mercury/testfail.merc"
         }
     ]
 }

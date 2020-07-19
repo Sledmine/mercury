@@ -6,13 +6,17 @@ local depackage = require "Mercury.actions.unpack"
 
 local PackageMercury = require "Mercury.entities.packageMercury"
 
+local DESCRIPTIONS = {
+    ERASE_FILE_ERROR = ""
+}
+
 -- Install any mercury package
 local function insert(mercPath, forceInstallation, noBackups)
     local mercPath, mercName, mercExtension = splitPath(mercPath)
     local mercFullName = mercPath .. "\\" .. mercName .. _MERC_EXTENSION
     if (fileExist(mercFullName)) then
         -- Depackage specified merc file
-        dprint("Trying to depackage '" .. mercName .. ".merc' ...\n")
+        dprint("Trying to depackage '" .. mercName .. ".merc' ...")
         local depackageFolder = _MERCURY_DEPACKED .. "\\" .. mercName
         if (not folderExist(depackageFolder)) then
             dprint("Creating folder: " .. depackageFolder)
@@ -24,7 +28,7 @@ local function insert(mercPath, forceInstallation, noBackups)
             local manifestJson = fileToString(depackageFolder .. "\\manifest.json")
             ---@type packageMercury
             local mercuryPackage = PackageMercury:new(manifestJson)
-            cprint(mercName .. " is being installed...\n")
+            cprint("Installing, " .. mercName .. "...")
             for file, path in pairs(mercuryPackage.files) do
                 -- Replace environment variables
                 local outputPath = path
@@ -41,9 +45,9 @@ local function insert(mercPath, forceInstallation, noBackups)
                         cprint("WARNING: Forced mode enabled, erasing conflicting files..")
                         local result, desc, error = deleteFile(outputFile)
                         if (result) then
-                            cprint("Deleted : '" .. file .. "'\n")
+                            cprint("Deleted : '" .. file .. "'")
                         else
-                            cprint("Error at trying to erase file: '" .. file .. "'\n")
+                            cprint("Error at trying to erase file: '" .. file .. "'")
                             return false
                         end
                     end
@@ -51,9 +55,9 @@ local function insert(mercPath, forceInstallation, noBackups)
                         cprint("WARNING: There are conflicting files, creating a backup...")
                         local result, desc, error = move(outputFile, outputFile .. ".bak")
                         if (result) then
-                            print("Backup created for '" .. file .. "'\n")
+                            print("Backup created for '" .. file .. "'")
                         else
-                            cprint("Error at trying to create a backup for: '" .. file .. "\n")
+                            cprint("Error at trying to create a backup for: '" .. file .. "")
                             return false
                         end
                     end
@@ -63,7 +67,7 @@ local function insert(mercPath, forceInstallation, noBackups)
                     dprint(outputFile)
                 else
                     print("Error at trying to install file: '" .. file .. "'")
-                    print(mercName .. ".merc' installation encountered one or more problems, aborting now!!")
+                    print("Encountered some problems at installing: " .. mercName .. ".merc")
                     return false
                 end
             end
@@ -75,7 +79,8 @@ local function insert(mercPath, forceInstallation, noBackups)
                 installedPackages = {}
             end
             -- Substract required package properties and install them
-            installedPackages[mercuryPackage.package] = mercuryPackage:getProperties()
+
+            installedPackages[mercuryPackage.label] = mercuryPackage:getProperties()
             local installedPackagesJson = json.encode(installedPackages)
             glue.writefile(_HALOCE_INSTALLED_PACKAGES, installedPackagesJson, "t")
             return true

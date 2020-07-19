@@ -1,2 +1,0 @@
-copy .\mercury.lua .\Mercury\mercury.lua
-mgit bundle -a 'ssl socket_core mime_core lfs cjson libcrypto libssl z minizip' -m 'mercury.lua argparse.lua Mercury/lib/*.lua Mercury/actions/*.lua Mercury/internal/*.lua Mercury/config/*.lua registry.lua socket.lua socket/*.lua ltn12.lua mime.lua fs*.lua path.lua inspect.lua ssl.lua minizip*.lua glue.lua argparse.lua ansicolors.lua' -M mercury -i "mercury.ico" -vi "FileVersion=3.0;ProductVersion=3.0;FileDescription=Halo CE Package Manager;ProductName=Mercury;InternalName=Mercury" -o Mercury\mercury.exe

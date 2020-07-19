@@ -17,7 +17,7 @@ local combiner = require "Mercury.actions.combiner"
 -- Local function imports
 local environment = require "Mercury.config.environment"
 
--- Get all environment variables
+-- Get all environment variables and configurations
 environment.get()
 
 -- Create argument parser with Mercury info

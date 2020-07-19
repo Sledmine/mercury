@@ -3,43 +3,39 @@
 -- Authors: Sledmine
 -- Version: 1.0
 ------------------------------------------------------------------------------
-
 local _M = {}
 
-require 'Mercury.lib.utilis'
+require "Mercury.lib.utilis"
 
-local search = require 'Mercury.actions.search'
-local list = require 'Mercury.actions.list'
-local download = require 'Mercury.actions.download'
-local insert = require 'Mercury.actions.insert'
-local depackage = require 'Mercury.actions.depackage'
-local remove = require 'Mercury.actions.remove'
-local mitosis = require 'Mercury.actions.mitosis'
-local set = require 'Mercury.actions.set'
+local search = require "Mercury.actions.search"
+local list = require "Mercury.actions.list"
+local download = require "Mercury.actions.download"
+local insert = require "Mercury.actions.insert"
+local depackage = require "Mercury.actions.depackage"
+local remove = require "Mercury.actions.remove"
+local mitosis = require "Mercury.actions.mitosis"
+local set = require "Mercury.actions.set"
 
 local install = function(packageLabel, packageVersion, forceInstallation, noBackups)
     if (search(packageLabel)) then
         if (forceInstallation) then
             remove(packageLabel, true, true)
         else
-            cprint("WARNING!!!: Package '" .. packageLabel .. "' is ALREADY installed.\n")
+            cprint("Package '" .. packageLabel .. "' is ALREADY installed.\n")
             return false
         end
     end
     local success, description, downloadedMercs = download(packageLabel, packageVersion)
     if (not success) then
-        cprint(
-            "\nERROR!!!! Error at trying to install '" ..
-                packageLabel .. "', " .. tostring(description)
-        )
+        cprint("Error at trying to install '" .. packageLabel .. "', " .. tostring(description))
     else
         local installationResults = foreach(downloadedMercs, insert, noBackups)
         for k, v in pairs(installationResults) do
             if (not v) then
-                cprint("\nERROR!!!! Error at installing files for '" .. packageLabel .. "'")
+                cprint("Error at installing files for '" .. packageLabel .. "'")
             end
         end
-        cprint("SUCCESS!!: Package '" .. packageLabel .. "' succesfully installed!!")
+        cprint("Package '" .. packageLabel .. "' succesfully installed!!")
     end
     return success
 end

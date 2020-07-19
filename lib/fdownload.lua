@@ -140,7 +140,7 @@ function getbyhttp(u, file)
     local r, c, h, s = http.request {url = u, sink = save }
     --[[if c ~= 200 then io.stderr:write(s or c, "\n")
     end]]
-    return r, c, h, s
+    return r, c, h, s, d
 end
 
 -- downloads a file using the ftp protocol

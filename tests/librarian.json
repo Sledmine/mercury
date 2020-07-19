@@ -5,7 +5,7 @@
             "package": "test",
             "author": "Sled",
             "version": "1.0",
-            "url": "localhost/mercury/test.merc"
+            "url": "https://mercury.shadowmods.net/repository/test.merc"
         },
         {
             "name": "Test 2",

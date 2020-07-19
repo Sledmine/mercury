@@ -64,7 +64,8 @@ end
 function copyFile(sourceFile, destinationFile)
     if (sourceFile ~= nil and destinationFile ~= nil) then
         if (fs.is(sourceFile) == false) then
-            print('Error: Specified source file does not exist!')
+            print('Copy file error, specified source does not exist!')
+            print(sourceFile .. "\n")
             return false
         end
         local sourceF = io.open(sourceFile, 'rb')

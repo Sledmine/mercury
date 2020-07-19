@@ -11,7 +11,7 @@ local search = require "Mercury.actions.search"
 local list = require "Mercury.actions.list"
 local download = require "Mercury.actions.download"
 local insert = require "Mercury.actions.insert"
-local depackage = require "Mercury.actions.depackage"
+local unpack = require "Mercury.actions.unpack"
 local remove = require "Mercury.actions.remove"
 local mitosis = require "Mercury.actions.mitosis"
 local set = require "Mercury.actions.set"
@@ -29,10 +29,12 @@ local install = function(packageLabel, packageVersion, forceInstallation, noBack
     if (not success) then
         cprint("Error at trying to install '" .. packageLabel .. "', " .. tostring(description))
     else
-        local installationResults = foreach(downloadedMercs, insert, noBackups)
+        local installationResults = foreach(downloadedMercs, insert, forceInstallation, noBackups)
         for k, v in pairs(installationResults) do
             if (not v) then
                 cprint("Error at installing files for '" .. packageLabel .. "'")
+                cprint("Error at trying to install '" .. packageLabel .. "'")
+                return false
             end
         end
         cprint("Package '" .. packageLabel .. "' succesfully installed!!")
@@ -43,7 +45,7 @@ end
 _M.search = search
 _M.list = list
 _M.download = download
-_M.depackage = depackage
+_M.unpack = unpack
 _M.install = install
 _M.remove = remove
 

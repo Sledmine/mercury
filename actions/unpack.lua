@@ -1,6 +1,8 @@
 local zip = require 'minizip'
 
-local function depackage(mercFile, outputPath)
+local function unpack(mercFile, outputPath)
+    local dir, file, ext = splitPath(mercFile)
+    print("Unpacking " .. file .. "...")
     dprint('mercFile: ' .. mercFile .. '\noutputPath: ' .. outputPath)
     mercZip = zip.open(mercFile, 'r')
 
@@ -17,7 +19,7 @@ local function depackage(mercFile, outputPath)
 
         if (fileName ~= 'manifest.json') then
             dprint('Current entry: ' .. i - 1 .. '/' .. entries - 1)
-            print("Decompressing '" .. fileName .. "'...")
+            dprint("Decompressing '" .. fileName .. "'...")
         end
 
         -- Current "file" is a folder create it
@@ -40,13 +42,13 @@ local function depackage(mercFile, outputPath)
     -- Close zip file
     mercZip:close()
 
-    local dir, file, ext = splitPath(mercFile)
+    
     if (fileCount == entries) then
-        cprint("Succesfully depacked '" .. file .. ".merc'!\n")
+        cprint(file .. " has been depacked!\n")
         return true
     end
     cprint("\nERROR!!!: An error ocurred at depacking '" .. mercFile .. "'...\n")
     return false
 end
 
-return depackage
+return unpack

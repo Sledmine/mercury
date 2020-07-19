@@ -37,18 +37,19 @@ local DESCRIPTION = {
 --- Download a merc file given package metadata
 ---@param packageMeta packageMetadata
 local function downloadMerc(packageMeta)
-    cprint("Downloading '" .. packageMeta.name .. "' package...")
+    cprint("Downloading '" .. packageMeta.name .. "' package...\n")
     local packageName = packageMeta.name
-    local packageVersion = packageMeta.version
-    local mercUrl = httpProtocol .. packageMeta.url
+    local packageVersion = tostring(packageMeta.version)
+    local mercUrl = packageMeta.url
     local mercOutput = _MERCURY_DOWNLOADS .. "\\" .. packageMeta.package .. ".merc"
+    dprint(mercUrl)
     dprint("Mercury url: " .. mercUrl)
     dprint("Mercury output: " .. mercOutput)
-    local result, errorCode, header, status = fdownload.get(mercUrl, mercOutput)
+    local result, errorCode, headers, status = fdownload.get(mercUrl, mercOutput)
     -- Merc file has been succesfully downloaded
     if (errorCode == 200) then
         if (fileExist(mercOutput)) then
-            cprint(packageName .. ", Version " .. packageVersion .. "' has been downloaded.")
+            cprint(packageName .. ", Version " .. packageVersion .. " has been downloaded.\n")
             return true, DESCRIPTION.SUCCESS, mercOutput
         else
             dprint("ERROR!!!: Merc '" .. mercOutput .. "' doesn't exist ...\n")
@@ -56,7 +57,12 @@ local function downloadMerc(packageMeta)
         end
     else
         -- An error ocurred at downloading merc file
-        cprint(tostring(errorCode) .. " - Error at downloading '" .. packageMeta.url .. "'\n")
+        dprint(headers)
+        if (type(errorCode) == "table") then
+            cprint(tostring(errorCode[1]) .. " - Error at downloading '" .. packageMeta.url .. "'\n")
+        else
+            cprint(tostring(errorCode) .. " - Error at downloading '" .. packageMeta.url .. "'\n")
+        end
         return false, DESCRIPTION.MERC_DOWNLOAD_ERROR
     end
 end

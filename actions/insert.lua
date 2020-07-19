@@ -1,79 +1,69 @@
-local json = require 'cjson'
-local path = require 'path'
+local json = require "cjson"
+local glue = require "glue"
+local path = require "path"
 
-local depackage = require 'Mercury.actions.depackage'
+local depackage = require "Mercury.actions.unpack"
+
+local PackageMercury = require "Mercury.entities.packageMercury"
 
 -- Install any mercury package
-local function insert(mercPath, noBackups)
+local function insert(mercPath, forceInstallation, noBackups)
     local mercPath, mercName, mercExtension = splitPath(mercPath)
-    local mercFullName = mercPath .. '\\' .. mercName .. _MERC_EXTENSION
+    local mercFullName = mercPath .. "\\" .. mercName .. _MERC_EXTENSION
     if (fileExist(mercFullName)) then
         -- Depackage specified merc file
         dprint("Trying to depackage '" .. mercName .. ".merc' ...\n")
-        local depackageFolder = _MERCURY_DEPACKED .. '\\' .. mercName
-        createFolder(depackageFolder)
-        if (depackage(mercFullName, depackageFolder)) then
+        local depackageFolder = _MERCURY_DEPACKED .. "\\" .. mercName
+        if (not folderExist(depackageFolder)) then
+            dprint("Creating folder: " .. depackageFolder)
+            createFolder(depackageFolder)
+        end
+        local depackageResult = depackage(mercFullName, depackageFolder)
+        if (depackageResult) then
             -- Load package manifest data
-            local mercManifest = json.decode(fileToString(depackageFolder .. '\\manifest.json'))
-            cprint('Installing package files... \n')
-            for file, path in pairs(mercManifest.files) do
+            local manifestJson = fileToString(depackageFolder .. "\\manifest.json")
+            ---@type packageMercury
+            local mercuryPackage = PackageMercury:new(manifestJson)
+            cprint(mercName .. " is being installed...\n")
+            for file, path in pairs(mercuryPackage.files) do
                 -- Replace environment variables
-                local replacedHaloPath = string.gsub(path, '_HALOCE', _HALOCE, 1)
-                local replacedMyGamesPath = string.gsub(replacedHaloPath, '_MYGAMES', _MYGAMES, 1)
-                local outputPath = replacedMyGamesPath
+                local outputPath = path
                 local outputFile = outputPath .. file
-                cprint("Installing '" .. file .. "' ...")
-                dprint("Output: '" .. outputPath .. file .. "' ...")
+                dprint("Installing '" .. file .. "' ...")
+                dprint("Output: '" .. outputFile .. "' ...")
                 -- Current file is a folder
                 if (not folderExist(outputPath)) then
-                    dprint('Creating folder: ' .. outputPath)
+                    dprint("Creating folder: " .. outputPath)
                     createFolder(outputPath)
                 end
-                if (fileExist(outputFile) and not noBackups) then
-                    cprint(
-                        'WARNING!!!: There is an existing file with the same name, renaming it to .bak for restoring purposes.'
-                    )
-                    local result, desc, error = move(outputPath .. file, outputPath .. file .. '.bak')
-                    if (result) then
-                        print("Succesfully created backup for: '" .. file .. "'")
-                    else
-                        cprint(
-                            "\nERROR!!!: Error at trying to create a backup for: '" ..
-                                file .. "' aborting installation now!!!"
-                        )
-                        cprint(
-                            "\n\nERROR!!!: '" ..
-                                mercName .. ".merc' installation encountered one or more problems!!"
-                        )
-                        return false
+                if (fileExist(outputFile)) then
+                    if (forceInstallation) then
+                        cprint("WARNING: Forced mode enabled, erasing conflicting files..")
+                        local result, desc, error = deleteFile(outputFile)
+                        if (result) then
+                            cprint("Deleted : '" .. file .. "'\n")
+                        else
+                            cprint("Error at trying to erase file: '" .. file .. "'\n")
+                            return false
+                        end
                     end
-                elseif (fileExist(outputFile) and noBackups) then
-                    cprint(
-                        'FORCED MODE: Found file with the same name, erasing it for compatibilty purposes.'
-                    )
-                    local result, desc, error = deleteFile(outputPath .. file)
-                    if (result) then
-                        cprint("OK!!!: Succesfully deleted: '" .. file .. "'")
-                    else
-                        cprint(
-                            "\nERROR!!!: Error at trying to erase file: '" ..
-                                file .. "', reason: '" .. desc .. "' aborting installation now!!!"
-                        )
-                        cprint(
-                            "\n'ERROR!!!: " ..
-                                mercName .. ".merc' installation encountered one or more problems!!"
-                        )
-                        return false
+                    if (not noBackups) then
+                        cprint("WARNING: There are conflicting files, creating a backup...")
+                        local result, desc, error = move(outputFile, outputFile .. ".bak")
+                        if (result) then
+                            print("Backup created for '" .. file .. "'\n")
+                        else
+                            cprint("Error at trying to create a backup for: '" .. file .. "\n")
+                            return false
+                        end
                     end
                 end
-                if (copyFile(depackageFolder .. '\\' .. file, outputPath .. file) == true) then
-                    print('File succesfully installed.\n')
+                if (copyFile(depackageFolder .. "\\" .. file, outputFile) == true) then
+                    dprint("File succesfully installed.")
+                    dprint(outputFile)
                 else
-                    print("Error at trying to install file: '" .. file .. "' aborting installation now!!!")
-                    print(
-                        "\n'ERROR: " ..
-                            mercName .. ".merc' installation encountered one or more problems, aborting now!!"
-                    )
+                    print("Error at trying to install file: '" .. file .. "'")
+                    print(mercName .. ".merc' installation encountered one or more problems, aborting now!!")
                     return false
                 end
             end
@@ -84,13 +74,14 @@ local function insert(mercPath, noBackups)
                 createFolder(_MERCURY_INSTALLED)
                 installedPackages = {}
             end
-            installedPackages[mercManifest.label] = mercManifest
-            stringToFile(_HALOCE_INSTALLED_PACKAGES, json.encode(installedPackages))
-            cprint("DONE!!: Package '" .. mercName .. ".merc' has been added to the game!!")
+            -- Substract required package properties and install them
+            installedPackages[mercuryPackage.package] = mercuryPackage:getProperties()
+            local installedPackagesJson = json.encode(installedPackages)
+            glue.writefile(_HALOCE_INSTALLED_PACKAGES, installedPackagesJson, "t")
             return true
         end
     else
-        print("\nSpecified .merc package doesn't exist. (" .. mercFullName .. ')')
+        print("Specified .merc package doesn't exist. (" .. mercFullName .. ")")
     end
     return false
 end

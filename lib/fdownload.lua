@@ -2,7 +2,6 @@
 -- FDownload: Library to download files using ftp, http, https
 -- Editor: Sledmine
 -- Original Author: Diego Nehab
--- Version: 1.0
 -----------------------------------------------------------------------------
 local socket = require("socket")
 local http = require("socket.http")

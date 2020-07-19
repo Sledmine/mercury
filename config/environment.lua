@@ -14,7 +14,7 @@ function cprint(value)
     if (type(value) ~= 'string') then
         print(inspect(value))
     else
-        print(colors(value))
+        print(value)
     end
 end
 
@@ -77,14 +77,14 @@ end
         utilis.createFolder(_ENVFOLDERS[i])
     end
     if (utilis.fileExist(_APPDATA.."\\mercury\\installed\\packages.json") or utilis.fileExist(_MYGAMES.."\\mercury\\installed\\packages.json")) then -- Migrate older installed packages.json to Halo CE folder
-        print(colors("\n%{yellow bright}WARNING!!!: Found installed packages json in older path, migrating them to Halo Custom Edition folder now!!!"))
+        print(colors("\nWARNING!!!: Found installed packages json in older path, migrating them to Halo Custom Edition folder now!!!"))
         local result, desc, error = utilis.move(_APPDATA.."\\mercury\\installed\\packages.json" or _MYGAMES.."\\mercury\\installed\\packages.json", _HALOCE.."\\mercury\\installed\\packages.json")
         if (result) then
             utilis.deleteFolder(_APPDATA.."\\mercury\\", true)
             utilis.deleteFolder(_MYGAMES.."\\mercury\\installed", true)
-            print(colors("%{green bright}SUCCESS!!!: %{reset}Installed json packages succesfully migrated to Halo Custom Edition folder."))
+            print(colors("SUCCESS!!!: Installed json packages succesfully migrated to Halo Custom Edition folder."))
         else
-            print(colors("%{red bright}ERROR!!!: %{reset}Error at trying to migrate packages json, reason: "..tostring(desc).."."))
+            print(colors("ERROR!!!: Error at trying to migrate packages json, reason: "..tostring(desc).."."))
         end
     end]]
 --[[ TODO STUFF: Global function creation.    

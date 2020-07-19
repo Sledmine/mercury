@@ -17,25 +17,25 @@ local function remove(packageLabel, noBackups, eraseBackups)
             file = string.gsub(file, '_MYGAMES', _MYGAMES, 1)
 
             -- Start erasing proccess
-            cprint("\n%{blue bright}Trying to erase: %{reset}'" .. file .. "'...")
+            cprint("\nTrying to erase: '" .. file .. "'...")
             local result, desc, error = deleteFile(file)
             if (result) then
-                cprint('%{green bright}OK!!!: %{reset}File erased succesfully.\nChecking for backup files...')
+                cprint('OK!!!: File erased succesfully.\nChecking for backup files...')
                 if (fileExist(file .. '.bak') and not noBackups) then
                     print('Backup file found, RESTORING now...')
                     move(file .. '.bak', file)
                     if (fileExist(file)) then
-                        cprint('%{green bright}OK!!!: %{reset}File succesfully restored.')
+                        cprint('OK!!!: File succesfully restored.')
                     else
                         print('Error at trying to RESTORE backup file...')
                     end
                 elseif (fileExist(file .. '.bak') and eraseBackups) then
-                    cprint('%{red bright}ERASE BACKUPS ACTIVATED: %{reset}Backup file found, DELETING now...')
+                    cprint('ERASE BACKUPS ACTIVATED: Backup file found, DELETING now...')
                     deleteFile(file .. '.bak')
                     if (fileExist(file)) then
                         print('Error at trying to DELETE backup file...')
                     else
-                        cprint('%{green bright}OK!!!: %{reset}File succesfully deleted.')
+                        cprint('OK!!!: File succesfully deleted.')
                     end
                 else
                     print('No backup is going to be restored for this file.')
@@ -43,7 +43,7 @@ local function remove(packageLabel, noBackups, eraseBackups)
             else
                 if (error == 2 or error == 3) then
                     cprint(
-                        '%{yellow bright}WARNING!!: %{reset}File not found for erasing, probably misplaced or manually removed.'
+                        'WARNING!!: File not found for erasing, probably misplaced or manually removed.'
                     )
                 else
                     print("Error at trying to erase file, reason: '" .. desc .. "' aborting uninstallation now!!!")
@@ -54,12 +54,12 @@ local function remove(packageLabel, noBackups, eraseBackups)
         installedPackages[packageLabel] = nil
         stringToFile(_HALOCE_INSTALLED_PACKAGES, json.encode(installedPackages))
         cprint(
-            "\n%{green bright}DONE!!: %{reset}Successfully %{yellow bright}removed %{reset}'" ..
+            "\nDONE!!: Successfully removed '" ..
                 packageLabel .. "' package."
         )
         return true
     end
-    cprint("%{red bright}WARNING!!!: %{reset}Package '" .. packageLabel .. "' is NOT installed.\n")
+    cprint("WARNING!!!: Package '" .. packageLabel .. "' is NOT installed.\n")
     return false
 end
 

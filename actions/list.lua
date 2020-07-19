@@ -11,7 +11,7 @@ local function listPackages(packageName, onlyNames, detailList)
             installedPackages = json.decode(installedPackagesFile)
         else
             utilis.deleteFile(_HALOCE.."\\mercury\\installed\\packages.json")
-            print(colors("%{red bright}WARNING!!!: %{reset}There are not any installed packages using Mercury...yet."))
+            print("WARNING!!!: There are not any installed packages using Mercury...yet.")
         end
         local printInfo = {}
         if (packageName ~= "all") then
@@ -26,7 +26,7 @@ local function listPackages(packageName, onlyNames, detailList)
         else
             printInfo = installedPackages
         end
-        for key,value in pairs(printInfo) do
+        for key, value in pairs(printInfo) do
             if (onlyNames) then
                 print(printInfo[key].name)
             else
@@ -35,7 +35,7 @@ local function listPackages(packageName, onlyNames, detailList)
         end
         return false
     end
-    print(colors("%{red bright}WARNING!!!: %{reset}There are not any installed packages using Mercury...yet."))
+    print("WARNING!!!: There are not any installed packages using Mercury...yet.")
 end
 
 return listPackages

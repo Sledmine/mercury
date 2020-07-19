@@ -42,10 +42,10 @@ local function depackage(mercFile, outputPath)
 
     local dir, file, ext = splitPath(mercFile)
     if (fileCount == entries) then
-        cprint("%{green bright}Succesfully depacked '" .. file .. ".merc'!\n")
+        cprint("Succesfully depacked '" .. file .. ".merc'!\n")
         return true
     end
-    cprint("%{red bright}\nERROR!!!: %{reset}An error ocurred at depacking '" .. mercFile .. "'...\n")
+    cprint("\nERROR!!!: An error ocurred at depacking '" .. mercFile .. "'...\n")
     return false
 end
 

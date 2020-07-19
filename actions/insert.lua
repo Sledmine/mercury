@@ -9,7 +9,7 @@ local function insert(mercPath, noBackups)
     local mercFullName = mercPath .. '\\' .. mercName .. _MERC_EXTENSION
     if (fileExist(mercFullName)) then
         -- Depackage specified merc file
-        dprint("%{yellow bright}Trying to depackage '" .. mercName .. ".merc' ...\n")
+        dprint("Trying to depackage '" .. mercName .. ".merc' ...\n")
         local depackageFolder = _MERCURY_DEPACKED .. '\\' .. mercName
         createFolder(depackageFolder)
         if (depackage(mercFullName, depackageFolder)) then
@@ -26,41 +26,41 @@ local function insert(mercPath, noBackups)
                 dprint("Output: '" .. outputPath .. file .. "' ...")
                 -- Current file is a folder
                 if (not folderExist(outputPath)) then
-                    dprint('%{yellow bright}Creating folder: ' .. outputPath)
+                    dprint('Creating folder: ' .. outputPath)
                     createFolder(outputPath)
                 end
                 if (fileExist(outputFile) and not noBackups) then
                     cprint(
-                        '%{yellow bright}WARNING!!!: %{reset}There is an existing file with the same name, renaming it to .bak for restoring purposes.'
+                        'WARNING!!!: There is an existing file with the same name, renaming it to .bak for restoring purposes.'
                     )
                     local result, desc, error = move(outputPath .. file, outputPath .. file .. '.bak')
                     if (result) then
                         print("Succesfully created backup for: '" .. file .. "'")
                     else
                         cprint(
-                            "%{red bright}\nERROR!!!: %{reset}Error at trying to create a backup for: '" ..
+                            "\nERROR!!!: Error at trying to create a backup for: '" ..
                                 file .. "' aborting installation now!!!"
                         )
                         cprint(
-                            "\n%{red bright}\nERROR!!!: %{reset}'" ..
+                            "\n\nERROR!!!: '" ..
                                 mercName .. ".merc' installation encountered one or more problems!!"
                         )
                         return false
                     end
                 elseif (fileExist(outputFile) and noBackups) then
                     cprint(
-                        '%{red bright}FORCED MODE: %{reset}Found file with the same name, erasing it for compatibilty purposes.'
+                        'FORCED MODE: Found file with the same name, erasing it for compatibilty purposes.'
                     )
                     local result, desc, error = deleteFile(outputPath .. file)
                     if (result) then
-                        cprint("%{green bright}OK!!!: %{reset}Succesfully deleted: '" .. file .. "'")
+                        cprint("OK!!!: Succesfully deleted: '" .. file .. "'")
                     else
                         cprint(
-                            "%{red bright}\nERROR!!!: %{reset}Error at trying to erase file: '" ..
+                            "\nERROR!!!: Error at trying to erase file: '" ..
                                 file .. "', reason: '" .. desc .. "' aborting installation now!!!"
                         )
                         cprint(
-                            "\n'%{red bright}ERROR!!!: %{reset}" ..
+                            "\n'ERROR!!!: " ..
                                 mercName .. ".merc' installation encountered one or more problems!!"
                         )
                         return false
@@ -86,7 +86,7 @@ local function insert(mercPath, noBackups)
             end
             installedPackages[mercManifest.label] = mercManifest
             stringToFile(_HALOCE_INSTALLED_PACKAGES, json.encode(installedPackages))
-            cprint("%{yellow bright}DONE!!: %{reset}Package '" .. mercName .. ".merc' has been added to the game!!")
+            cprint("DONE!!: Package '" .. mercName .. ".merc' has been added to the game!!")
             return true
         end
     else

@@ -80,5 +80,10 @@ version:action(function(args, name)
     cprint("Current Halo CE path: '" .. _HALOCE .. "'\n")
 end)
 
+-- Show commands information if no args
+if (not arg[1]) then
+    print(parser:get_help())
+end
+
 -- Override args array with parser ones
 local args = parser:parse()

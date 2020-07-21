@@ -25,7 +25,7 @@ environment.get()
 environment.destroy()
 
 -- Create argument parser with Mercury info
-local parser = argparse("mercury", "Package manager for Halo Custom Edition.",
+local parser = argparse("mercury", "Package Manager for Halo Custom Edition.",
                         "Support mercury on: https://mercury.shadowmods.net")
 -- Disable command required message                        
 parser:require_command(false)

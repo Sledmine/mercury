@@ -9,12 +9,17 @@ Is a console program that gives you some features such as downloading an install
 ## What is the purpose of Mercury?
 
 - Get access into our package repository and download the latest or the oldest version of your favorite packages.
-- Manage your favorite mods or addons, install from remote repository, upgrade them, etc.
-- Make different Halo Custom Edition versions in just seconds "mitosising" an existing version of the game.
+- Manage your favorite mods or addons, install them, upgrade them,  etc, all from the Mercury repository.
+- Create different Halo Custom Edition versions in just seconds "mitosising" an existing version of the game.
 
 ## Installing Mercury
 
-To download and use Mercury in your computer you have to download Windows binaries from the releases tab or from the official site.
+To download and use Mercury in your computer you have to download Windows binaries from the [releases](https://github.com/Sledmine/Mercury/releases) tab or from the official site.
+**AN INSTALLER WILL BE AVAILABLE SOON!**
+
+# Contribute to Mercury
+
+Feel free to fork and ask for pull requests to this repository also we are looking for an interface application for Mercury so any frontend developer is welcome! :)
 
 # Building Mercury
 

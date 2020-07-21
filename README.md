@@ -2,7 +2,7 @@
 
 ## What is Mercury?
 
-Is a console program that allows you to download all kind of tools, addons, mods, extensions and install it directly into your Halo Custom Edition game, everything you need in one place being downloaded in the pure Linux style, basically a software package manager but for a game.
+Is a console program that gives you some features such as downloading an installing tools, addons, mods and maps for your Halo Custom Edition game, everything you need in one place being downloaded in the pure Linux style, basically a software package manager oriented to a game with mods.
 
 ![Mercury GIF](https://i.imgur.com/0Brri7L.gif)
 

@@ -128,14 +128,3 @@ end
 function arrayPop(array)
     return array[#array]
 end
-
---- Replace all the environment related paths
----@param files
-function replaceEnvironmentPaths(files)
-    local paths = {}
-    for file, path in pairs(files) do
-        local replacedPath = path:gsub("_HALOCE", _HALOCE):gsub("_MYGAMES", _MYGAMES)
-        paths[file] = replacedPath
-    end
-    return paths
-end

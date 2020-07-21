@@ -16,6 +16,18 @@ local function parseVersionNumber(version)
     return tonumber(version)
 end
 
+--- Replace all the environment related paths
+---@param files table
+local function replaceEnvironmentPaths(files)
+    local paths = {}
+    for file, path in pairs(files) do
+        local replacedPath = path:gsub("_HALOCE", _HALOCE):gsub("_MYGAMES", _MYGAMES)
+        paths[file] = replacedPath
+    end
+    return paths
+end
+
+
 --- Entity constructor
 ---@param jsonString string
 function packageMercury:initialize(jsonString)

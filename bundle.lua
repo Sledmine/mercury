@@ -42,12 +42,14 @@ local modules = {
     "Mercury/lib/*.lua",
 }
 
+local version = "3.0.0.0"
+
 local versionInfo = {
     "FileVersion=3.0",
     "ProductVersion=3.0",
     "FileDescription=Halo CE Package Manager",
     "ProductName=Mercury",
-    "InternalName=Mercury",
+    "InternalName=Mercury"
 }
 
 local iconPath = "Mercury/assets/icons/mercury.ico"
@@ -56,10 +58,10 @@ local mainLua = "mercury"
 
 local outputPath = "Mercury\\mercury.exe"
 
-local bundleLine = "mgit bundle -a '%s' -m '%s' -M '%s' -i '%s' -vi '%s' -o '%s'"
+local bundleLine = "mgit bundle -a '%s' -m '%s' -M '%s' -i '%s' -fv %s -vi '%s' -o '%s'"
 
 local bundleBuild = string.format(bundleLine, table.concat(staticLibs, " "),
                                   table.concat(modules, " "), mainLua, iconPath,
-                                  table.concat(versionInfo, ";"), outputPath)
+                                  version, table.concat(versionInfo, ";"), outputPath)
 print(bundleBuild)
 os.execute(bundleBuild)

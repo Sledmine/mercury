@@ -6,6 +6,10 @@
 ------------------------------------------------------------------------------
 local environment = {}
 
+local lfs = require("lfs")
+local glue = require("glue")
+local json = require("cjson")
+
 -- Libraries importation
 local registry = require "registry"
 
@@ -28,6 +32,8 @@ function cprint(value)
         colorText = string.gsub(colorText, "Warning,", "[93mWarning[0m,")
         colorText = string.gsub(colorText, "Unpacking", "[93mUnpacking[0m")
         colorText = string.gsub(colorText, "Installing", "[93mInstalling[0m")
+        --colorText = string.gsub(colorText, "Removing", "[93mRemoving[0m")
+        --colorText = string.gsub(colorText, "Erasing", "[93mErasing[0m")
         print(colorText)
     end
 end
@@ -83,7 +89,8 @@ local function mercurySetup()
     print("Mercury Successfully setup!")
 end]]
 
-function environment.get() -- Setup environment to work, store data, temp files, etc.
+--- Setup environment to work, environment variables, configuration folder, etc
+function environment.get() 
     local _TEMP = os.getenv("TEMP")
     local _SOURCEFOLDER = lfs.currentdir()
     local _APPDATA = os.getenv("APPDATA")
@@ -106,9 +113,25 @@ function environment.get() -- Setup environment to work, store data, temp files,
     _HALOCE_INSTALLED_PACKAGES = _HALOCE .. "\\mercury\\installed\\packages.json"
 end
 
--- Destroy environment previously created, temp folders, trash files, etc
+--- Destroy environment previously created, temp folders, trash files, etc
 function environment.destroy()
     deleteFile(_MERCURY_TEMP .. "\\mercury\\", true)
+end
+
+--- Get mercury local installed packages
+---@param newPackages packageMercury[]
+function environment.packages(newPackages)
+    if (not newPackages) then
+        if (fileExist(_HALOCE_INSTALLED_PACKAGES)) then
+            return json.decode(glue.readfile(_HALOCE_INSTALLED_PACKAGES, "t"))
+        else
+            createFolder(_MERCURY_INSTALLED)
+        end
+    else
+        local installedPackagesJson = json.encode(newPackages)
+        glue.writefile(_HALOCE_INSTALLED_PACKAGES, installedPackagesJson, "t")
+    end
+    return nil
 end
 
 return environment

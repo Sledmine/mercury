@@ -34,7 +34,7 @@ local modules = {
     "middleclass.lua",
     -- Luaunit is just for testing purposes, not required for release
     -- Anyway, keep it here for tracking...
-    --"luaunit.lua",
+    -- "luaunit.lua",
     "Mercury/actions/*.lua",
     "Mercury/config/*.lua",
     "Mercury/entities/*.lua",

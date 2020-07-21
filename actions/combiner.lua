@@ -1,54 +1,47 @@
 ------------------------------------------------------------------------------
--- Combiner: Function combiner for Mercury actions
+-- Combiner
 -- Authors: Sledmine
--- Version: 1.0
+-- Function combiner for Mercury actions
 ------------------------------------------------------------------------------
-local _M = {}
+local combiner = {}
 
-require "Mercury.lib.utilis"
+combiner.search = require("Mercury.actions.search")
+combiner.list = require("Mercury.actions.list")
+combiner.download = require("Mercury.actions.download")
+combiner.insert = require("Mercury.actions.insert")
+combiner.unpack = require("Mercury.actions.unpack")
+combiner.remove = require("Mercury.actions.remove")
+combiner.mitosis = require("Mercury.actions.mitosis")
+combiner.set = require("Mercury.actions.set")
 
-local search = require "Mercury.actions.search"
-local list = require "Mercury.actions.list"
-local download = require "Mercury.actions.download"
-local insert = require "Mercury.actions.insert"
-local unpack = require "Mercury.actions.unpack"
-local remove = require "Mercury.actions.remove"
-local mitosis = require "Mercury.actions.mitosis"
-local set = require "Mercury.actions.set"
-
-local install = function(packageLabel, packageVersion, forceInstallation, noBackups)
-    if (search(packageLabel)) then
+function combiner.install(packageLabel, packageVersion, forceInstallation, noBackups)
+    if (combiner.search(packageLabel)) then
         if (forceInstallation) then
             remove(packageLabel, true, true)
         else
             cprint("Warning, package '" .. packageLabel .. "' is already installed.")
             return false
         end
-    end
-    local success, description, downloadedMercs = download(packageLabel, packageVersion)
-    if (not success) then
-        cprint("Error, at trying to install '" .. packageLabel .. "', " .. tostring(description))
     else
-        local installationResults = foreach(downloadedMercs, insert, forceInstallation, noBackups)
-        for k, v in pairs(installationResults) do
-            if (not v) then
-                cprint("Error, at trying to install '" .. packageLabel .. "' package.")
-                return false
+        local success, description, downloadedMercs =
+            combiner.download(packageLabel, packageVersion)
+        if (not success) then
+            cprint("Error, at trying to install '" .. packageLabel .. "', " .. tostring(description))
+        else
+            local installationResults = forEach(downloadedMercs, combiner.insert, forceInstallation,
+                                                noBackups)
+            dprint(installationResults)
+            for index, installData in pairs(installationResults) do
+                local result = installData[1]
+                if (not result) then
+                    cprint("Error, at trying to install '" .. packageLabel .. "' package.")
+                    return false
+                end
             end
+            cprint("Done, package '" .. packageLabel .. "' succesfully installed!")
         end
-        cprint("Done, package '" .. packageLabel .. "' succesfully installed!")
+        return success
     end
-    return success
 end
 
-_M.search = search
-_M.list = list
-_M.download = download
-_M.unpack = unpack
-_M.install = install
-_M.remove = remove
-
-_M.mitosis = mitosis
-_M.set = set
-
-return _M
+return combiner

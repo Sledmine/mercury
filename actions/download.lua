@@ -114,7 +114,7 @@ local function download(packageLabel, packageVersion)
                             local dependencyResult, errorString, dependencyMercs =
                                 download(dependencyMetaData.name, dependencyMetaData.version)
                             if (dependencyResult) then
-                                table.merge(downloadedFiles, dependencyMercs)
+                                glue.update(downloadedFiles, dependencyMercs)
                             else
                                 return false, DESCRIPTION.DEPENDENCY_ERROR
                             end

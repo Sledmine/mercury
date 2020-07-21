@@ -7,7 +7,10 @@ local depackage = require "Mercury.actions.unpack"
 local PackageMercury = require "Mercury.entities.packageMercury"
 
 local DESCRIPTIONS = {
-    ERASE_FILE_ERROR = ""
+    ERASE_FILE_ERROR = "Error, at trying to erase some files.",
+    BACKUP_CREATING_ERROR = "Error, at trying to create some backup files.",
+    INSTALLATION_ERROR = "Error, at trying to install a package.",
+    MERC_NOT_EXIST = "Error, mercury local package does not exist.",
 }
 
 -- Install any mercury package
@@ -28,7 +31,7 @@ local function insert(mercPath, forceInstallation, noBackups)
             local manifestJson = fileToString(depackageFolder .. "\\manifest.json")
             ---@type packageMercury
             local mercuryPackage = PackageMercury:new(manifestJson)
-            cprint("Installing, " .. mercName .. "...")
+            cprint("Installing " .. mercName .. "...")
             for file, path in pairs(mercuryPackage.files) do
                 -- Replace environment variables
                 local outputPath = path
@@ -42,23 +45,23 @@ local function insert(mercPath, forceInstallation, noBackups)
                 end
                 if (fileExist(outputFile)) then
                     if (forceInstallation) then
-                        cprint("WARNING: Forced mode enabled, erasing conflicting files..")
+                        cprint("Warning, Forced mode enabled, erasing conflicting files..")
                         local result, desc, error = deleteFile(outputFile)
                         if (result) then
                             cprint("Deleted : '" .. file .. "'")
                         else
-                            cprint("Error at trying to erase file: '" .. file .. "'")
-                            return false
+                            cprint("Error, at trying to erase file: '" .. file .. "'")
+                            return false, DESCRIPTIONS.ERASE_FILE_ERROR
                         end
                     end
                     if (not noBackups) then
-                        cprint("WARNING: There are conflicting files, creating a backup...")
+                        cprint("Warning, There are conflicting files, creating a backup...")
                         local result, desc, error = move(outputFile, outputFile .. ".bak")
                         if (result) then
                             print("Backup created for '" .. file .. "'")
                         else
-                            cprint("Error at trying to create a backup for: '" .. file .. "")
-                            return false
+                            cprint("Error, at trying to create a backup for: '" .. file .. "")
+                            return false, DESCRIPTIONS.BACKUP_CREATING_ERROR
                         end
                     end
                 end
@@ -66,29 +69,24 @@ local function insert(mercPath, forceInstallation, noBackups)
                     dprint("File succesfully installed.")
                     dprint(outputFile)
                 else
-                    print("Error at trying to install file: '" .. file .. "'")
-                    print("Encountered some problems at installing: " .. mercName .. ".merc")
-                    return false
+                    cprint("Error, at trying to install file: '" .. file .. "'")
+                    return false, DESCRIPTIONS.INSTALLATION_ERROR
                 end
             end
-            local installedPackages
-            if (fileExist(_HALOCE_INSTALLED_PACKAGES)) then
-                installedPackages = json.decode(fileToString(_HALOCE_INSTALLED_PACKAGES))
-            else
-                createFolder(_MERCURY_INSTALLED)
+            local installedPackages = environment.packages()
+            if (not installedPackages) then
                 installedPackages = {}
             end
             -- Substract required package properties and install them
-
-            installedPackages[mercuryPackage.label] = mercuryPackage:getProperties()
-            local installedPackagesJson = json.encode(installedPackages)
-            glue.writefile(_HALOCE_INSTALLED_PACKAGES, installedPackagesJson, "t")
+            local packageProperties = mercuryPackage:getProperties()
+            installedPackages[mercuryPackage.label] = packageProperties
+            -- Create a json string from installed packages
+            environment.packages(installedPackages)
             return true
         end
-    else
-        print("Specified .merc package doesn't exist. (" .. mercFullName .. ")")
     end
-    return false
+    dprint("Error, " .. mercFullName .. " does not exist.")
+    return false, DESCRIPTIONS.MERC_NOT_EXIST
 end
 
 return insert

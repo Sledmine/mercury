@@ -1,12 +1,11 @@
 ------------------------------------------------------------------------------
--- Utilis: Semi-universal tool library for Mercury
+-- Utils module
 -- Authors: Sledmine
--- Version: 1.0
+-- Some util functions
 ------------------------------------------------------------------------------
-local lfs = require "lfs"
 local fs = require "fs"
-local inspect = require "inspect"
 local path = require "path"
+local glue = require "glue"
 
 function splitPath(pathName)
     local dir
@@ -63,8 +62,8 @@ end
 function copyFile(sourceFile, destinationFile)
     if (sourceFile ~= nil and destinationFile ~= nil) then
         if (fs.is(sourceFile) == false) then
-            print("Copy file error, specified source does not exist!")
-            print(sourceFile)
+            cprint("Error, specified source file does not exist!")
+            cprint(sourceFile)
             return false
         end
         local sourceF = io.open(sourceFile, "rb")
@@ -76,15 +75,15 @@ function copyFile(sourceFile, destinationFile)
             return true
         end
         if (sourceF == nil) then
-            print("Error in: " .. sourceFile .. ", Source file can't be opened.")
+            cprint("Error, " .. sourceFile .. " source file can't be opened.")
         end
         if (destinationF == nil) then
-            print("Error in:" .. destinationFile .. ", Destination file can't be opened.")
+            cprint("Error," .. destinationFile .. ", destination file can't be opened.")
         end
-        print("Error: One of the specified source or destination file can't be opened.")
+        cprint("Error, one of the specified source or destination file can't be opened.")
         return false
     end
-    print("Error: Trying to copy files, one of the specified paths is null.")
+    cprint("Error, at trying to copy files, one of the specified paths is null.")
     return false
 end
 
@@ -103,17 +102,10 @@ function isFile(filepath)
     return true
 end
 
-function table.merge(t1, t2)
-    for k, v in ipairs(t2) do
-        table.insert(t1, v)
-    end
-    return t1
-end
-
-function foreach(t, f, ...)
+function forEach(t, f, ...)
     tr = {}
     for k, v in pairs(t) do
-        table.insert(tr, f(v, ...))
+        glue.append(tr, {f(v, ...)})
     end
     return tr
 end
@@ -135,4 +127,15 @@ end
 
 function arrayPop(array)
     return array[#array]
+end
+
+--- Replace all the environment related paths
+---@param files
+function replaceEnvironmentPaths(files)
+    local paths = {}
+    for file, path in pairs(files) do
+        local replacedPath = path:gsub("_HALOCE", _HALOCE):gsub("_MYGAMES", _MYGAMES)
+        paths[file] = replacedPath
+    end
+    return paths
 end

@@ -1,16 +1,15 @@
 
 local search = require "Mercury.actions.search"
-local utilis = require "Mercury.lib.utilis"
 local json = require "cjson"
 
 local function listPackages(packageName, onlyNames, detailList)
     local installedPackages = {}
-    if (utilis.fileExist(_HALOCE.."\\mercury\\installed\\packages.json") == true) then
-        local installedPackagesFile = utilis.fileToString(_HALOCE.."\\mercury\\installed\\packages.json")
+    if (fileExist(_HALOCE.."\\mercury\\installed\\packages.json") == true) then
+        local installedPackagesFile = fileToString(_HALOCE.."\\mercury\\installed\\packages.json")
         if (installedPackagesFile ~= "") then
             installedPackages = json.decode(installedPackagesFile)
         else
-            utilis.deleteFile(_HALOCE.."\\mercury\\installed\\packages.json")
+            deleteFile(_HALOCE.."\\mercury\\installed\\packages.json")
             print("WARNING!!!: There are not any installed packages using Mercury...yet.")
         end
         local printInfo = {}

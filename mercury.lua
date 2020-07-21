@@ -8,14 +8,15 @@ _MERCURY_VERSION = 3.0
 _MERC_EXTENSION = ".merc"
 
 -- Global libraries
-argparse = require "argparse"
-inspect = require "inspect"
+argparse = require("argparse")
+inspect = require("inspect")
+utils = require("Mercury.lib.utils")
 
 -- Local libraries
 local combiner = require "Mercury.actions.combiner"
 
--- Local function imports
-local environment = require "Mercury.config.environment"
+-- Global data
+environment = require "Mercury.config.environment"
 
 -- Get all environment variables and configurations
 environment.get()
@@ -26,23 +27,17 @@ environment.destroy()
 -- Create argument parser with Mercury info
 local parser = argparse("mercury", "Package manager for Halo Custom Edition.",
                         "Support mercury on: https://mercury.shadowmods.net")
+-- Disable command required message                        
+parser:require_command(false)
 
 -- Catch command name as "command" on the args object
 parser:command_target("command")
 
 -- Developer flags
-parser:flag("-d --debug", "Mercury will print debug messages.")
-parser:flag("-t --test", "Every command will test their own functionality.")
+parser:flag("-d --debug", "Debug mode will be enabled to print debug messages.")
+parser:flag("-t --test", "Test mode will be enabled, some testing behaviour will occur.")
 
--- "Install command"
-local install = parser:command("install", "Download and install any package into the game.")
-install:description("Download and install any package from Mercury repository.")
-install:argument("packageLabel", "Label of the package you want to download.")
-install:argument("packageVersion", "Version of the package to retrieve."):args("?")
-install:flag("-f --force", "Will remove any package and replace any file before installing.")
-install:flag("-n --nobackups", "Avoid backup creation for any conflict package file.")
-install:action(function(args, name)
-    dprint(args)
+local function flagsCheck(args)
     if (args.debug) then
         _DEBUG_MODE = true
         cprint("Warning, Debug mode enabled.")
@@ -54,7 +49,17 @@ install:action(function(args, name)
         httpProtocol = "http://"
         cprint("Warning, Test mode enabled.")
     end
-    -- (packageLabel, packageVersion, forceInstallation, noBackups)
+end
+
+-- "Install command"
+local install = parser:command("install", "Install any package into the game.")
+install:description("Install will download and add any package from Mercury repository.")
+install:argument("packageLabel", "Label of the package you want to download.")
+install:argument("packageVersion", "Version of the package to install."):args("?")
+install:flag("-f --force", "Remove any existing package and force new package installation.")
+install:flag("-n --nobackups", "Avoid backup creation for any conflicting package.")
+install:action(function(args, name)
+    flagsCheck(args)
     combiner.install(args.packageLabel, args.packageVersion, args.force, args.nobackups)
 end)
 
@@ -63,6 +68,7 @@ local remove = parser:command("remove", "Delete any currently installed package.
 remove:description("Remove will delete any package that is already installed.")
 remove:argument("packageLabel", "Label of the package you want to remove.")
 remove:action(function(args, name)
+    flagsCheck(args)
     combiner.remove(args.packageLabel)
 end)
 

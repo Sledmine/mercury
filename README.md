@@ -4,6 +4,8 @@
 
 Is a console program that allows you to download all kind of tools, addons, mods, extensions and install it directly into your game, everything you need in one place being downloaded in the pure Linux style, basically a package manager for Halo Custom Edition.
 
+![Mercury GIF](https://i.imgur.com/0Brri7L.gif)
+
 ## What is the purpose of Mercury?
 
 - Get access into our package repository and download the latest or the oldest version of your favorite packages.

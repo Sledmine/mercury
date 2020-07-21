@@ -17,8 +17,9 @@ local function remove(packageLabel, noBackups, eraseBackups)
     local installedPackages = environment.packages()
     if (installedPackages and search(packageLabel)) then
         cprint("Removing package '" .. packageLabel .. "'...")
-        local packageFiles = installedPackages[packageLabel].files
-        for fileName, path in pairs(packageFiles) do
+        ---@type packageMercury
+        local packageMercury = installedPackages[packageLabel]
+        for fileName, path in pairs(packageMercury.files) do
             local filePath = path .. fileName
             -- Start erasing proccess
             dprint("Erasing '" .. fileName .. "'...")
@@ -42,7 +43,7 @@ local function remove(packageLabel, noBackups, eraseBackups)
                         cprint("Done, file succesfully deleted.")
                     end
                 --else
-                 --   cprint("Warning, there is no backup for this file.")
+                --   cprint("Warning, there is no backup for this file.")
                 end
             else
                 if (errorCode == 2 or errorCode == 3) then

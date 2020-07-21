@@ -27,7 +27,6 @@ local function replaceEnvironmentPaths(files)
     return paths
 end
 
-
 --- Entity constructor
 ---@param jsonString string
 function packageMercury:initialize(jsonString)

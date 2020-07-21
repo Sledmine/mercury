@@ -23,7 +23,7 @@ Feel free to fork and ask for pull requests to this repository also we are looki
 
 # Building Mercury
 
-Mercury uses [LuaPower](https://luapower.com) as the base of the project, this is needed to get the required amount of libraries and files to bundle/compile the code in this repository.
+Mercury uses [luapower](https://luapower.com) as the base of the project, this is needed to get the required amount of libraries and files to bundle/compile the code in this repository.
 **There are known some problems with precompiled libs, try to compile your own ssl libs from LuaPower if you are having problems at bundle time.**
 
 Some libraries and tools are needed too:
@@ -41,18 +41,24 @@ These libraries are already included in the repository but you can check their o
 # Development Environment
 
 If you want to modify and verify code in this repository you will have a couple of tools to
-test everything in your local environment, some unit testing will be added soon.
+test everything in your local environment, some unit testing is being added continuously.
 
-### Mocking Librarian Server
+## Run with LuaJIT
+Luapower follows a structure where everything must be inside the root folder to work, by just making a Symlink of your cloned respository into the Luapower folder you will be able to run, you can clone your repository directly in the Luapower folder but I would recommend you to create a Symlink.
 
-You can run an mock of a librarian server using [json-server](https://github.com/typicode/json-server) and the command below:
-
+After that you can just use this command in the luapower folder in order to run it:
 ```
-json-server -w tests\librarian.json
+luajit mercury\mercury.lua
 ```
 
-or
+## Mocking Librarian Server
 
+You can run a mock of a librarian server using [json-server](https://github.com/typicode/json-server) and the command below:
 ```
-server.cmd
+mercury\server.cmd
 ```
+
+# FAQ
+- **Luapower is a cross platform framework, why is this only working for Windows?**
+
+Halo Custom Edition only works in a Windows environment by native running or via emulation using Wine for example, so creating a package manager for Linux would be a little bit weird if the game itself only runs on Windows.

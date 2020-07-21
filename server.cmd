@@ -1,1 +1,1 @@
-json-server -w tests\librarian.json
+json-server -w Mercury\tests\server\librarian.json

@@ -41,6 +41,8 @@ function packageMercury:initialize(jsonString)
     self.version = parseVersionNumber(properties.version)
     ---@type table
     self.files = replaceEnvironmentPaths(properties.files)
+    ---@type table
+    self.dependencies = properties.dependencies
 end
 
 function packageMercury:getProperties()
@@ -50,6 +52,7 @@ function packageMercury:getProperties()
         author = self.author,
         version = self.version,
         files = self.files,
+        dependencies = self.dependencies,
     }
 end
 

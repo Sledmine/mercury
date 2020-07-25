@@ -11,14 +11,17 @@ function splitPath(pathName)
     local dir
     local ext
     local filename
-    if (path.dir(pathName) ~= nil) then
+    local pathDir = path.dir(pathName)
+    if (pathDir) then
         dir = path.dir(pathName)
     end
-    if (path.ext(pathName) ~= nil) then
+    local pathExt = path.ext(pathName)
+    if (pathExt) then
         ext = "." .. path.ext(pathName)
     end
-    if (path.file(pathName) ~= nil and ext ~= nil) then
-        filename = string.gsub(path.file(pathName), "." .. path.ext(pathName), "", 1)
+    local pathFile = path.file(pathName)
+    if (pathFile and ext) then
+        filename = string.gsub(pathFile, "." .. pathExt, "")
     end
     return dir, filename, ext
 end

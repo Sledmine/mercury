@@ -29,6 +29,8 @@ function packageMetadata:initialize(jsonString)
     self.version = properties.version
     ---@type string
     self.url = properties.url
+    ---@type table
+    self.dependencies = properties.dependencies
 end
 
 return packageMetadata

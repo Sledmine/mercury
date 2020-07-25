@@ -6,8 +6,8 @@
 local lu = require("luaunit")
 local glue = require("glue")
 
--- Local libraries
-local utils = require "Mercury.lib.utilis"
+-- Global libraries
+require "Mercury.lib.utils"
 
 -- Local function imports
 local environment = require "Mercury.config.environment"
@@ -21,6 +21,7 @@ local PackageMercury = require("Mercury.entities.packageMercury")
 test_PackageMercury = {}
 
 function test_PackageMercury:setUp()
+    ---@language JSON
     self.jsonString = [[{
         "label": "test",
         "name": "Mercury Test Package",
@@ -29,7 +30,10 @@ function test_PackageMercury:setUp()
         "files": {
             "test.txt": "_HALOCE\\MERCURY_TEST\\",
             "test2.txt": "_HALOCE\\MERCURY_TEST\\"
-        }
+        },
+        "dependencies": [
+            {"label": "test2", "version":1}
+        ]
     }]]
     self.expectedEntity = {
         label = "test",
@@ -40,6 +44,7 @@ function test_PackageMercury:setUp()
             ["test.txt"] = _HALOCE .. "\\MERCURY_TEST\\",
             ["test2.txt"] = _HALOCE .. "\\MERCURY_TEST\\",
         },
+        dependencies = {{label = "test2", version = 1}},
     }
 end
 
@@ -53,6 +58,7 @@ function test_PackageMercury:test_EntityConstructor()
     lu.assertEquals(packageProperties.version, self.expectedEntity.version)
     lu.assertEquals(packageProperties.name, self.expectedEntity.name)
     lu.assertEquals(packageProperties.files, self.expectedEntity.files)
+    lu.assertEquals(packageProperties.dependencies, self.expectedEntity.dependencies)
 end
 
 local function runTests()

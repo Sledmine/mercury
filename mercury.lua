@@ -47,6 +47,7 @@ local function flagsCheck(args)
         -- Override respository connection data
         repositoryHost = "localhost:3000"
         httpProtocol = "http://"
+        librarianPath = "package?"
         cprint("Warning, Test mode enabled.")
     end
 end

@@ -4,17 +4,19 @@
 -- Version: 3.0
 ------------------------------------------------------------------------------
 local json = require "cjson"
+local glue = require "glue"
+
 local fdownload = require "Mercury.lib.fdownload"
 
 -- Entities importation
 local PackageMetadata = require "Mercury.entities.packageMetadata"
 
 -- Main repository url
-repositoryHost = repositoryHost or "mercury.shadowmods.net"
-httpProtocol = httpProtocol or "http://"
-
+-- These are global variables with default values provide override
+repositoryHost = repositoryHost or "genesis.gedd.xyz"
+httpProtocol = httpProtocol or "https://"
 -- Path for master librarian index
-local librarianPath = "packages?"
+librarianPath = librarianPath or "vulcano?"
 
 local DESCRIPTION = {
     -- General errors
@@ -63,8 +65,7 @@ local function downloadMerc(packageMeta)
             cprint("Error, " .. tostring(errorCode[1]) .. " at downloading '" .. packageMeta.url ..
                        "'")
         else
-            cprint("Error," .. tostring(errorCode) .. " at downloading '" .. packageMeta.url ..
-                       "'")
+            cprint("Error," .. tostring(errorCode) .. " at downloading '" .. packageMeta.url .. "'")
         end
         return false, DESCRIPTION.MERC_DOWNLOAD_ERROR
     end
@@ -104,17 +105,19 @@ local function download(packageLabel, packageVersion)
                     local downloadResult, errorDescription, mercPath = downloadMerc(packageMeta)
                     if (downloadResult) then
                         dprint("Appending " .. mercPath)
-                        table.insert(downloadedFiles, mercPath)
+                        glue.append(downloadedFiles, mercPath)
+                        dprint(downloadedFiles)
                     else
                         return downloadResult, errorDescription
                     end
                     -- Package has other packages as dependencies
                     if (packageMeta.dependencies and #packageMeta.dependencies > 0) then
-                        for index, dependencyMetaData in pairs(packageMeta.dependencies) do
+                        for index, dependencyMetadata in pairs(packageMeta.dependencies) do
                             local dependencyResult, errorString, dependencyMercs =
-                                download(dependencyMetaData.name, dependencyMetaData.version)
+                                download(dependencyMetadata.label, dependencyMetadata.version)
                             if (dependencyResult) then
-                                glue.update(downloadedFiles, dependencyMercs)
+                                dprint(dependencyMercs)
+                                glue.extend(downloadedFiles, dependencyMercs)
                             else
                                 return false, DESCRIPTION.DEPENDENCY_ERROR
                             end

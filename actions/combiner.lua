@@ -25,6 +25,7 @@ function combiner.install(packageLabel, packageVersion, forceInstallation, noBac
     else
         local success, description, downloadedMercs =
             combiner.download(packageLabel, packageVersion)
+            --dprint("MERCS: " .. inspect(downloadedMercs))
         if (not success) then
             cprint("Error, at trying to install '" .. packageLabel .. "', " .. tostring(description))
         else

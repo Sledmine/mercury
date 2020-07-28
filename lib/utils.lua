@@ -7,6 +7,25 @@ local fs = require "fs"
 local path = require "path"
 local glue = require "glue"
 
+-- Experimental language addons
+
+--- Provide simple list/array iterator
+function each(t)
+    local i = 0
+    local n = table.getn(t)
+    return function()
+        i = i + 1
+        if i <= n then
+            return t[i], i
+        end
+    end
+end
+
+-- Provide string concatenation via addition operator
+getmetatable("").__add = function (a,b)
+    return a .. b
+end
+
 function splitPath(pathName)
     local dir
     local ext

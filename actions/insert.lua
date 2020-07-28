@@ -53,8 +53,7 @@ local function insert(mercPath, forceInstallation, noBackups)
                             cprint("Error, at trying to erase file: '" .. file .. "'")
                             return false, DESCRIPTIONS.ERASE_FILE_ERROR
                         end
-                    end
-                    if (not noBackups) then
+                    elseif (not noBackups) then
                         cprint("Warning, There are conflicting files, creating a backup...")
                         local result, desc, error = move(outputFile, outputFile .. ".bak")
                         if (result) then

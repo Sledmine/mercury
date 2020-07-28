@@ -13,10 +13,10 @@ inspect = require("inspect")
 utils = require("Mercury.lib.utils")
 
 -- Local libraries
-local combiner = require "Mercury.actions.combiner"
+local combiner = require("Mercury.actions.combiner")
 
 -- Global data
-environment = require "Mercury.config.environment"
+environment = require("Mercury.config.environment")
 
 -- Get all environment variables and configurations
 environment.get()
@@ -68,9 +68,12 @@ end)
 local remove = parser:command("remove", "Delete any currently installed package.")
 remove:description("Remove will delete any package that is already installed.")
 remove:argument("packageLabel", "Label of the package you want to remove.")
+remove:flag("-n --norestore", "Prevent previous backups from being restored.")
+remove:flag("-e --erasebackups", "Erase previously created backups.")
+remove:flag("-r --recursive", "Remove all the dependencies of this package.")
 remove:action(function(args, name)
     flagsCheck(args)
-    combiner.remove(args.packageLabel)
+    combiner.remove(args.packageLabel, args.norestore, args.erasebackups, args.recursive)
 end)
 
 -- "List command"

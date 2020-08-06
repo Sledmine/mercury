@@ -13,7 +13,7 @@ local PackageMetadata = require "Mercury.entities.packageMetadata"
 
 -- Main repository url
 -- These are global variables with default values provide override
-repositoryHost = repositoryHost or "genesis.gedd.xyz"
+repositoryHost = repositoryHost or "genesis.vadam.net"
 httpProtocol = httpProtocol or "https://"
 -- Path for master librarian index
 librarianPath = librarianPath or "vulcano?"

@@ -1,0 +1,10 @@
+{
+	"label": "fail",
+	"name": "Mercury Test Package Fail",
+	"version": 1,
+	"author": "Sled",
+	"files": {
+		"test.txt": "_HALOCE\\MERCURY_TEST\\",
+		"test2.txt": "_HALOCE\\MERCURY_TEST\\"
+	}
+}

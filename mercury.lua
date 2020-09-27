@@ -1,22 +1,23 @@
 ------------------------------------------------------------------------------
--- Mercury: Package Manager for Halo Custom Edition
--- Authors: JerryBrick, Sledmine
--- Version: 3.0
+-- Mercury
+-- JerryBrick, Sledmine
+-- Package Manager for Halo Custom Edition
+-- Version 3.0
 ------------------------------------------------------------------------------
 -- Constant definition.
 _MERCURY_VERSION = 3.0
 _MERC_EXTENSION = ".merc"
 
 -- Global libraries
-argparse = require("argparse")
-inspect = require("inspect")
-utils = require("Mercury.lib.utils")
+argparse = require "argparse"
+inspect = require "inspect"
+utils = require "Mercury.lib.utils"
 
 -- Local libraries
-local combiner = require("Mercury.actions.combiner")
+local combiner = require "Mercury.actions.combiner"
 
 -- Global data
-environment = require("Mercury.config.environment")
+environment = require "Mercury.config.environment"
 
 -- Get all environment variables and configurations
 environment.get()
@@ -47,12 +48,12 @@ local function flagsCheck(args)
         -- Override respository connection data
         repositoryHost = "localhost:3000"
         httpProtocol = "http://"
-        librarianPath = "package?"
+        librarianPath = "vulcano?"
         cprint("Warning, Test mode enabled.")
     end
 end
 
--- "Install command"
+-- Install command
 local install = parser:command("install", "Install any package into the game.")
 install:description("Install will download and add any package from Mercury repository.")
 install:argument("packageLabel", "Label of the package you want to download.")
@@ -62,6 +63,26 @@ install:flag("-n --nobackups", "Avoid backup creation for any conflicting packag
 install:action(function(args, name)
     flagsCheck(args)
     combiner.install(args.packageLabel, args.packageVersion, args.force, args.nobackups)
+end)
+
+-- Update command
+local update = parser:command("update", "Update any installed package in this game instance.")
+update:description("Update any package in your game by binary difference.")
+update:argument("packageLabel", "Label of the package you want to update.")
+update:argument("packageVersion", "Version of the package to update, latest by default."):args("?")
+update:flag("-f --force", "Remove any existing package and force new package installation.")
+update:action(function(args, name)
+    flagsCheck(args)
+    combiner.install(args.packageLabel, args.packageVersion, args.force, args.nobackups)
+end)
+
+-- Bundle command
+local bundle = parser:command("bundle", "Bundle any lua mod into a single deployable script.")
+bundle:description("Merge any modular lua project into a single script with dependencies.")
+bundle:flag("-c --compile", "Compile this project using the lua target compiler in the bundle file.")
+bundle:action(function(args, name)
+    flagsCheck(args)
+    combiner.bundle(nil, args.compile)
 end)
 
 -- "Remove command"
@@ -79,14 +100,15 @@ end)
 -- "List command"
 local list = parser:command("list", "Show already installed packages in this game instance.")
 list:action(function(args, name)
-    print("TODO!!!")
+    flagsCheck(args)
+    combiner.list()
 end)
 
 -- "Mitsosis command"
-local mitosis = parser:command("mitosis", "Create a new game instance with just core files.")
+--[[local mitosis = parser:command("mitosis", "Create a new game instance with just core files.")
 mitosis:action(function(args, name)
     print("TODO!!!")
-end)
+end)]]
 
 -- "Version command"
 local version = parser:command("version", "Get Mercury version and usefull info.")

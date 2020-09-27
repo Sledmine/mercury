@@ -33,13 +33,13 @@ local DESCRIPTION = {
     MERC_FILE_NOT_EXIST = "Previously downloaded merc file is not on the expected location.",
     MERC_DOWNLOAD_ERROR = "An error ocurred at downloading merc file.",
     -- No error.
-    SUCCESS = "SUCCESS",
+    SUCCESS = "SUCCESS"
 }
 
 --- Download a merc file given package metadata
 ---@param packageMeta packageMetadata
 local function downloadMerc(packageMeta)
-    cprint("Downloading '" .. packageMeta.name .. "' package..")
+    cprint("Downloading " .. packageMeta.name .. "...")
     local packageName = packageMeta.name
     local packageVersion = tostring(packageMeta.version)
     local mercUrl = packageMeta.url
@@ -65,7 +65,7 @@ local function downloadMerc(packageMeta)
             cprint("Error, " .. tostring(errorCode[1]) .. " at downloading '" .. packageMeta.url ..
                        "'")
         else
-            cprint("Error," .. tostring(errorCode) .. " at downloading '" .. packageMeta.url .. "'")
+            cprint("Error, " .. tostring(errorCode) .. " at downloading '" .. packageMeta.url .. "'")
         end
         return false, DESCRIPTION.MERC_DOWNLOAD_ERROR
     end
@@ -76,7 +76,7 @@ end
 ---@param packageVersion string
 local function download(packageLabel, packageVersion)
     -- Path and Filename for the JSON file obtained from the server
-    cprint("Looking for package '" .. packageLabel .. "' in Mercury repository...")
+    cprint("Looking for '" .. packageLabel .. "' in Mercury repository... ", true)
     local repositoryUrl = httpProtocol .. repositoryHost .. "/" .. librarianPath
     local packageRequestUrl = repositoryUrl .. "package=" .. packageLabel
     if (packageVersion) then
@@ -98,7 +98,8 @@ local function download(packageLabel, packageVersion)
                 if (not packageVersion) then
                     packageVersion = packageMeta.version
                 end
-                cprint("[ Package: " .. packageLabel .. " | Version = " .. packageVersion .. " ]")
+                cprint("done.")
+                cprint("Name = " .. packageMeta.name .. ", Version = " .. packageVersion)
                 local downloadedFiles = {}
                 -- There is a merc file download url for this package
                 if (packageMeta.url) then
@@ -110,8 +111,9 @@ local function download(packageLabel, packageVersion)
                     else
                         return downloadResult, errorDescription
                     end
+                    -- // TODO This is pending of revision, discuss about when to get dependencies
                     -- Package has other packages as dependencies
-                    if (packageMeta.dependencies and #packageMeta.dependencies > 0) then
+                    --[[if (packageMeta.dependencies and #packageMeta.dependencies > 0) then
                         for index, dependencyMetadata in pairs(packageMeta.dependencies) do
                             local dependencyResult, errorString, dependencyMercs =
                                 download(dependencyMetadata.label, dependencyMetadata.version)
@@ -122,7 +124,7 @@ local function download(packageLabel, packageVersion)
                                 return false, DESCRIPTION.DEPENDENCY_ERROR
                             end
                         end
-                    end
+                    end]]
                     return true, DESCRIPTION.SUCCESS, downloadedFiles
                 else
                     return false, DESCRIPTION.NO_PACKAGE_URL

@@ -1,36 +1,57 @@
+------------------------------------------------------------------------------
+-- Insert
+-- Sledmine
+-- Insert all the files from a Mercury Package into the game
+------------------------------------------------------------------------------
 local json = require "cjson"
 local glue = require "glue"
 local path = require "path"
 
 local depackage = require "Mercury.actions.unpack"
+local download = require "Mercury.actions.download"
 
 local PackageMercury = require "Mercury.entities.packageMercury"
 
-local DESCRIPTIONS = {
+local descriptions = {
     ERASE_FILE_ERROR = "Error, at trying to erase some files.",
     BACKUP_CREATING_ERROR = "Error, at trying to create some backup files.",
     INSTALLATION_ERROR = "Error, at trying to install a package.",
-    MERC_NOT_EXIST = "Error, mercury local package does not exist.",
+    DEPENDENCY_ERROR = "Error, at trying to install a package dependency.",
+    MERC_NOT_EXIST = "Error, mercury local package does not exist."
 }
 
 -- Install any mercury package
 local function insert(mercPath, forceInstallation, noBackups)
     local mercPath, mercName, mercExtension = splitPath(mercPath)
-    local mercFullName = mercPath .. "\\" .. mercName .. _MERC_EXTENSION
-    if (fileExist(mercFullName)) then
+    local mercFullPath = mercPath .. "\\" .. mercName .. _MERC_EXTENSION
+    if (fileExist(mercFullPath)) then
         -- Depackage specified merc file
         dprint("Trying to depackage '" .. mercName .. ".merc' ...")
-        local depackageFolder = _MERCURY_DEPACKED .. "\\" .. mercName
-        if (not folderExist(depackageFolder)) then
-            dprint("Creating folder: " .. depackageFolder)
-            createFolder(depackageFolder)
+        local depackageFolderPath = _MERCURY_DEPACKED .. "\\" .. mercName
+        if (not folderExist(depackageFolderPath)) then
+            dprint("Creating folder: " .. depackageFolderPath)
+            createFolder(depackageFolderPath)
         end
-        local depackageResult = depackage(mercFullName, depackageFolder)
+        local depackageResult = depackage(mercFullPath, depackageFolderPath)
         if (depackageResult) then
             -- Load package manifest data
-            local manifestJson = fileToString(depackageFolder .. "\\manifest.json")
+            local manifestJson = fileToString(depackageFolderPath .. "\\manifest.json")
             ---@type packageMercury
             local mercuryPackage = PackageMercury:new(manifestJson)
+            -- Get other package dependencies
+            if (mercuryPackage.dependencies) then
+                cprint("Getting package dependencies...")
+                for dependencyIndex, dependency in pairs(mercuryPackage.dependencies) do
+                    local success, description, downloadedMercs =
+                    download(dependency.label, dependency.version)
+                    if (success) then
+                        -- // FIXME This is using the old dependencies implementation
+                        insert(downloadedMercs[1], forceInstallation, noBackups)
+                    else
+                        return false, descriptions.DEPENDENCY_ERROR
+                    end
+                end
+            end
             cprint("Installing " .. mercName .. "...")
             for file, path in pairs(mercuryPackage.files) do
                 -- Replace environment variables
@@ -45,31 +66,33 @@ local function insert(mercPath, forceInstallation, noBackups)
                 end
                 if (fileExist(outputFile)) then
                     if (forceInstallation) then
-                        cprint("Warning, Forced mode enabled, erasing conflicting files..")
+                        cprint("Warning, Forced mode enabled, erasing conflicting files...", true)
                         local result, desc, error = deleteFile(outputFile)
                         if (result) then
-                            cprint("Deleted : '" .. file .. "'")
+                            dprint("Deleted : '" .. file .. "'")
+                            cprint("done.")
                         else
                             cprint("Error, at trying to erase file: '" .. file .. "'")
-                            return false, DESCRIPTIONS.ERASE_FILE_ERROR
+                            return false, descriptions.ERASE_FILE_ERROR
                         end
                     elseif (not noBackups) then
-                        cprint("Warning, There are conflicting files, creating a backup...")
+                        cprint("Warning, conflicting file found, creating backup...", true)
                         local result, desc, error = move(outputFile, outputFile .. ".bak")
                         if (result) then
-                            print("Backup created for '" .. file .. "'")
+                            cprint("done.")
+                            cprint("Backup created for '" .. file .. "'")
                         else
                             cprint("Error, at trying to create a backup for: '" .. file .. "")
-                            return false, DESCRIPTIONS.BACKUP_CREATING_ERROR
+                            return false, descriptions.BACKUP_CREATING_ERROR
                         end
                     end
                 end
-                if (copyFile(depackageFolder .. "\\" .. file, outputFile) == true) then
+                if (copyFile(depackageFolderPath .. "\\" .. file, outputFile) == true) then
                     dprint("File succesfully installed.")
                     dprint(outputFile)
                 else
                     cprint("Error, at trying to install file: '" .. file .. "'")
-                    return false, DESCRIPTIONS.INSTALLATION_ERROR
+                    return false, descriptions.INSTALLATION_ERROR
                 end
             end
             local installedPackages = environment.packages()
@@ -84,8 +107,8 @@ local function insert(mercPath, forceInstallation, noBackups)
             return true
         end
     end
-    dprint("Error, " .. mercFullName .. " does not exist.")
-    return false, DESCRIPTIONS.MERC_NOT_EXIST
+    dprint("Error, " .. mercFullPath .. " does not exist.")
+    return false, descriptions.MERC_NOT_EXIST
 end
 
 return insert

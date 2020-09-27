@@ -1,18 +1,19 @@
 ------------------------------------------------------------------------------
--- Combiner
--- Authors: Sledmine
+-- Combiner module
+-- Sledmine
 -- Function combiner for Mercury actions
 ------------------------------------------------------------------------------
 local combiner = {}
 
-combiner.search = require("Mercury.actions.search")
-combiner.list = require("Mercury.actions.list")
-combiner.download = require("Mercury.actions.download")
-combiner.insert = require("Mercury.actions.insert")
-combiner.unpack = require("Mercury.actions.unpack")
-combiner.remove = require("Mercury.actions.remove")
-combiner.mitosis = require("Mercury.actions.mitosis")
-combiner.set = require("Mercury.actions.set")
+combiner.search = require "Mercury.actions.search"
+combiner.list = require "Mercury.actions.list"
+combiner.bundle = require "Mercury.actions.bundler"
+combiner.download = require "Mercury.actions.download"
+combiner.insert = require "Mercury.actions.insert"
+combiner.unpack = require "Mercury.actions.unpack"
+combiner.remove = require "Mercury.actions.remove"
+combiner.mitosis = require "Mercury.actions.mitosis"
+combiner.set = require "Mercury.actions.set"
 
 function combiner.install(packageLabel, packageVersion, forceInstallation, noBackups)
     if (combiner.search(packageLabel)) then
@@ -25,10 +26,11 @@ function combiner.install(packageLabel, packageVersion, forceInstallation, noBac
     else
         local success, description, downloadedMercs =
             combiner.download(packageLabel, packageVersion)
-            --dprint("MERCS: " .. inspect(downloadedMercs))
+        -- dprint("MERCS: " .. inspect(downloadedMercs))
         if (not success) then
             cprint("Error, at trying to install '" .. packageLabel .. "', " .. tostring(description))
         else
+            -- // FIXME This is using the old dependencies implementation
             local installationResults = forEach(downloadedMercs, combiner.insert, forceInstallation,
                                                 noBackups)
             dprint(installationResults)

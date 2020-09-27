@@ -7,7 +7,7 @@ local glue = require "glue"
 ---@return boolean result
 local function unpack(mercFile, outputPath)
     local dir, file, ext = splitPath(mercFile)
-    cprint("Unpacking " .. file .. "...")
+    dprint("Unpacking " .. file .. "...")
     dprint("mercFile: " .. mercFile .. "outputPath: " .. outputPath)
     mercZip = zip.open(mercFile, "r")
 
@@ -52,7 +52,7 @@ local function unpack(mercFile, outputPath)
 
     -- File count equals the number of files to unpack
     if (fileCount == entries) then
-        cprint("Done, " .. file .. " has been unpacked!")
+        dprint("Done, " .. file .. " has been unpacked!")
         return true
     end
     cprint("Error, there was a problem at unpacking '" .. mercFile .. "'!")

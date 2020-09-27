@@ -46,16 +46,17 @@ test everything in your local environment, some unit testing is being added cont
 ## Run with LuaJIT
 Luapower follows a structure where everything must be inside the root folder to work, by just making a Symlink of your cloned respository into the Luapower folder you will be able to run, you can clone your repository directly in the Luapower folder but I would recommend you to create a Symlink.
 
-After that you can just use this command in the luapower folder in order to run it:
+After that you can just use this command in the luapower folder to run it:
 ```
 luajit mercury\mercury.lua
 ```
 
 ## Mocking Librarian Server
 
-You can run a mock of a librarian server using [json-server](https://github.com/typicode/json-server) and the command below:
+You can run a mock of a librarian server using [easymock](https://github.com/CyberAgent/node-easymock) and the commands below:
 ```
-mercury\server.cmd
+cd tests\server
+easymock
 ```
 
 # FAQ

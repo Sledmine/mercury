@@ -41,3 +41,6 @@ luac.out
 
 # VS Code
 .vscode
+
+# Server files
+*.db

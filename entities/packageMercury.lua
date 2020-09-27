@@ -4,6 +4,7 @@
 -- Package entity for merc files
 ------------------------------------------------------------------------------
 local json = require "cjson"
+local glue = require "glue"
 
 local class = require("middleclass")
 
@@ -13,6 +14,26 @@ local packageMercury = class("packageMercury")
 --- Parse and format version number strings
 ---@param version string
 local function parseVersionNumber(version)
+    --[[
+        Mercury is expecting to handle versions that look like this
+        2.4.3.1
+
+        So when parsed they need to be like this:
+
+        2431
+
+        To provide a simple version aritmetic comparasion with
+
+        internalVersion > 2431
+    ]]
+    local versionDetails = glue.string.split(version, ".")
+    if (#versionDetails > 1) then
+        local parsedVersion = ""
+        for versionLevel in each(versionDetails) do
+            parsedVersion = parsedVersion .. versionLevel:gsub("[%a%p%c%s]", "")
+        end
+        return tonumber(parsedVersion)
+    end
     return tonumber(version)
 end
 
@@ -27,8 +48,17 @@ local function replaceEnvironmentPaths(files)
     return paths
 end
 
+---@class packageMercuryJson
+---@field name string
+---@field label string
+---@field author string
+---@field version string
+---@field internalVersion number
+---@field files table
+---@field dependencies table
+
 --- Entity constructor
----@param jsonString string
+---@param jsonString packageMercuryJson
 function packageMercury:initialize(jsonString)
     local properties = json.decode(jsonString or "{}")
     ---@type string
@@ -38,13 +68,17 @@ function packageMercury:initialize(jsonString)
     ---@type string
     self.author = properties.author
     ---@type number
-    self.version = parseVersionNumber(properties.version)
+    self.version = properties.version
+    ---@type number
+    self.internalVersion = parseVersionNumber(properties.version)
     ---@type table
     self.files = replaceEnvironmentPaths(properties.files)
     ---@type table
     self.dependencies = properties.dependencies
 end
 
+--- Return the public/raw properties of the package
+---@return packageMercuryJson
 function packageMercury:getProperties()
     return {
         name = self.name,
@@ -52,7 +86,7 @@ function packageMercury:getProperties()
         author = self.author,
         version = self.version,
         files = self.files,
-        dependencies = self.dependencies,
+        dependencies = self.dependencies
     }
 end
 

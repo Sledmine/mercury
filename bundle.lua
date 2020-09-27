@@ -17,6 +17,7 @@ local staticLibs = {
 
 local modules = {
     -- Luapower libs
+    "bundle.lua",
     "socket.lua",
     "socket/*.lua",
     "ltn12.lua",

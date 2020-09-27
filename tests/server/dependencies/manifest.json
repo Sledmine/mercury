@@ -1,0 +1,15 @@
+{
+	"label": "dependencies",
+	"name": "Mercury Test Package Dependencies",
+	"version": 1,
+	"author": "Sled",
+	"files": {
+		"test3.txt": "_HALOCE\\MERCURY_TEST\\"
+	},
+	"dependencies": [
+		{
+			"label": "test",
+			"version": 1
+		}
+	]
+}

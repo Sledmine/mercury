@@ -1,1 +1,0 @@
-json-server -w Mercury\tests\server\librarian.json

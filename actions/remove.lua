@@ -3,10 +3,10 @@
 -- Authors: Sledmine
 -- Remove any mercury package
 ------------------------------------------------------------------------------
-local json = require("cjson")
-local glue = require("glue")
+local json = require "cjson"
+local glue = require "glue"
 
-local search = require "Mercury.actions.search"
+local search = require("Mercury.actions.search")
 
 --- Remove/uninstall a package from the game
 ---@param packageLabel string
@@ -15,11 +15,12 @@ local search = require "Mercury.actions.search"
 ---@param recursive boolean
 local function remove(packageLabel, noRestore, eraseBackups, recursive)
     ---@type packageMercury[]
-    local installedPackages = environment.packages()
-    if (installedPackages and search(packageLabel)) then
+    if (search(packageLabel)) then
+        local installedPackages = environment.packages()
         cprint("Removing package '" .. packageLabel .. "'...")
         ---@type packageMercury
         local packageMercury = installedPackages[packageLabel]
+        -- Remove dependencies recursively
         if (recursive) then
             cprint("Warning, remove is in recursive mode.")
             local packageDependencies = packageMercury.dependencies
@@ -32,27 +33,27 @@ local function remove(packageLabel, noRestore, eraseBackups, recursive)
         for fileName, path in pairs(packageMercury.files) do
             local filePath = path .. fileName
             -- Start erasing proccess
-            dprint("Erasing '" .. fileName .. "'...")
+            dprint("Erasing '" .. fileName .. "'... ", true)
             local result, description, errorCode = deleteFile(filePath)
             if (result) then
                 dprint("Done, file erased.")
                 if (fileExist(filePath .. ".bak") and not noRestore) then
                     if (not noRestore) then
-                        cprint("Warning, backup file found, restoring file now...")
+                        cprint("Warning, restoring '" .. fileName .. "' backup file... ", true)
                         move(filePath .. ".bak", filePath)
                         if (fileExist(filePath)) then
-                            cprint("Done, file succesfully restored.")
+                            cprint("done.")
                         else
                             cprint("Error, at trying to restore backup file.")
                         end
                     end
                     if (eraseBackups) then
-                        cprint("Warning, Backups erase enabled, deleting file now...")
+                        cprint("Warning, Backups erase enabled deleting file now... ", true)
                         deleteFile(filePath .. ".bak")
                         if (fileExist(filePath)) then
                             cprint("Error, at trying to delete backup file.")
                         else
-                            cprint("Done, file succesfully deleted.")
+                            cprint("done.")
                         end
                     end
                 end
@@ -66,6 +67,7 @@ local function remove(packageLabel, noRestore, eraseBackups, recursive)
                 end
             end
         end
+        local installedPackages = environment.packages()
         installedPackages[packageLabel] = nil
         environment.packages(installedPackages)
         cprint("Done, package '" .. packageLabel .. "' has been removed.")

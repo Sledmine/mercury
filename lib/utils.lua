@@ -7,12 +7,43 @@ local fs = require "fs"
 local path = require "path"
 local glue = require "glue"
 
+--- Overloaded color printing function
+function cprint(value, nextLine)
+    if (type(value) ~= "string") then
+        print(inspect(value))
+    else
+        local colorText = string.gsub(value, "Done", "[92mDone[0m")
+        colorText = string.gsub(colorText, "done.", "[92mdone[0m.")
+        colorText = string.gsub(colorText, "Downloading", "[94mDownloading[0m")
+        colorText = string.gsub(colorText, "Looking", "[94mLooking[0m")
+        colorText = string.gsub(colorText, "Error", "[91mError[0m")
+        colorText = string.gsub(colorText, "Warning", "[93mWarning[0m")
+        colorText = string.gsub(colorText, "Unpacking", "[93mUnpacking[0m")
+        colorText = string.gsub(colorText, "Inserting", "[93mInstalling[0m")
+        colorText = string.gsub(colorText, "Bundling", "[93mBundling[0m")
+        colorText = string.gsub(colorText, "Compiling", "[93mCompiling[0m")
+        colorText = string.gsub(colorText, "Removing", "[91mRemoving[0m")
+        io.write(colorText)
+        if (not nextLine) then
+            io.write("\n")
+        end
+    end
+end
+
+--- Debug print for testing purposes only
+function dprint(value)
+    if (_DEBUG_MODE and value) then
+        cprint(value)
+        print("\n")
+    end
+end
+
 -- Experimental language addons
 
 --- Provide simple list/array iterator
 function each(t)
     local i = 0
-    local n = table.getn(t)
+    local n = #t
     return function()
         i = i + 1
         if i <= n then
@@ -22,7 +53,7 @@ function each(t)
 end
 
 -- Provide string concatenation via addition operator
-getmetatable("").__add = function (a,b)
+getmetatable("").__add = function(a, b)
     return a .. b
 end
 

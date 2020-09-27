@@ -20,32 +20,6 @@ REGENTRIES = {
     HALOCE64 = "HKEY_LOCAL_MACHINE\\SOFTWARE\\WOW6432Node\\Microsoft\\Microsoft Games\\Halo CE",
 }
 
--- Super function to print ASCII color strings and structures, tables and functions.
-function cprint(value)
-    if (type(value) ~= "string") then
-        print(inspect(value))
-    else
-        local colorText = string.gsub(value, "Done,", "[92mDone[0m,")
-        colorText = string.gsub(colorText, "Downloading", "[94mDownloading[0m")
-        colorText = string.gsub(colorText, "Looking", "[94mLooking[0m")
-        colorText = string.gsub(colorText, "Error,", "[91mError[0m,")
-        colorText = string.gsub(colorText, "Warning,", "[93mWarning[0m,")
-        colorText = string.gsub(colorText, "Unpacking", "[93mUnpacking[0m")
-        colorText = string.gsub(colorText, "Installing", "[93mInstalling[0m")
-        --colorText = string.gsub(colorText, "Removing", "[93mRemoving[0m")
-        --colorText = string.gsub(colorText, "Erasing", "[93mErasing[0m")
-        print(colorText)
-    end
-end
-
--- Debug print for testing purposes only
-function dprint(value)
-    if (_DEBUG_MODE and value) then
-        cprint(value)
-        print("\n")
-    end
-end
-
 local function getMyGamesPath()
     local documentsPath = registry.getkey(REGENTRIES.DOCUMENTS)
     if (documentsPath ~= nil) then
@@ -123,7 +97,10 @@ end
 function environment.packages(newPackages)
     if (not newPackages) then
         if (fileExist(_HALOCE_INSTALLED_PACKAGES)) then
-            return json.decode(glue.readfile(_HALOCE_INSTALLED_PACKAGES, "t"))
+            local installedPackages = json.decode(glue.readfile(_HALOCE_INSTALLED_PACKAGES, "t"))
+            if (installedPackages and #glue.keys(installedPackages) > 0) then
+                return installedPackages
+            end
         else
             createFolder(_MERCURY_INSTALLED)
         end

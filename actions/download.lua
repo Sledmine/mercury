@@ -63,10 +63,10 @@ local function downloadFromMetadata(packageMeta)
         -- An error ocurred at downloading merc file
         dprint(headers)
         if (type(errorCode) == "table") then
-            cprint("Error, " .. tostring(errorCode[1]) .. " at downloading '" .. packageMeta.url ..
+            cprint("Error, " .. tostring(errorCode[1]) .. " at downloading '" .. mercUrl ..
                        "'")
         else
-            cprint("Error, " .. tostring(errorCode) .. " at downloading '" .. packageMeta.url .. "'")
+            cprint("Error, " .. tostring(errorCode) .. " at downloading '" .. mercUrl .. "'")
         end
         return false, description.mercDownloadError
     end

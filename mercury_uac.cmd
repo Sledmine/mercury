@@ -27,4 +27,5 @@ if '%errorlevel%' NEQ '0' (
 :gotAdmin
     pushd "%CD%"
     CD /D "%~dp0"
+    cmd /Q /K title Mercury Console
 :--------------------------------------    

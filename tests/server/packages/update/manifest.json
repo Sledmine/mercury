@@ -1,0 +1,12 @@
+{
+	"label": "test",
+	"name": "Mercury Test Package",
+	"version": "1.0",
+	"author": "Sled",
+	"files": {
+		"test.txt": "_HALOCE\\MERCURY_TEST\\"
+	},
+	"updates": {
+		"test2.txt": "_HALOCE\\MERCURY_TEST\\"
+	}
+}

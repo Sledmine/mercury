@@ -43,8 +43,8 @@ function testPackageMercury:setUp()
         internalVersion = 1006675769751,
         author = "Sled",
         files = {
-            ["test.txt"] = _HALOCE .. "\\merctest\\",
-            ["test2.txt"] = _HALOCE .. "\\merctest\\"
+            ["test.txt"] = GamePath .. "\\merctest\\",
+            ["test2.txt"] = GamePath .. "\\merctest\\"
         },
         dependencies = {
             {label = "test2", version = 1}
@@ -71,8 +71,8 @@ function testPackageMercury:setUp()
         internalVersion = 1234,
         author = "Sled",
         files = {
-            ["test.txt"] = _HALOCE .. "\\merctest\\",
-            ["test2.txt"] = _HALOCE .. "\\merctest\\"
+            ["test.txt"] = GamePath .. "\\merctest\\",
+            ["test2.txt"] = GamePath .. "\\merctest\\"
         },
         dependencies = {
             {label = "test2", version = 1}

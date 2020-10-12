@@ -8,11 +8,11 @@ local path = require "path"
 local glue = require "glue"
 
 --- Overloaded color printing function
-function cprint(value, nextLine)
-    if (type(value) ~= "string") then
-        print(inspect(value))
+function cprint(text, nextLine)
+    if (type(text) ~= "string") then
+        print(inspect(text))
     else
-        local colorText = string.gsub(value, "Done", "[92mDone[0m")
+        local colorText = string.gsub(text, "Done", "[92mDone[0m")
         colorText = string.gsub(colorText, "done.", "[92mdone[0m.")
         colorText = string.gsub(colorText, "Downloading", "[94mDownloading[0m")
         colorText = string.gsub(colorText, "Looking", "[94mLooking[0m")

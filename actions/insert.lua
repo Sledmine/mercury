@@ -13,11 +13,11 @@ local download = require "Mercury.actions.download"
 local PackageMercury = require "Mercury.entities.packageMercury"
 
 local descriptions = {
-    ERASE_FILE_ERROR = "Error, at trying to erase some files.",
-    BACKUP_CREATING_ERROR = "Error, at trying to create some backup files.",
-    INSTALLATION_ERROR = "Error, at trying to install a package.",
-    DEPENDENCY_ERROR = "Error, at trying to install a package dependency.",
-    MERC_NOT_EXIST = "Error, mercury local package does not exist."
+    eraseFileError = "Error, at trying to erase some files.",
+    backupCreationError = "Error, at trying to create some backup files.",
+    installationError = "Error, at trying to install a package.",
+    depedencyError = "Error, at trying to install a package dependency.",
+    mercFileDoesNotExist = "Error, mercury local package does not exist."
 }
 
 -- Install any mercury package
@@ -42,13 +42,13 @@ local function insert(mercPath, forceInstallation, noBackups)
             if (mercuryPackage.dependencies) then
                 cprint("Getting package dependencies...")
                 for dependencyIndex, dependency in pairs(mercuryPackage.dependencies) do
-                    local success, description, downloadedMercs =
-                    download(dependency.label, dependency.version)
-                    if (success) then
-                        -- // FIXME This is using the old dependencies implementation
-                        insert(downloadedMercs[1], forceInstallation, noBackups)
+                    local downloadResult, description, mercPath =
+                        download(dependency.label, dependency.version)
+                    if (downloadResult) then
+                        -- Recursive dependency installation
+                        insert(mercPath, forceInstallation, noBackups)
                     else
-                        return false, descriptions.DEPENDENCY_ERROR
+                        return false, descriptions.depedencyError
                     end
                 end
             end
@@ -73,7 +73,7 @@ local function insert(mercPath, forceInstallation, noBackups)
                             cprint("done.")
                         else
                             cprint("Error, at trying to erase file: '" .. file .. "'")
-                            return false, descriptions.ERASE_FILE_ERROR
+                            return false, descriptions.eraseFileError
                         end
                     elseif (not noBackups) then
                         cprint("Warning, conflicting file found, creating backup...", true)
@@ -83,7 +83,7 @@ local function insert(mercPath, forceInstallation, noBackups)
                             cprint("Backup created for '" .. file .. "'")
                         else
                             cprint("Error, at trying to create a backup for: '" .. file .. "")
-                            return false, descriptions.BACKUP_CREATING_ERROR
+                            return false, descriptions.backupCreationError
                         end
                     end
                 end
@@ -92,23 +92,22 @@ local function insert(mercPath, forceInstallation, noBackups)
                     dprint(outputFile)
                 else
                     cprint("Error, at trying to install file: '" .. file .. "'")
-                    return false, descriptions.INSTALLATION_ERROR
+                    return false, descriptions.installationError
                 end
             end
             local installedPackages = environment.packages()
             if (not installedPackages) then
                 installedPackages = {}
             end
-            -- Substract required package properties and install them
-            local packageProperties = mercuryPackage:getProperties()
-            installedPackages[mercuryPackage.label] = packageProperties
-            -- Create a json string from installed packages
+            -- Substract required package properties and store them
+            installedPackages[mercuryPackage.label] = mercuryPackage:getProperties()
+            -- Update current environment packages data with the new one
             environment.packages(installedPackages)
             return true
         end
     end
     dprint("Error, " .. mercFullPath .. " does not exist.")
-    return false, descriptions.MERC_NOT_EXIST
+    return false, descriptions.mercFileDoesNotExist
 end
 
 return insert

@@ -1,7 +1,7 @@
 ------------------------------------------------------------------------------
--- Download: Download any package file
--- Authors: Sledmine
--- Version: 3.0
+-- Download action
+-- Sledmine
+-- Download any package file
 ------------------------------------------------------------------------------
 local json = require "cjson"
 local glue = require "glue"
@@ -12,37 +12,38 @@ local fdownload = require "Mercury.lib.fdownload"
 local PackageMetadata = require "Mercury.entities.packageMetadata"
 
 -- Main repository url
--- These are global variables with default values provide override
+-- These are global variables with default values to provide override
 repositoryHost = repositoryHost or "genesis.vadam.net"
 httpProtocol = httpProtocol or "https://"
 -- Path for master librarian index
-librarianPath = librarianPath or "vulcano?"
+librarianPath = librarianPath or "api/vulcano"
 
-local DESCRIPTION = {
+local description = {
     -- General errors
-    UNKOWN_ERROR = "Unknown error.",
-    NO_REPOSITORY_SERVER = "Repository server can't be reached.",
-    NO_RESPONSE = "No response from the server.",
-    NO_PACKAGE_URL = "No package url found in repository response.",
+    unknown = "Unknown error.",
+    noRepositoryServer = "Repository server can't be reached.",
+    noResponseFromServer = "No response from the server.",
+    noPackageUrl = "No package url found in repository response.",
     -- Package errors
-    PACKAGE_ALREADY_INSTALLED = "Desired package is already installed.",
-    PACKAGE_NOT_FOUND = "Package you are looking for is not in the Mercury repository.",
+    packageAlreadyInstalled = "Desired package is already installed.",
+    packageNotFound = "Package you are looking for is not in the Mercury repository.",
     -- Dependency error
-    DEPENDENCY_ERROR = "There was a problem at downloading one or more dependiences.",
+    dependencyError = "There was a problem at downloading one or more dependencies.",
     -- Merc errors
-    MERC_FILE_NOT_EXIST = "Previously downloaded merc file is not on the expected location.",
-    MERC_DOWNLOAD_ERROR = "An error ocurred at downloading merc file.",
-    -- No error.
-    SUCCESS = "SUCCESS"
+    mercFileNotExist = "Previously downloaded merc file is not on the expected location.",
+    mercDownloadError = "An error occurred at downloading merc file.",
+    -- No error
+    success = "Package downloaded successfully."
 }
 
 --- Download a merc file given package metadata
 ---@param packageMeta packageMetadata
-local function downloadMerc(packageMeta)
+local function downloadFromMetadata(packageMeta)
     cprint("Downloading " .. packageMeta.name .. "...")
     local packageName = packageMeta.name
     local packageVersion = tostring(packageMeta.version)
-    local mercUrl = packageMeta.url
+    -- //TODO Add mirroring selection for this value
+    local mercUrl = packageMeta.mirrors[1]
     local mercOutput = _MERCURY_DOWNLOADS .. "\\" .. packageMeta.label .. ".merc"
     dprint(mercUrl)
     dprint("Mercury url: " .. mercUrl)
@@ -53,10 +54,10 @@ local function downloadMerc(packageMeta)
         if (fileExist(mercOutput)) then
             cprint("Done, " .. packageName .. " - Version " .. packageVersion ..
                        " has been downloaded.")
-            return true, DESCRIPTION.SUCCESS, mercOutput
+            return true, description.success, mercOutput
         else
             dprint("Error, '" .. mercOutput .. "' doesn't exist ...")
-            return false, DESCRIPTION.MERC_FILE_NOT_EXIST
+            return false, description.mercFileNotExist
         end
     else
         -- An error ocurred at downloading merc file
@@ -67,7 +68,7 @@ local function downloadMerc(packageMeta)
         else
             cprint("Error, " .. tostring(errorCode) .. " at downloading '" .. packageMeta.url .. "'")
         end
-        return false, DESCRIPTION.MERC_DOWNLOAD_ERROR
+        return false, description.mercDownloadError
     end
 end
 
@@ -75,22 +76,22 @@ end
 ---@param packageLabel string
 ---@param packageVersion string
 local function download(packageLabel, packageVersion)
-    -- Path and Filename for the JSON file obtained from the server
     cprint("Looking for '" .. packageLabel .. "' in Mercury repository... ", true)
     local repositoryUrl = httpProtocol .. repositoryHost .. "/" .. librarianPath
-    local packageRequestUrl = repositoryUrl .. "package=" .. packageLabel
+    local packageRequestUrl = repositoryUrl .. "/" .. packageLabel
     if (packageVersion) then
-        packageRequestUrl = repositoryUrl .. "package=" .. packageLabel .. "&version=" ..
-                                packageVersion
+        packageRequestUrl = packageRequestUrl .. "/" .. packageVersion
     end
-    dprint("URL: " .. packageRequestUrl)
+    dprint("Package Request URL: " .. packageRequestUrl)
     local result, errorCode, headers, status, responseData = fdownload.get(packageRequestUrl)
     if (errorCode == 404) then
-        return false, DESCRIPTION.NO_REPOSITORY_SERVER
+        return false, description.noRepositoryServer
     elseif (errorCode == 200) then
         if (headers["content-length"] == "0") then
-            return false, DESCRIPTION.PACKAGE_NOT_FOUND
+            -- Server response was empty, package was not found
+            return false, description.packageNotFound
         else
+            -- Server gave us a response with data
             if (responseData) then
                 dprint("Response data:" .. responseData)
                 ---@type packageMetadata
@@ -100,37 +101,20 @@ local function download(packageLabel, packageVersion)
                 end
                 cprint("done.")
                 cprint("Name = " .. packageMeta.name .. ", Version = " .. packageVersion)
-                local downloadedFiles = {}
-                -- There is a merc file download url for this package
-                if (packageMeta.url) then
-                    local downloadResult, errorDescription, mercPath = downloadMerc(packageMeta)
-                    if (downloadResult) then
-                        dprint("Appending " .. mercPath)
-                        glue.append(downloadedFiles, mercPath)
-                        dprint(downloadedFiles)
-                    else
-                        return downloadResult, errorDescription
+                -- //TODO Add conflicting packages handle here
+                -- Get available mirrors from metadata
+                if (packageMeta.mirrors) then
+                    local downloadResult, errorDescription, mercPath =
+                        downloadFromMetadata(packageMeta)
+                    if (not downloadResult) then
+                        return false, errorDescription, mercPath
                     end
-                    -- // TODO This is pending of revision, discuss about when to get dependencies
-                    -- Package has other packages as dependencies
-                    --[[if (packageMeta.dependencies and #packageMeta.dependencies > 0) then
-                        for index, dependencyMetadata in pairs(packageMeta.dependencies) do
-                            local dependencyResult, errorString, dependencyMercs =
-                                download(dependencyMetadata.label, dependencyMetadata.version)
-                            if (dependencyResult) then
-                                dprint(dependencyMercs)
-                                glue.extend(downloadedFiles, dependencyMercs)
-                            else
-                                return false, DESCRIPTION.DEPENDENCY_ERROR
-                            end
-                        end
-                    end]]
-                    return true, DESCRIPTION.SUCCESS, downloadedFiles
+                    return true, description.success, mercPath
                 else
-                    return false, DESCRIPTION.NO_PACKAGE_URL
+                    return false, description.noPackageUrl
                 end
             else
-                return false, DESCRIPTION.NO_RESPONSE
+                return false, description.noResponseFromServer
             end
         end
     else
@@ -139,7 +123,7 @@ local function download(packageLabel, packageVersion)
         else
             cprint(tostring(errorCode))
         end
-        return false, DESCRIPTION.UNKOWN_ERROR
+        return false, description.unknown
     end
 end
 

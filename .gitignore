@@ -41,6 +41,8 @@ luac.out
 
 # VS Code
 .vscode
+# IntelliJ IDEA
+.idea
 
 # Server files
 *.db

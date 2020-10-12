@@ -48,7 +48,7 @@ local function flagsCheck(args)
         -- Override respository connection data
         repositoryHost = "localhost:3000"
         httpProtocol = "http://"
-        librarianPath = "vulcano?"
+        librarianPath = "api/vulcano"
         cprint("Warning, Test mode enabled.")
     end
 end
@@ -69,11 +69,11 @@ end)
 local update = parser:command("update", "Update any installed package in this game instance.")
 update:description("Update any package in your game by binary difference.")
 update:argument("packageLabel", "Label of the package you want to update.")
-update:argument("packageVersion", "Version of the package to update, latest by default."):args("?")
-update:flag("-f --force", "Remove any existing package and force new package installation.")
+--update:argument("packageVersion", "Version of the package to update, latest by default."):args("?")
+--update:flag("-f --force", "Remove any existing package and force new package installation.")
 update:action(function(args, name)
     flagsCheck(args)
-    combiner.install(args.packageLabel, args.packageVersion, args.force, args.nobackups)
+    combiner.update(args.packageLabel)
 end)
 
 -- Bundle command
@@ -99,9 +99,11 @@ end)
 
 -- "List command"
 local list = parser:command("list", "Show already installed packages in this game instance.")
+list:flag("-j --json", "Print the packages list in a json format.")
+list:flag("-t --table", "Print the packages list in a lua table format.")
 list:action(function(args, name)
     flagsCheck(args)
-    combiner.list()
+    combiner.list(args.json, args.table)
 end)
 
 -- "Mitsosis command"
@@ -115,8 +117,8 @@ local version = parser:command("version", "Get Mercury version and usefull info.
 version:action(function(args, name)
     cprint("Mercury - Package Manager, Version " .. _MERCURY_VERSION .. ".")
     cprint("Licensed in GNU General Public License v3.0")
-    cprint("My Games path: '" .. _MYGAMES .. "'")
-    cprint("Current Halo CE path: '" .. _HALOCE .. "'")
+    cprint("My Games path: '" .. MyGamesPath .. "'")
+    cprint("Current Halo CE path: '" .. GamePath .. "'")
 end)
 
 -- Show commands information if no args

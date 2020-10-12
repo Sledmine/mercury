@@ -1,7 +1,0 @@
-{
-    "name": "#{package}",
-    "label": "#{package}",
-    "author": "Sledmine",
-    "version": 1,
-    "url": "http://#{HOST}/#{package}.merc"
-}

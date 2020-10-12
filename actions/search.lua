@@ -1,12 +1,9 @@
 local json = require "cjson"
 
 local function searchPackage(packageLabel)
-    local installedPackages = {}
-    if (fileExist(_HALOCE_INSTALLED_PACKAGES)) then
-        installedPackages = json.decode(fileToString(_HALOCE_INSTALLED_PACKAGES))
-        if (installedPackages[packageLabel]) then
-            return true
-        end
+    local installedPackages = environment.packages()
+    if (installedPackages and installedPackages[packageLabel]) then
+        return installedPackages[packageLabel]
     end
     return false
 end

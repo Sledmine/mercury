@@ -5,6 +5,8 @@
 ------------------------------------------------------------------------------
 local combiner = {}
 
+local errorSummary = require "Mercury.entities.errorSummary"
+
 combiner.search = require "Mercury.actions.search"
 combiner.list = require "Mercury.actions.list"
 combiner.bundle = require "Mercury.actions.bundler"
@@ -15,7 +17,7 @@ combiner.remove = require "Mercury.actions.remove"
 combiner.mitosis = require "Mercury.actions.mitosis"
 combiner.set = require "Mercury.actions.set"
 
-function combiner.install(packageLabel, packageVersion, forceInstallation, noBackups)
+function combiner.install(packageLabel, packageVersion, forceInstallation, noBackups, update)
     if (combiner.search(packageLabel)) then
         if (forceInstallation) then
             remove(packageLabel, true, true)
@@ -23,27 +25,29 @@ function combiner.install(packageLabel, packageVersion, forceInstallation, noBac
             cprint("Warning, package '" .. packageLabel .. "' is already installed.")
             return false
         end
+    end
+    local downloadResult, description, mercPath = combiner.download(packageLabel, packageVersion)
+    if (not downloadResult) then
+        cprint("Error, at trying to install '" .. packageLabel .. "', " .. tostring(description))
+        return false
     else
-        local success, description, downloadedMercs =
-            combiner.download(packageLabel, packageVersion)
-        -- dprint("MERCS: " .. inspect(downloadedMercs))
-        if (not success) then
-            cprint("Error, at trying to install '" .. packageLabel .. "', " .. tostring(description))
-        else
-            -- // FIXME This is using the old dependencies implementation
-            local installationResults = forEach(downloadedMercs, combiner.insert, forceInstallation,
-                                                noBackups)
-            dprint(installationResults)
-            for index, installData in pairs(installationResults) do
-                local result = installData[1]
-                if (not result) then
-                    cprint("Error, at trying to install '" .. packageLabel .. "' package.")
-                    return false
-                end
-            end
-            cprint("Done, package '" .. packageLabel .. "' succesfully installed!")
+        local insertResult, description = combiner.insert(mercPath, forceInstallation, noBackups)
+        if (not insertResult) then
+            cprint("Error, at trying to insert merc '" .. packageLabel .. "'.")
+            return false
         end
-        return success
+    end
+    -- //TODO Finish the implementation of this error object for interface purposes
+    -- local test = errorSummary:new()
+    cprint("Done, package '" .. packageLabel .. "' succesfully installed!")
+    return downloadResult
+
+end
+
+function combiner.update(packageLabel)
+    local installedPackage = combiner.search(packageLabel)
+    if (installedPackage) then
+        combiner.install(packageLabel)
     end
 end
 

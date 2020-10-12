@@ -2,11 +2,11 @@ local function set(instanceName)
     if (instanceName == "default") then
         getGameRegistryPath()
     end
-    local folderName = utilis.arrayPop(utilis.explode("\\", _HALOCE))
+    local folderName = utilis.arrayPop(utilis.explode("\\", GamePath))
     if (instanceName == "default") then
         instanceName = folderName
     end
-    local preGameFolder = utilis.explode(folderName, _HALOCE)[1]
+    local preGameFolder = utilis.explode(folderName, GamePath)[1]
     local mitosisPath = preGameFolder..instanceName
     if (utilis.folderExist(mitosisPath)) then
         print("SUCCESS!!!: Setting current Halo Custom Edition instance to: "..instanceName)

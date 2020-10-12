@@ -42,7 +42,7 @@ end
 local function replaceEnvironmentPaths(files)
     local paths = {}
     for file, path in pairs(files) do
-        local replacedPath = path:gsub("_HALOCE", _HALOCE):gsub("_MYGAMES", _MYGAMES)
+        local replacedPath = path:gsub("_HALOCE", GamePath):gsub("_MYGAMES", MyGamesPath)
         paths[file] = replacedPath
     end
     return paths
@@ -60,7 +60,7 @@ end
 --- Entity constructor
 ---@param jsonString packageMercuryJson
 function packageMercury:initialize(jsonString)
-    local properties = json.decode(jsonString or "{}")
+    local properties = json.decode(jsonString)
     ---@type string
     self.name = properties.name
     ---@type string

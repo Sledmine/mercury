@@ -11,13 +11,19 @@ _MERC_EXTENSION = ".merc"
 -- Global libraries
 argparse = require "argparse"
 inspect = require "inspect"
-utils = require "Mercury.lib.utils"
 
--- Local libraries
-local combiner = require "Mercury.actions.combiner"
+-- Provide path to project modules
+package.path = package.path .. ";.\\Mercury\\?.lua"
+
+utils = require "lib.utils" 
+
+-- Project modules
+local combiner = require "actions.combiner"
+local install = require "actions.install"
+api = require "modules.api"
 
 -- Global data
-environment = require "Mercury.config.environment"
+environment = require "config.environment"
 
 -- Get all environment variables and configurations
 environment.get()
@@ -46,23 +52,23 @@ local function flagsCheck(args)
     if (args.test) then
         _TEST_MODE = true
         -- Override respository connection data
-        repositoryHost = "localhost:3000"
-        httpProtocol = "http://"
-        librarianPath = "api/vulcano"
+        api.repositoryHost = "localhost:3000"
+        api.httpProtocol = "http"
+        api.librarianPath = "api/vulcano"
         cprint("Warning, Test mode enabled.")
     end
 end
 
 -- Install command
-local install = parser:command("install", "Install any package into the game.")
-install:description("Install will download and add any package from Mercury repository.")
-install:argument("packageLabel", "Label of the package you want to download.")
-install:argument("packageVersion", "Version of the package to install."):args("?")
-install:flag("-f --force", "Remove any existing package and force new package installation.")
-install:flag("-n --nobackups", "Avoid backup creation for any conflicting package.")
-install:action(function(args, name)
+local installCmd = parser:command("install", "Install any package into the game.")
+installCmd:description("Install will download and add any package from Mercury repository.")
+installCmd:argument("packageLabel", "Label of the package you want to download.")
+installCmd:argument("packageVersion", "Version of the package to install."):args("?")
+installCmd:flag("-f --force", "Remove any existing package and force new package installation.")
+installCmd:flag("-n --nobackups", "Avoid backup creation for any conflicting package.")
+installCmd:action(function(args, name)
     flagsCheck(args)
-    combiner.install(args.packageLabel, args.packageVersion, args.force, args.nobackups)
+    install.package(args.packageLabel, args.packageVersion, args.force, args.nobackups)
 end)
 
 -- Update command

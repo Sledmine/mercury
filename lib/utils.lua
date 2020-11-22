@@ -15,7 +15,7 @@ function cprint(text, nextLine)
         local colorText = string.gsub(text, "Done", "[92mDone[0m")
         colorText = string.gsub(colorText, "done.", "[92mdone[0m.")
         colorText = string.gsub(colorText, "Downloading", "[94mDownloading[0m")
-        colorText = string.gsub(colorText, "Looking", "[94mLooking[0m")
+        colorText = string.gsub(colorText, "Searching", "[94mSearching[0m")
         colorText = string.gsub(colorText, "Error", "[91mError[0m")
         colorText = string.gsub(colorText, "Warning", "[93mWarning[0m")
         colorText = string.gsub(colorText, "Unpacking", "[93mUnpacking[0m")
@@ -33,12 +33,14 @@ end
 --- Debug print for testing purposes only
 function dprint(value)
     if (_DEBUG_MODE and value) then
-        cprint(value)
-        print("\n")
+        if (type(value) == "table") then
+            print(inspect(value))
+        else
+            cprint(value)
+            print("\n")
+        end
     end
 end
-
--- Experimental language addons
 
 --- Provide simple list/array iterator
 function each(t)
@@ -57,59 +59,37 @@ getmetatable("").__add = function(a, b)
     return a .. b
 end
 
-function splitPath(pathName)
-    local dir
-    local ext
-    local filename
-    local pathDir = path.dir(pathName)
-    if (pathDir) then
-        dir = path.dir(pathName)
+function splitPath(fileOrFolderPath)
+    if (fileOrFolderPath) then
+        local directory = path.dir(fileOrFolderPath)
+        if (directory == ".") then
+            directory = nil
+        end
+        local extension = path.ext(fileOrFolderPath)
+        local fileName = path.file(fileOrFolderPath)
+        if (fileName and fileName ~= "" and extension) then
+            fileName = string.gsub(fileName, "." .. extension, "")
+        else
+            fileName = nil
+        end
+        return directory, fileName, extension
     end
-    local pathExt = path.ext(pathName)
-    if (pathExt) then
-        ext = "." .. path.ext(pathName)
+    error("No given file or folder path to split!")
+end
+
+function createFolder(folderPath)
+    return fs.mkdir(folderPath, true)
+end
+
+function move(sourceFile, destinationFile)
+    return fs.move(sourceFile, destinationFile)
+end
+
+function delete(fileOrFolderPath, recursive)
+    if (recursive) then
+        return fs.remove(fileOrFolderPath, true)
     end
-    local pathFile = path.file(pathName)
-    if (pathFile and ext) then
-        filename = string.gsub(pathFile, "." .. pathExt, "")
-    end
-    return dir, filename, ext
-end
-
-function fileToString(file)
-    local f = assert(io.open(file, "rb"))
-    local content = f:read("*all")
-    f:close()
-    return content
-end
-
-function stringToFile(file, text)
-    local f = assert(io.open(file, "w"))
-    local content = f:write(text)
-    f:close()
-end
-
-function createFolder(folderName)
-    return fs.mkdir(folderName, true)
-end
-
-function move(inputPath, outputPath)
-    return fs.move(inputPath, outputPath)
-end
-
-function deleteFolder(folderName, withFiles)
-    if (withFiles == true) then
-        os.execute("rmdir /S /Q \"" .. folderName .. "\"")
-    else
-        os.execute("rmdir \"" .. folderName .. "\"")
-    end
-end
-
-function deleteFile(filePath, recursive)
-    if (recursive == true) then
-        return fs.remove(filePath, true)
-    end
-    return fs.remove(filePath)
+    return fs.remove(fileOrFolderPath)
 end
 
 function copyFile(sourceFile, destinationFile)
@@ -140,44 +120,10 @@ function copyFile(sourceFile, destinationFile)
     return false
 end
 
-function folderExist(folderPath)
-    return fileExist(folderPath)
+function exist(fileOrFolderPath)
+    return fs.is(fileOrFolderPath)
 end
 
-function fileExist(filePath)
-    return fs.is(filePath)
-end
-
-function isFile(filepath)
-    if (path.ext(filepath) == nil) then
-        return false
-    end
-    return true
-end
-
-function forEach(t, f, ...)
-    tr = {}
-    for k, v in pairs(t) do
-        glue.append(tr, {f(v, ...)})
-    end
-    return tr
-end
-
-function explode(divider, string) -- Created by: http://richard.warburton.it
-    if (divider == nil or divider == "") then
-        return 1
-    end
-    local position, array = 0, {}
-    for st, sp in function()
-        return string.find(string, divider, position, true)
-    end do
-        table.insert(array, string.sub(string, position, st - 1))
-        position = sp + 1
-    end
-    table.insert(array, string.sub(string, position))
-    return array
-end
-
-function arrayPop(array)
-    return array[#array]
+function isFile(filePath)
+    return path.ext(filePath)
 end

@@ -1,6 +1,6 @@
 ------------------------------------------------------------------------------
 -- Merc Package Entity
--- Author: Sledmine
+-- Sledmine
 -- Package entity for merc files
 ------------------------------------------------------------------------------
 local json = require "cjson"
@@ -40,12 +40,14 @@ end
 --- Replace all the environment related paths
 ---@param files table
 local function replaceEnvironmentPaths(files)
-    local paths = {}
-    for file, path in pairs(files) do
-        local replacedPath = path:gsub("_HALOCE", GamePath):gsub("_MYGAMES", MyGamesPath)
-        paths[file] = replacedPath
+    if (files) then
+        local paths = {}
+        for file, path in pairs(files) do
+            local replacedPath = path:gsub("_HALOCE", GamePath):gsub("_MYGAMES", MyGamesPath)
+            paths[file] = replacedPath
+        end
+        return paths
     end
-    return paths
 end
 
 ---@class packageMercuryJson
@@ -74,6 +76,8 @@ function packageMercury:initialize(jsonString)
     ---@type table
     self.files = replaceEnvironmentPaths(properties.files)
     ---@type table
+    self.updates = replaceEnvironmentPaths(properties.updates)
+    ---@type table
     self.dependencies = properties.dependencies
 end
 
@@ -85,6 +89,7 @@ function packageMercury:getProperties()
         label = self.label,
         author = self.author,
         version = self.version,
+        internalVersion = self.internalVersion,
         files = self.files,
         dependencies = self.dependencies
     }

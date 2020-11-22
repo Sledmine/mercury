@@ -1,6 +1,6 @@
 ------------------------------------------------------------------------------
--- Bundle script for Mercury
--- Author: Sledmine
+-- Compile script for Mercury
+-- Sledmine
 -- Script to simplify mercury bundle process
 ------------------------------------------------------------------------------
 local staticLibs = {
@@ -16,7 +16,7 @@ local staticLibs = {
 }
 
 local modules = {
-    -- Luapower libs
+    -- Luapower modules
     "bundle.lua",
     "socket.lua",
     "socket/*.lua",
@@ -43,11 +43,11 @@ local modules = {
     "Mercury/lib/*.lua",
 }
 
-local version = "3.0.0.0"
+local version = "1.0.0.0"
 
 local versionInfo = {
-    "FileVersion=3.0",
-    "ProductVersion=3.0",
+    "FileVersion=1.0",
+    "ProductVersion=1.0",
     "FileDescription=Halo CE Package Manager",
     "ProductName=Mercury",
     "InternalName=Mercury"
@@ -57,11 +57,11 @@ local iconPath = "Mercury/assets/icons/mercury.ico"
 
 local mainLua = "mercury"
 
-local outputPath = "Mercury\\mercury.exe"
+local outputPath = "Mercury\\bin\\mercury.exe"
 
-local bundleLine = "mgit bundle -a '%s' -m '%s' -M '%s' -i '%s' -fv %s -vi '%s' -o '%s'"
+local bundleCmd = "mgit bundle -a '%s' -m '%s' -M '%s' -i '%s' -fv %s -vi '%s' -o '%s'"
 
-local bundleBuild = string.format(bundleLine, table.concat(staticLibs, " "),
+local bundleBuild = string.format(bundleCmd, table.concat(staticLibs, " "),
                                   table.concat(modules, " "), mainLua, iconPath,
                                   version, table.concat(versionInfo, ";"), outputPath)
 print(bundleBuild)

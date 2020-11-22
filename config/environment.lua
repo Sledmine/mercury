@@ -55,15 +55,15 @@ function environment.get()
     MyGamesPath = getMyGamesPath()
     _MERCURY_TEMP = _TEMP .. "\\mercury"
     _MERCURY_PACKAGES = _MERCURY_TEMP .. "\\packages"
-    if (not folderExist(_MERCURY_PACKAGES)) then
+    if (not exist(_MERCURY_PACKAGES)) then
         createFolder(_MERCURY_PACKAGES)
     end
     _MERCURY_DOWNLOADS = _MERCURY_PACKAGES .. "\\downloaded"
-    if (not folderExist(_MERCURY_DOWNLOADS)) then
+    if (not exist(_MERCURY_DOWNLOADS)) then
         createFolder(_MERCURY_DOWNLOADS)
     end
     _MERCURY_DEPACKED = _MERCURY_PACKAGES .. "\\depacked"
-    if (not folderExist(_MERCURY_DEPACKED)) then
+    if (not exist(_MERCURY_DEPACKED)) then
         createFolder(_MERCURY_DEPACKED)
     end
     _MERCURY_INSTALLED = GamePath .. "\\mercury\\installed"
@@ -72,14 +72,14 @@ end
 
 --- Destroy laat environment data, temp folders, trash files...
 function environment.destroy()
-    deleteFile(_MERCURY_TEMP .. "\\mercury\\", true)
+    delete(_MERCURY_TEMP .. "\\mercury\\", true)
 end
 
 --- Get mercury local installed packages
 ---@param newPackages packageMercury[]
 function environment.packages(newPackages)
     if (not newPackages) then
-        if (fileExist(_HALOCE_INSTALLED_PACKAGES)) then
+        if (exist(_HALOCE_INSTALLED_PACKAGES)) then
             local installedPackages = json.decode(glue.readfile(_HALOCE_INSTALLED_PACKAGES, "t"))
             if (installedPackages and #glue.keys(installedPackages) > 0) then
                 return installedPackages

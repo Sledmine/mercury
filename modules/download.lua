@@ -6,17 +6,10 @@
 local json = require "cjson"
 local glue = require "glue"
 
-local fdownload = require "Mercury.lib.fdownload"
+local fdownload = require "lib.fdownload"
 
 -- Entities importation
-local PackageMetadata = require "Mercury.entities.packageMetadata"
-
--- Main repository url
--- These are global variables with default values to provide override
-repositoryHost = repositoryHost or "genesis.vadam.net"
-httpProtocol = httpProtocol or "https://"
--- Path for master librarian index
-librarianPath = librarianPath or "api/vulcano"
+local PackageMetadata = require "entities.packageMetadata"
 
 local description = {
     -- General errors
@@ -26,7 +19,7 @@ local description = {
     noPackageUrl = "No package url found in repository response.",
     -- Package errors
     packageAlreadyInstalled = "Desired package is already installed.",
-    packageNotFound = "Package you are looking for is not in the Mercury repository.",
+    packageNotFound = "Requested package is not in the Mercury repository.",
     -- Dependency error
     dependencyError = "There was a problem at downloading one or more dependencies.",
     -- Merc errors
@@ -39,7 +32,7 @@ local description = {
 --- Download a merc file given package metadata
 ---@param packageMeta packageMetadata
 local function downloadFromMetadata(packageMeta)
-    cprint("Downloading " .. packageMeta.name .. "...")
+    cprint("Downloading " .. packageMeta.name .. " v" .. packageMeta.version "...")
     local packageName = packageMeta.name
     local packageVersion = tostring(packageMeta.version)
     -- //TODO Add mirroring selection for this value
@@ -51,7 +44,7 @@ local function downloadFromMetadata(packageMeta)
     local result, errorCode, headers, status = fdownload.get(mercUrl, mercOutput)
     -- Merc file has been succesfully downloaded
     if (errorCode == 200) then
-        if (fileExist(mercOutput)) then
+        if (exist(mercOutput)) then
             cprint("Done, " .. packageName .. " - Version " .. packageVersion ..
                        " has been downloaded.")
             return true, description.success, mercOutput
@@ -63,8 +56,7 @@ local function downloadFromMetadata(packageMeta)
         -- An error ocurred at downloading merc file
         dprint(headers)
         if (type(errorCode) == "table") then
-            cprint("Error, " .. tostring(errorCode[1]) .. " at downloading '" .. mercUrl ..
-                       "'")
+            cprint("Error, " .. tostring(errorCode[1]) .. " at downloading '" .. mercUrl .. "'")
         else
             cprint("Error, " .. tostring(errorCode) .. " at downloading '" .. mercUrl .. "'")
         end
@@ -73,10 +65,13 @@ local function downloadFromMetadata(packageMeta)
 end
 
 --- Download a package from the repository
----@param packageLabel string
----@param packageVersion string
-local function download(packageLabel, packageVersion)
-    cprint("Looking for '" .. packageLabel .. "' in Mercury repository... ", true)
+---@param packageLabel string Label of the mercury package
+---@param packageVersion string Desired version of the package
+---@param update string Set this download request to update mode
+local function download(packageLabel, packageVersion, update)
+    if (not update) then
+        cprint("Looking for '" .. packageLabel .. "' in Mercury repository... ", true)
+    end
     local repositoryUrl = httpProtocol .. repositoryHost .. "/" .. librarianPath
     local packageRequestUrl = repositoryUrl .. "/" .. packageLabel
     if (packageVersion) then
@@ -96,11 +91,13 @@ local function download(packageLabel, packageVersion)
                 dprint("Response data:" .. responseData)
                 ---@type packageMetadata
                 local packageMeta = PackageMetadata:new(responseData)
+                if (update and packageMeta.nextVersion) then
+                    return download(packageLabel, packageMeta.nextVersion)
+                end
                 if (not packageVersion) then
                     packageVersion = packageMeta.version
                 end
                 cprint("done.")
-                cprint("Name = " .. packageMeta.name .. ", Version = " .. packageVersion)
                 -- //TODO Add conflicting packages handle here
                 -- Get available mirrors from metadata
                 if (packageMeta.mirrors) then

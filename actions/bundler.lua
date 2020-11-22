@@ -7,7 +7,7 @@ local glue = require "glue"
 local json = require "cjson"
 local bundle = require "bundle"
 
-local codeBundler = require "Mercury.lib.codeBundler"
+local codeBundler = require "lib.codeBundler"
 
 ---@class bundle
 ---@field name string
@@ -19,7 +19,7 @@ local codeBundler = require "Mercury.lib.codeBundler"
 local function bundler(bundleName, compile)
     -- // TODO Add compilation feature based on the lua target
     local bundleFileName = bundleName or "bundle.json"
-    if (fileExist(bundleFileName)) then
+    if (exist(bundleFileName)) then
         ---@type bundle
         local project = json.decode(glue.readfile(bundleFileName, "t"))
         if (project) then

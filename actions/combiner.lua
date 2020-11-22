@@ -5,18 +5,16 @@
 ------------------------------------------------------------------------------
 local combiner = {}
 
-local errorSummary = require "Mercury.entities.errorSummary"
+local errorSummary = require "entities.errorSummary"
 
-combiner.search = require "Mercury.actions.search"
-combiner.list = require "Mercury.actions.list"
-combiner.bundle = require "Mercury.actions.bundler"
-combiner.download = require "Mercury.actions.download"
-combiner.insert = require "Mercury.actions.insert"
-combiner.unpack = require "Mercury.actions.unpack"
-combiner.remove = require "Mercury.actions.remove"
-combiner.mitosis = require "Mercury.actions.mitosis"
-combiner.set = require "Mercury.actions.set"
-
+--[[
+combiner.search = require "actions.search"
+combiner.list = require "actions.list"
+combiner.bundle = require "actions.bundler"
+combiner.insert = require "actions.insert"
+combiner.remove = require "actions.remove"
+combiner.mitosis = require "actions.mitosis"
+combiner.set = require "actions.set"
 function combiner.install(packageLabel, packageVersion, forceInstallation, noBackups, update)
     if (combiner.search(packageLabel)) then
         if (forceInstallation) then
@@ -40,15 +38,24 @@ function combiner.install(packageLabel, packageVersion, forceInstallation, noBac
     -- //TODO Finish the implementation of this error object for interface purposes
     -- local test = errorSummary:new()
     cprint("Done, package '" .. packageLabel .. "' succesfully installed!")
-    return downloadResult
-
+    return true
 end
 
 function combiner.update(packageLabel)
+    ---@type packageMercury
     local installedPackage = combiner.search(packageLabel)
     if (installedPackage) then
-        combiner.install(packageLabel)
+        local downloadResult, description, mercPath =
+            combiner.download(installedPackage.label, installedPackage.version, true)
+        if (downloadResult) then
+            local insertResult, description = combiner.insert(mercPath, true)
+            return insertResult
+        else
+            cprint("Error, at trying to update '" .. packageLabel .. "', " .. tostring(description))
+            return false
+        end
     end
-end
+    return false
+end]]
 
 return combiner

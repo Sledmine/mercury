@@ -1,4 +1,4 @@
-local search = require "Mercury.actions.search"
+local search = require "actions.search"
 local json = require "cjson"
 
 local function listPackages(jsonPrint, tablePrint)
@@ -12,12 +12,12 @@ local function listPackages(jsonPrint, tablePrint)
         else
             print("Installed Packages:")
             for packageIndex, package in pairs(installedPackages) do
-                print("- " .. package.label)
+                print("- " .. package.label .. " v" .. package.version)
             end
         end
         return true
     end
-    cprint("Warning, There are not any installed packages using Mercury...yet.")
+    cprint("Warning, There are not any installed packages using Mercury... yet.")
     return false
 end
 

@@ -1,9 +1,9 @@
 local json = require "cjson"
 
 local function mitosis(instanceName)
-    if (fileExist(".\\data\\mitosis.json") == true) then
+    if (exist(".\\data\\mitosis.json") == true) then
         local fileList
-        local folderName = arrayPop(explode("\\", GamePath))
+        local folderName = pop(explode("\\", GamePath))
         local mitosisPath = explode(folderName, GamePath)[1]..instanceName.."\\"
         createFolder(mitosisPath)
         print(mitosisPath)

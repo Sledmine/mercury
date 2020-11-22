@@ -8,10 +8,10 @@ local glue = require "glue"
 inspect = require "inspect"
 
 -- Global libraries
-require "Mercury.lib.utils"
+require "lib.utils"
 
 -- Local function imports
-local environment = require "Mercury.config.environment"
+local environment = require "config.environment"
 
 -- Get all environment variables and configurations
 environment.get()
@@ -19,9 +19,9 @@ environment.get()
 -- Entities
 local PackageMercury = require("Mercury.entities.packageMercury")
 
-testPackageMercury = {}
+testUtils = {}
 
-function testPackageMercury:setUp()
+function testUtils:setUp()
     ---@language JSON
     self.testPackage1 = [[{
         "label": "test",
@@ -81,7 +81,7 @@ function testPackageMercury:setUp()
 end
 
 -- Test correct entity constructor
-function testPackageMercury:testEntityConstructor()
+function testUtils:testEntityConstructor()
     ---@type packageMercury
     local packageInstance = PackageMercury:new(self.testPackage1)
     local packageProperties = packageInstance:getProperties()
@@ -93,7 +93,7 @@ function testPackageMercury:testEntityConstructor()
     lu.assertEquals(packageProperties.dependencies, self.expectedPackage1.dependencies)
 end
 
-function testPackageMercury:testEntityInternalVersion()
+function testUtils:testEntityInternalVersion()
     ---@type packageMercury
     local packageInstance = PackageMercury:new(self.testPackage1)
     lu.assertEquals(packageInstance.internalVersion, self.expectedPackage1.internalVersion)

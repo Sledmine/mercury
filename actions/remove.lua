@@ -34,14 +34,14 @@ local function remove(packageLabel, noRestore, eraseBackups, recursive)
             local filePath = path .. fileName
             -- Start erasing proccess
             dprint("Erasing '" .. fileName .. "'... ", true)
-            local result, description, errorCode = deleteFile(filePath)
+            local result, description, errorCode = delete(filePath)
             if (result) then
                 dprint("Done, file erased.")
-                if (fileExist(filePath .. ".bak") and not noRestore) then
+                if (exist(filePath .. ".bak") and not noRestore) then
                     if (not noRestore) then
                         cprint("Warning, restoring '" .. fileName .. "' backup file... ", true)
                         move(filePath .. ".bak", filePath)
-                        if (fileExist(filePath)) then
+                        if (exist(filePath)) then
                             cprint("done.")
                         else
                             cprint("Error, at trying to restore backup file.")
@@ -49,8 +49,8 @@ local function remove(packageLabel, noRestore, eraseBackups, recursive)
                     end
                     if (eraseBackups) then
                         cprint("Warning, Backups erase enabled deleting file now... ", true)
-                        deleteFile(filePath .. ".bak")
-                        if (fileExist(filePath)) then
+                        delete(filePath .. ".bak")
+                        if (exist(filePath)) then
                             cprint("Error, at trying to delete backup file.")
                         else
                             cprint("done.")
@@ -67,8 +67,11 @@ local function remove(packageLabel, noRestore, eraseBackups, recursive)
                 end
             end
         end
-        local installedPackages = environment.packages()
+        -- Get current instance packages
+        local installedPackages = environment.packages() or {}
+        -- Erase data for this package
         installedPackages[packageLabel] = nil
+        -- Update current environment packages data with the new one
         environment.packages(installedPackages)
         cprint("Done, package '" .. packageLabel .. "' has been removed.")
         return true

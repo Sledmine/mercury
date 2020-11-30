@@ -1,0 +1,10 @@
+{
+    "name": "Chimera",
+    "label": "chimera",
+    "author": "Kavawuvi",
+    "version": "1.0.0-r757",
+    "fullVersion": "1.0.0.r757.23e426f",
+    "mirrors": [
+        "http://#{HOST}/repository/chimera/1.0.0-r757/chimera-1.0.0-r757.merc"
+    ]
+}

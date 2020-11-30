@@ -15,7 +15,8 @@ local errorTable = {
     ["404"] = "package not found",
     ["connection refused"] = "no connection to repository",
     ["download error"] = "an error occurred while downloading",
-    ["invalid host"] = "package host is invalid"
+    ["invalid host"] = "package host is invalid",
+    ["no update"] = "there is no update available for this package",
 }
 
 local function getError(error)
@@ -93,6 +94,7 @@ function install.update(packageLabel)
                 return getError(error)
             end
         else
+            error = "no update"
             return getError(error)
         end
     else

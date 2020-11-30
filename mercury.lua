@@ -2,7 +2,6 @@
 -- Mercury
 -- JerryBrick, Sledmine
 -- Package Manager for Halo Custom Edition
--- Version 3.0
 ------------------------------------------------------------------------------
 -- Constant definition.
 _MERCURY_VERSION = 3.0
@@ -12,15 +11,36 @@ _MERC_EXTENSION = ".merc"
 argparse = require "argparse"
 inspect = require "inspect"
 
--- Provide path to project modules
-package.path = package.path .. ";.\\Mercury\\?.lua"
+-- Create custom require due to app bundle messing with the modules import
+local appBundle = require "bundle"
+local orequire = require
+if (appBundle.appversion) then
+    local function crequire(import)
+        local result, error = pcall(function()
+            orequire(import)
+        end)
+        if (result == false) then
+            return orequire("Mercury." .. import)
+        end
+        return orequire(import)
+    end
+    require = crequire
+else
+    -- Provide path to project modules
+    package.path = package.path .. ";.\\Mercury\\?.lua"
+end
 
-utils = require "lib.utils" 
+utils = require "lib.utils"
 
 -- Project modules
-local combiner = require "actions.combiner"
-local install = require "actions.install"
+-- // FIXME Install is a global module and it should not be used this way, probably...
+install = require "modules.install"
 api = require "modules.api"
+
+local combiner = require "actions.combiner"
+local remove = require "actions.remove"
+local list = require "actions.list"
+local luabundle = require "actions.bundle"
 
 -- Global data
 environment = require "config.environment"
@@ -72,44 +92,45 @@ installCmd:action(function(args, name)
 end)
 
 -- Update command
-local update = parser:command("update", "Update any installed package in this game instance.")
-update:description("Update any package in your game by binary difference.")
-update:argument("packageLabel", "Label of the package you want to update.")
---update:argument("packageVersion", "Version of the package to update, latest by default."):args("?")
---update:flag("-f --force", "Remove any existing package and force new package installation.")
-update:action(function(args, name)
+local updateCmd = parser:command("update", "Update any installed package in this game instance.")
+updateCmd:description("Update any package in your game by binary difference.")
+updateCmd:argument("packageLabel", "Label of the package you want to update.")
+-- update:argument("packageVersion", "Version of the package to update, latest by default."):args("?")
+-- update:flag("-f --force", "Remove any existing package and force new package installation.")
+updateCmd:action(function(args, name)
     flagsCheck(args)
-    combiner.update(args.packageLabel)
+    install.update(args.packageLabel)
 end)
 
 -- Bundle command
-local bundle = parser:command("bundle", "Bundle any lua mod into a single deployable script.")
-bundle:description("Merge any modular lua project into a single script with dependencies.")
-bundle:flag("-c --compile", "Compile this project using the lua target compiler in the bundle file.")
-bundle:action(function(args, name)
+local bundleCmd = parser:command("bundle", "Bundle any lua mod into a single deployable script.")
+bundleCmd:description("Merge any modular lua project into a single script with dependencies.")
+bundleCmd:flag("-c --compile",
+               "Compile this project using the lua target compiler in the bundle file.")
+bundleCmd:action(function(args, name)
     flagsCheck(args)
-    combiner.bundle(nil, args.compile)
+    luabundle(nil, args.compile)
 end)
 
 -- "Remove command"
-local remove = parser:command("remove", "Delete any currently installed package.")
-remove:description("Remove will delete any package that is already installed.")
-remove:argument("packageLabel", "Label of the package you want to remove.")
-remove:flag("-n --norestore", "Prevent previous backups from being restored.")
-remove:flag("-e --erasebackups", "Erase previously created backups.")
-remove:flag("-r --recursive", "Remove all the dependencies of this package.")
-remove:action(function(args, name)
+local removeCmd = parser:command("remove", "Delete any currently installed package.")
+removeCmd:description("Remove will delete any package that is already installed.")
+removeCmd:argument("packageLabel", "Label of the package you want to remove.")
+removeCmd:flag("-n --norestore", "Prevent previous backups from being restored.")
+removeCmd:flag("-e --erasebackups", "Erase previously created backups.")
+removeCmd:flag("-r --recursive", "Remove all the dependencies of this package.")
+removeCmd:action(function(args, name)
     flagsCheck(args)
-    combiner.remove(args.packageLabel, args.norestore, args.erasebackups, args.recursive)
+    remove(args.packageLabel, args.norestore, args.erasebackups, args.recursive)
 end)
 
 -- "List command"
-local list = parser:command("list", "Show already installed packages in this game instance.")
-list:flag("-j --json", "Print the packages list in a json format.")
-list:flag("-t --table", "Print the packages list in a lua table format.")
-list:action(function(args, name)
+local listCmd = parser:command("list", "Show already installed packages in this game instance.")
+listCmd:flag("-j --json", "Print the packages list in a json format.")
+listCmd:flag("-t --table", "Print the packages list in a lua table format.")
+listCmd:action(function(args, name)
     flagsCheck(args)
-    combiner.list(args.json, args.table)
+    list(args.json, args.table)
 end)
 
 -- "Mitsosis command"

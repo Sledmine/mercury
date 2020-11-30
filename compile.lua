@@ -3,6 +3,8 @@
 -- Sledmine
 -- Script to simplify mercury bundle process
 ------------------------------------------------------------------------------
+local version = "1.0.0.0"
+
 local staticLibs = {
     "socket_core",
     "mime_core",
@@ -12,7 +14,7 @@ local staticLibs = {
     "lfs",
     "cjson",
     "z",
-    "minizip",
+    "minizip"
 }
 
 local modules = {
@@ -37,17 +39,16 @@ local modules = {
     -- Anyway, keep it here for tracking...
     -- "luaunit.lua",
     "Mercury/actions/*.lua",
+    "Mercury/modules/*.lua",
     "Mercury/config/*.lua",
     "Mercury/entities/*.lua",
     "Mercury/internal/*.lua",
-    "Mercury/lib/*.lua",
+    "Mercury/lib/*.lua"
 }
 
-local version = "1.0.0.0"
-
 local versionInfo = {
-    "FileVersion=1.0",
-    "ProductVersion=1.0",
+    "FileVersion=" .. version,
+    "ProductVersion=" .. version,
     "FileDescription=Halo CE Package Manager",
     "ProductName=Mercury",
     "InternalName=Mercury"
@@ -59,10 +60,10 @@ local mainLua = "mercury"
 
 local outputPath = "Mercury\\bin\\mercury.exe"
 
-local bundleCmd = "mgit bundle -a '%s' -m '%s' -M '%s' -i '%s' -fv %s -vi '%s' -o '%s'"
+local bundleCmd = "mgit bundle -a '%s' -m '%s' -M '%s' -i '%s' -fv %s -vi '%s' -o '%s' -av " .. version
 
 local bundleBuild = string.format(bundleCmd, table.concat(staticLibs, " "),
-                                  table.concat(modules, " "), mainLua, iconPath,
-                                  version, table.concat(versionInfo, ";"), outputPath)
+                                  table.concat(modules, " "), mainLua, iconPath, version,
+                                  table.concat(versionInfo, ";"), outputPath)
 print(bundleBuild)
 os.execute(bundleBuild)

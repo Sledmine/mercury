@@ -8,21 +8,20 @@ local glue = require "glue"
 local path = require "path"
 
 local unpack = require "actions.unpack"
-local download = require "actions.download"
 
 local PackageMercury = require "entities.packageMercury"
 
-local descriptions = {
-    eraseFileError = "Error, at trying to erase some files.",
-    backupCreationError = "Error, at trying to create some backup files.",
-    installationError = "Error, at trying to install a package.",
-    updateError = "Error, at trying to update a file.",
-    depedencyError = "Error, at trying to install a package dependency.",
-    mercFileDoesNotExist = "Error, mercury local package does not exist."
+local errorTable = {
+    eraseFileError = "an error ocurred at erasing some files",
+    backupCreationError = "an error ocurred at creating a backup file",
+    installationError = "at trying to install a package",
+    updateError = "at trying to update a file",
+    depedencyError = "at trying to install a package dependency",
+    mercFileDoesNotExist = "mercury local package does not exist"
 }
 
 -- Install any mercury package
-local function insert(mercPath, forceInstallation, noBackups)
+local function insert(mercPath, forced, noBackups)
     local mercPath, mercName = splitPath(mercPath)
     local mercFullPath = mercPath .. "\\" .. mercName .. _MERC_EXTENSION
     if (exist(mercFullPath)) then
@@ -43,21 +42,19 @@ local function insert(mercPath, forceInstallation, noBackups)
             -- Get other package dependencies
             if (mercuryPackage.dependencies) then
                 cprint("Getting package dependencies...")
+                -- // TODO Some version lookup should be done here for dependencies, not being forced
                 for dependencyIndex, dependency in pairs(mercuryPackage.dependencies) do
-                    local downloadResult, description, mercPath =
-                        download(dependency.label, dependency.version)
-                    if (downloadResult) then
-                        -- Recursive dependency installation
-                        insert(mercPath, forceInstallation, noBackups)
-                    else
-                        return false, descriptions.depedencyError
+                    local result, error = install.package(dependency.label, dependency.version,
+                                                          true, true)
+                    if (not result) then
+                        return false, errorTable.depedencyError
                     end
                 end
             end
 
             -- Insert new files into the game
             if (mercuryPackage.files) then
-                cprint("Installing " .. mercName .. " files...")
+                cprint("Installing " .. mercName .. " files... ", true)
                 for file, filePath in pairs(mercuryPackage.files) do
                     -- File path from mercury unpack path
                     local inputFile = unpackPath .. "\\" .. file
@@ -74,7 +71,7 @@ local function insert(mercPath, forceInstallation, noBackups)
                     end
 
                     if (exist(outputFile)) then
-                        if (forceInstallation) then
+                        if (forced) then
                             cprint("Warning, Forced mode enabled, erasing conflicting files...",
                                    true)
                             local result, desc, error = delete(outputFile)
@@ -83,7 +80,7 @@ local function insert(mercPath, forceInstallation, noBackups)
                                 cprint("done.")
                             else
                                 cprint("Error, at trying to erase file: '" .. file .. "'")
-                                return false, descriptions.eraseFileError
+                                return false, errorTable.eraseFileError
                             end
                         elseif (not noBackus) then
                             cprint("Warning, conflicting file found, creating backup...", true)
@@ -93,7 +90,7 @@ local function insert(mercPath, forceInstallation, noBackups)
                                 cprint("Backup created for '" .. file .. "'")
                             else
                                 cprint("Error, at trying to create a backup for: '" .. file .. "")
-                                return false, descriptions.backupCreationError
+                                return false, errorTable.backupCreationError
                             end
                         end
                     end
@@ -104,9 +101,10 @@ local function insert(mercPath, forceInstallation, noBackups)
                         dprint(outputFile)
                     else
                         cprint("Error, at trying to install file: '" .. file .. "'")
-                        return false, descriptions.installationError
+                        return false, errorTable.installationError
                     end
                 end
+                cprint("done.")
             end
 
             -- Apply updates to files if available
@@ -137,7 +135,7 @@ local function insert(mercPath, forceInstallation, noBackups)
                         cprint("done.")
                     else
                         cprint("Error, at updating '" .. file .. "'")
-                        return false, descriptions.updateError
+                        return false, errorTable.updateError
                     end
                 end
             end
@@ -153,7 +151,8 @@ local function insert(mercPath, forceInstallation, noBackups)
                 local oldProperties = installedPackages[mercuryPackage.label]
                 glue.merge(oldProperties.files, updateProperties.updates)
                 updateProperties.updates = nil
-                installedPackages[mercuryPackage.label] = glue.update(oldProperties, updateProperties)
+                installedPackages[mercuryPackage.label] =
+                    glue.update(oldProperties, updateProperties)
             else
                 installedPackages[mercuryPackage.label] = mercuryPackage:getProperties()
             end
@@ -163,7 +162,7 @@ local function insert(mercPath, forceInstallation, noBackups)
         end
     end
     dprint("Error, " .. mercFullPath .. " does not exist.")
-    return false, descriptions.mercFileDoesNotExist
+    return false, errorTable.mercFileDoesNotExist
 end
 
 return insert

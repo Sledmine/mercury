@@ -1,1 +1,0 @@
-luajit ..\luapower-all-master\Mercury\tests\entities\packageMercury.lua

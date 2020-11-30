@@ -30,7 +30,8 @@ Name: "english"; MessagesFile: "compiler:Default.isl"
 Name: "spanish"; MessagesFile: "compiler:Languages\Spanish.isl"
 
 [Files]
-Source: "mercury.exe"; DestDir: "{app}"; Flags: ignoreversion
+Source: "bin\mercury.exe"; DestDir: "{app}"; Flags: ignoreversion
+Source: "bin\xdelta3.exe"; DestDir: "{app}"; Flags: ignoreversion
 Source: "mercury_uac.cmd"; DestDir: "{app}"; Flags: ignoreversion
 
 [Icons]

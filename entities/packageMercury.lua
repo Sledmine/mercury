@@ -6,10 +6,10 @@
 local json = require "cjson"
 local glue = require "glue"
 
-local class = require("middleclass")
+local class = require "middleclass"
 
 ---@class packageMercury
-local packageMercury = class("packageMercury")
+local packageMercury = class "packageMercury"
 
 --- Parse and format version number strings
 ---@param version string

@@ -46,3 +46,6 @@ luac.out
 
 # Server files
 *.db
+
+# Mercury packages
+packages\

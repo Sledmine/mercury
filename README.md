@@ -28,7 +28,6 @@ Mercury uses [luapower](https://luapower.com) as the base of the project, this i
 
 Some libraries and tools are needed too:
 
-- [MSYS](http://www.mingw.org/wiki/MSYS)
 - [MinGW](http://mingw-w64.org/doku.php)
 
 These libraries are already included in the repository but you can check their own repository if needed:
@@ -37,6 +36,9 @@ These libraries are already included in the repository but you can check their o
 - [registry](https://github.com/Tieske/registry)
 - [middleclass](https://github.com/kikito/middleclass)
 - [luaunit](https://github.com/bluebird75/luaunit)
+
+However using luapower was a bad decision due to the lack of documentation and support of it, so we are working to migrate this
+to use luarocks instead to use the vast support of modules and project management used there.
 
 # Development Environment
 
@@ -60,6 +62,9 @@ easymock
 ```
 
 # FAQ
+
 - **Luapower is a cross platform framework, why is this only working for Windows?**
 
-Halo Custom Edition only works in a Windows environment by native running or via emulation using Wine for example, so creating a package manager for Linux would be a little bit weird if the game itself only runs on Windows.
+Halo Custom Edition only works in a Windows environment by native running or via emulation using
+Wine for example, so creating a package manager for Linux would be a little bit weird if the game
+itself only runs on Windows but after some work migration a Linux build would be possible.

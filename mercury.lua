@@ -38,7 +38,6 @@ utils = require "lib.utils"
 install = require "modules.install"
 api = require "modules.api"
 
-local combiner = require "actions.combiner"
 local remove = require "actions.remove"
 local list = require "actions.list"
 local luabundle = require "actions.luabundle"
@@ -85,11 +84,11 @@ local installCmd = parser:command("install", "Install any package into the game.
 installCmd:description("Install will download and add any package from Mercury repository.")
 installCmd:argument("packageLabel", "Label of the package you want to download.")
 installCmd:argument("packageVersion", "Version of the package to install."):args("?")
-installCmd:flag("-f --force", "Remove any existing package and force new package installation.")
-installCmd:flag("-n --nobackups", "Avoid backup creation for any conflicting package.")
+installCmd:flag("-f --force",
+                "Force installation by removing packages and deleting conflicting files also avoid backup creation.")
 installCmd:action(function(args, name)
     flagsCheck(args)
-    install.package(args.packageLabel, args.packageVersion, args.force, args.nobackups)
+    install.package(args.packageLabel, args.packageVersion, args.force)
 end)
 
 -- Update command
@@ -142,12 +141,18 @@ mitosis:action(function(args, name)
 end)]]
 
 -- "Version command"
-local versionCmd = parser:command("version", "Get Mercury version and usefull info.")
+local aboutCmd = parser:command("about", "Get Mercury information.")
+aboutCmd:action(function(args, name)
+    cprint("Package manager for for Halo Custom Edition.")
+    cprint("Licensed in GNU General Public License v3.0\n")
+    cprint("My Games path: \"" .. MyGamesPath .. "\"")
+    cprint("Current Halo CE path: \"" .. GamePath .. "\"")
+end)
+
+-- "Version command"
+local versionCmd = parser:command("version", "Get Mercury version.")
 versionCmd:action(function(args, name)
-    cprint("Mercury - Package Manager, Version " .. MERCURY_VERSION .. ".")
-    cprint("Licensed in GNU General Public License v3.0")
-    cprint("My Games path: '" .. MyGamesPath .. "'")
-    cprint("Current Halo CE path: '" .. GamePath .. "'")
+    cprint("mercury version " .. MERCURY_VERSION)
 end)
 
 -- Show commands information if no args

@@ -30,7 +30,7 @@ local function getError(error)
     return false, errorDescription
 end
 
-function install.package(packageLabel, packageVersion, forced, noBackups)
+function install.package(packageLabel, packageVersion, forced)
     if (search(packageLabel)) then
         if (forced) then
             remove(packageLabel, true, true)
@@ -47,7 +47,7 @@ function install.package(packageLabel, packageVersion, forced, noBackups)
         if (packageMeta and packageMeta.mirrors) then
             local result, packagePath = download.package(packageMeta)
             if (result) then
-                local result, error = insert(packagePath, forced, noBackups)
+                local result, error = insert(packagePath, forced)
                 if (result) then
                     cprint("Success, package \"" .. packageLabel .. "\" has been installed.")
                     return true

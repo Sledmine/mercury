@@ -53,43 +53,43 @@ function environment.get()
     local _APPDATA = os.getenv("APPDATA")
     GamePath = getGamePath()
     MyGamesPath = getMyGamesPath()
-    _MERCURY_TEMP = _TEMP .. "\\mercury"
-    _MERCURY_PACKAGES = _MERCURY_TEMP .. "\\packages"
-    if (not exist(_MERCURY_PACKAGES)) then
-        createFolder(_MERCURY_PACKAGES)
+    MERCURY_TEMP = _TEMP .. "\\mercury"
+    MERCURY_PACKAGES = MERCURY_TEMP .. "\\packages"
+    if (not exist(MERCURY_PACKAGES)) then
+        createFolder(MERCURY_PACKAGES)
     end
-    _MERCURY_DOWNLOADS = _MERCURY_PACKAGES .. "\\downloaded"
+    _MERCURY_DOWNLOADS = MERCURY_PACKAGES .. "\\downloaded"
     if (not exist(_MERCURY_DOWNLOADS)) then
         createFolder(_MERCURY_DOWNLOADS)
     end
-    _MERCURY_DEPACKED = _MERCURY_PACKAGES .. "\\depacked"
-    if (not exist(_MERCURY_DEPACKED)) then
-        createFolder(_MERCURY_DEPACKED)
+    MERCURY_DEPACKED = MERCURY_PACKAGES .. "\\depacked"
+    if (not exist(MERCURY_DEPACKED)) then
+        createFolder(MERCURY_DEPACKED)
     end
-    _MERCURY_INSTALLED = GamePath .. "\\mercury\\installed"
-    _HALOCE_INSTALLED_PACKAGES = GamePath .. "\\mercury\\installed\\packages.json"
+    MERCURY_INSTALLED = GamePath .. "\\mercury\\installed"
+    HALOCE_INSTALLED_PACKAGES = GamePath .. "\\mercury\\installed\\packages.json"
 end
 
 --- Destroy laat environment data, temp folders, trash files...
 function environment.destroy()
-    delete(_MERCURY_TEMP .. "\\mercury\\", true)
+    delete(MERCURY_TEMP .. "\\mercury\\", true)
 end
 
 --- Get mercury local installed packages
 ---@param newPackages packageMercury[]
 function environment.packages(newPackages)
     if (not newPackages) then
-        if (exist(_HALOCE_INSTALLED_PACKAGES)) then
-            local installedPackages = json.decode(glue.readfile(_HALOCE_INSTALLED_PACKAGES, "t"))
+        if (exist(HALOCE_INSTALLED_PACKAGES)) then
+            local installedPackages = json.decode(glue.readfile(HALOCE_INSTALLED_PACKAGES, "t"))
             if (installedPackages and #glue.keys(installedPackages) > 0) then
                 return installedPackages
             end
         else
-            createFolder(_MERCURY_INSTALLED)
+            createFolder(MERCURY_INSTALLED)
         end
     else
         local installedPackagesJson = json.encode(newPackages)
-        glue.writefile(_HALOCE_INSTALLED_PACKAGES, installedPackagesJson, "t")
+        glue.writefile(HALOCE_INSTALLED_PACKAGES, installedPackagesJson, "t")
     end
     return nil
 end

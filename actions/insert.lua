@@ -21,18 +21,18 @@ local errorTable = {
 }
 
 -- Install any mercury package
-local function insert(mercPath, forced, noBackups)
+local function insert(mercPath, forced)
     local mercPath, mercName = splitPath(mercPath)
-    local mercFullPath = mercPath .. "\\" .. mercName .. MERC_EXTENSION
-    if (exist(mercFullPath)) then
+    local mercAbsolutePath = mercPath .. "\\" .. mercName .. MERC_EXTENSION
+    if (exist(mercAbsolutePath)) then
         -- Unpack merc file
         dprint("Trying to unpack '" .. mercName .. ".merc' ...")
-        local unpackPath = _MERCURY_DEPACKED .. "\\" .. mercName
+        local unpackPath = MERCURY_DEPACKED .. "\\" .. mercName
         if (not exist(unpackPath)) then
             dprint("Creating folder: " .. unpackPath)
             createFolder(unpackPath)
         end
-        local depackageResult = unpack(mercFullPath, unpackPath)
+        local depackageResult = unpack(mercAbsolutePath, unpackPath)
         if (depackageResult) then
             -- Load package manifest data
             local manifestJson = glue.readfile(unpackPath .. "\\manifest.json")
@@ -54,7 +54,7 @@ local function insert(mercPath, forced, noBackups)
 
             -- Insert new files into the game
             if (mercuryPackage.files) then
-                cprint("Installing " .. mercName .. " files... ", true)
+                cprint("Installing " .. mercName .. " files... ")
                 for file, filePath in pairs(mercuryPackage.files) do
                     -- File path from mercury unpack path
                     local inputFile = unpackPath .. "\\" .. file
@@ -82,7 +82,7 @@ local function insert(mercPath, forced, noBackups)
                                 cprint("Error, at trying to erase file: '" .. file .. "'")
                                 return false, errorTable.eraseFileError
                             end
-                        elseif (not noBackus) then
+                        else
                             cprint("Warning, conflicting file found, creating backup...", true)
                             local result, desc, error = move(outputFile, outputFile .. ".bak")
                             if (result) then
@@ -104,7 +104,6 @@ local function insert(mercPath, forced, noBackups)
                         return false, errorTable.installationError
                     end
                 end
-                cprint("done.")
             end
 
             -- Apply updates to files if available
@@ -161,7 +160,7 @@ local function insert(mercPath, forced, noBackups)
             return true
         end
     end
-    dprint("Error, " .. mercFullPath .. " does not exist.")
+    dprint("Error, " .. mercAbsolutePath .. " does not exist.")
     return false, errorTable.mercFileDoesNotExist
 end
 

@@ -4,7 +4,7 @@
 -- Package Manager for Halo Custom Edition
 ------------------------------------------------------------------------------
 -- Constant definition.
-_MERCURY_VERSION = 3.0
+MERCURY_VERSION = "1.0.0.0"
 _MERC_EXTENSION = ".merc"
 
 -- Global libraries
@@ -14,6 +14,7 @@ inspect = require "inspect"
 -- Create custom require due to app bundle messing with the modules import
 local appBundle = require "bundle"
 local orequire = require
+-- Running in compiled mode
 if (appBundle.appversion) then
     local function crequire(import)
         local result, error = pcall(function()
@@ -33,14 +34,14 @@ end
 utils = require "lib.utils"
 
 -- Project modules
--- // FIXME Install is a global module and it should not be used this way, probably...
+-- // FIXME Install is a global module due to recursive calls, a better solution should be provided
 install = require "modules.install"
 api = require "modules.api"
 
 local combiner = require "actions.combiner"
 local remove = require "actions.remove"
 local list = require "actions.list"
-local luabundle = require "actions.bundle"
+local luabundle = require "actions.luabundle"
 
 -- Global data
 environment = require "config.environment"
@@ -66,11 +67,11 @@ parser:flag("-t --test", "Test mode will be enabled, some testing behaviour will
 
 local function flagsCheck(args)
     if (args.debug) then
-        _DEBUG_MODE = true
+        IsDebugModeEnabled = true
         cprint("Warning, Debug mode enabled.")
     end
     if (args.test) then
-        _TEST_MODE = true
+        IsTestModeEnabled = true
         -- Override respository connection data
         api.repositoryHost = "localhost:3000"
         api.httpProtocol = "http"
@@ -103,11 +104,12 @@ updateCmd:action(function(args, name)
 end)
 
 -- Bundle command
-local bundleCmd = parser:command("bundle", "Bundle any lua mod into a single deployable script.")
-bundleCmd:description("Merge any modular lua project into a single script with dependencies.")
-bundleCmd:flag("-c --compile",
-               "Compile this project using the lua target compiler in the bundle file.")
-bundleCmd:action(function(args, name)
+local luabundleCmd = parser:command("luabundle",
+                                    "Bundle any lua mod into a single deployable script.")
+luabundleCmd:description("Merge any modular lua project into a single script with dependencies.")
+luabundleCmd:flag("-c --compile",
+                  "Compile this project using the lua target compiler in the bundle file.")
+luabundleCmd:action(function(args, name)
     flagsCheck(args)
     luabundle(nil, args.compile)
 end)
@@ -140,9 +142,9 @@ mitosis:action(function(args, name)
 end)]]
 
 -- "Version command"
-local version = parser:command("version", "Get Mercury version and usefull info.")
-version:action(function(args, name)
-    cprint("Mercury - Package Manager, Version " .. _MERCURY_VERSION .. ".")
+local versionCmd = parser:command("version", "Get Mercury version and usefull info.")
+versionCmd:action(function(args, name)
+    cprint("Mercury - Package Manager, Version " .. MERCURY_VERSION .. ".")
     cprint("Licensed in GNU General Public License v3.0")
     cprint("My Games path: '" .. MyGamesPath .. "'")
     cprint("Current Halo CE path: '" .. GamePath .. "'")

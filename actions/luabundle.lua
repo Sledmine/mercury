@@ -44,7 +44,7 @@ local function bundler(bundleName, compile)
                     end
                 end
             else
-                cprint("Error, " + error)
+                cprint("Error, " .. error)
                 return false
             end
         end

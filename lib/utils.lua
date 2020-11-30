@@ -33,7 +33,7 @@ end
 
 --- Debug print for testing purposes only
 function dprint(value)
-    if (_DEBUG_MODE and value) then
+    if (IsDebugModeEnabled and value) then
         if (type(value) == "table") then
             print(inspect(value))
         else
@@ -53,11 +53,6 @@ function each(t)
             return t[i], i
         end
     end
-end
-
--- Provide string concatenation via addition operator
-getmetatable("").__add = function(a, b)
-    return a .. b
 end
 
 function splitPath(fileOrFolderPath)

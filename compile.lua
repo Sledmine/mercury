@@ -3,7 +3,7 @@
 -- Sledmine
 -- Script to simplify mercury bundle process
 ------------------------------------------------------------------------------
-local version = "1.0.0.0"
+local version = "1.0.0"
 
 local staticLibs = {
     "socket_core",

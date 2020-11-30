@@ -23,7 +23,7 @@ local errorTable = {
 -- Install any mercury package
 local function insert(mercPath, forced, noBackups)
     local mercPath, mercName = splitPath(mercPath)
-    local mercFullPath = mercPath .. "\\" .. mercName .. _MERC_EXTENSION
+    local mercFullPath = mercPath .. "\\" .. mercName .. MERC_EXTENSION
     if (exist(mercFullPath)) then
         -- Unpack merc file
         dprint("Trying to unpack '" .. mercName .. ".merc' ...")

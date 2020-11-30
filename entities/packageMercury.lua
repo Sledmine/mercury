@@ -11,32 +11,6 @@ local class = require "middleclass"
 ---@class packageMercury
 local packageMercury = class "packageMercury"
 
---- Parse and format version number strings
----@param version string
-local function parseVersionNumber(version)
-    --[[
-        Mercury is expecting to handle versions that look like this
-        2.4.3.1
-
-        So when parsed they need to be like this:
-
-        2431
-
-        To provide a simple version aritmetic comparasion with
-
-        internalVersion > 2431
-    ]]
-    local versionDetails = glue.string.split(version, ".")
-    if (#versionDetails > 1) then
-        local parsedVersion = ""
-        for versionLevel in each(versionDetails) do
-            parsedVersion = parsedVersion .. versionLevel:gsub("[%a%p%c%s]", "")
-        end
-        return tonumber(parsedVersion)
-    end
-    return tonumber(version)
-end
-
 --- Replace all the environment related paths
 ---@param files table
 local function replaceEnvironmentPaths(files)
@@ -55,9 +29,9 @@ end
 ---@field label string
 ---@field author string
 ---@field version string
----@field internalVersion number
+---@field internalVersion string
 ---@field files table
----@field dependencies table
+---@field dependencies string[]
 
 --- Entity constructor
 ---@param jsonString packageMercuryJson
@@ -72,12 +46,12 @@ function packageMercury:initialize(jsonString)
     ---@type number
     self.version = properties.version
     ---@type number
-    self.internalVersion = parseVersionNumber(properties.version)
+    self.internalVersion = properties.internalVersion
     ---@type table
     self.files = replaceEnvironmentPaths(properties.files)
     ---@type table
     self.updates = replaceEnvironmentPaths(properties.updates)
-    ---@type table
+    ---@type string[]
     self.dependencies = properties.dependencies
 end
 

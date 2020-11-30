@@ -1,7 +1,7 @@
 {
 	"label": "fail",
 	"name": "Mercury Test Package Fail",
-	"version": 1,
+	"version": "1.0.0",
 	"author": "Sled",
 	"files": {
 		"test.txt": "_HALOCE\\MERCURY_TEST\\",

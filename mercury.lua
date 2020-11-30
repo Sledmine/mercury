@@ -4,8 +4,8 @@
 -- Package Manager for Halo Custom Edition
 ------------------------------------------------------------------------------
 -- Constant definition.
-MERCURY_VERSION = "1.0.0.0"
-_MERC_EXTENSION = ".merc"
+MERCURY_VERSION = "1.0.0"
+MERC_EXTENSION = ".merc"
 
 -- Global libraries
 argparse = require "argparse"

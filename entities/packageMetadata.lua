@@ -23,10 +23,10 @@ function packageMetadata:initialize(jsonString)
     ---@type number
     self.version = properties.version
     ---@type string
-    self.fullVersion = properties.fullVersion
+    self.internalVersion = properties.internalVersion
     ---@type string
     self.category = properties.category
-    ---@type table
+    ---@type string[]
     self.conflicts = properties.conflicts
     ---@type string
     self.mirrors = properties.mirrors

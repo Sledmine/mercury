@@ -3,7 +3,8 @@
 	"name": "Mercury Test Package",
 	"version": "2.0.0",
 	"author": "Sled",
-	"updates": {
-		"test2.txt": "_HALOCE\\MERCURY_TEST\\"
+	"files": {
+		"test.txt": "$haloce\\MERCURY_TEST\\",
+		"test2.txt": "$haloce\\MERCURY_TEST\\"
 	}
 }

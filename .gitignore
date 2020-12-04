@@ -48,4 +48,4 @@ luac.out
 *.db
 
 # Mercury packages
-packages\
+packages/

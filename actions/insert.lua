@@ -8,6 +8,7 @@ local glue = require "glue"
 local path = require "path"
 
 local unpack = require "actions.unpack"
+local search = require "actions.search"
 
 local PackageMercury = require "entities.packageMercury"
 
@@ -22,18 +23,17 @@ local errorTable = {
 
 -- Install any mercury package
 local function insert(mercPath, forced)
-    local mercPath, mercName = splitPath(mercPath)
-    local mercAbsolutePath = mercPath .. "\\" .. mercName .. MERC_EXTENSION
-    if (exist(mercAbsolutePath)) then
+    local _, mercFilename = splitPath(mercPath)
+    if (exist(mercPath)) then
         -- Unpack merc file
-        dprint("Trying to unpack '" .. mercName .. ".merc' ...")
-        local unpackPath = MERCURY_DEPACKED .. "\\" .. mercName
+        dprint("Trying to unpack '" .. mercFilename .. ".merc' ...")
+        local unpackPath = MERCURY_DEPACKED .. "\\" .. mercFilename
         if (not exist(unpackPath)) then
             dprint("Creating folder: " .. unpackPath)
             createFolder(unpackPath)
         end
-        local depackageResult = unpack(mercAbsolutePath, unpackPath)
-        if (depackageResult) then
+        local unpackResult = unpack(mercPath, unpackPath)
+        if (unpackResult) then
             -- Load package manifest data
             local manifestJson = glue.readfile(unpackPath .. "\\manifest.json")
             ---@type packageMercury
@@ -41,53 +41,54 @@ local function insert(mercPath, forced)
 
             -- Get other package dependencies
             if (mercuryPackage.dependencies) then
-                cprint("Getting package dependencies...")
+                cprint("Checking for package dependencies...")
                 -- // TODO Some version lookup should be done here for dependencies, not being forced
                 for dependencyIndex, dependency in pairs(mercuryPackage.dependencies) do
-                    local result, error = install.package(dependency.label, dependency.version,
-                                                          true, true)
-                    if (not result) then
-                        return false, errorTable.depedencyError
+                    local existingDependency = search(dependency.label)
+                    if (existingDependency and existingDependency.version ~= dependency.version) then
+                        local result, error = install.package(dependency.label, dependency.version,
+                                                              true, true)
+                        if (not result) then
+                            return false, errorTable.depedencyError
+                        end
                     end
                 end
             end
 
             -- Insert new files into the game
             if (mercuryPackage.files) then
-                cprint("Installing " .. mercName .. " files... ")
+                cprint("Inserting " .. mercFilename .. " files... ")
                 for file, filePath in pairs(mercuryPackage.files) do
                     -- File path from mercury unpack path
                     local inputFile = unpackPath .. "\\" .. file
                     -- File path for insertion
                     local outputFile = filePath .. file
-
-                    dprint("Inserting file '" .. file .. "' ...")
-                    dprint("Output: '" .. outputFile .. "' ...")
+                    local outputFilePath = splitPath(outputFile)
 
                     -- Create folder for current file
-                    if (not exist(filePath)) then
-                        dprint("Creating folder: " .. filePath)
-                        createFolder(filePath)
+                    if (not exist(outputFilePath)) then
+                        createFolder(outputFilePath)
                     end
+
+                    dprint("Inserting file \"" .. file .. "\" ...")
+                    dprint("Output: \"" .. outputFile .. "\" ...")
 
                     if (exist(outputFile)) then
                         if (forced) then
-                            cprint("Warning, Forced mode enabled, erasing conflicting files...",
+                            cprint("Warning, Forced mode was enabled, erasing conflict file: \"" .. file .. "\"... ",
                                    true)
                             local result, desc, error = delete(outputFile)
                             if (result) then
-                                dprint("Deleted : '" .. file .. "'")
                                 cprint("done.")
                             else
                                 cprint("Error, at trying to erase file: '" .. file .. "'")
                                 return false, errorTable.eraseFileError
                             end
                         else
-                            cprint("Warning, conflicting file found, creating backup...", true)
+                            cprint("Warning, creating backup for conflict file: \"" .. file .. "\"... ", true)
                             local result, desc, error = move(outputFile, outputFile .. ".bak")
                             if (result) then
                                 cprint("done.")
-                                cprint("Backup created for '" .. file .. "'")
                             else
                                 cprint("Error, at trying to create a backup for: '" .. file .. "")
                                 return false, errorTable.backupCreationError
@@ -160,7 +161,7 @@ local function insert(mercPath, forced)
             return true
         end
     end
-    dprint("Error, " .. mercAbsolutePath .. " does not exist.")
+    dprint("Error, " .. mercPath .. " does not exist.")
     return false, errorTable.mercFileDoesNotExist
 end
 

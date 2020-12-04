@@ -1,4 +1,12 @@
-# Mercury - Halo Custom Edition Package Manager
+<html>
+    <p align="center">
+        <img width="300px" src="assets/images/mercury.png"/>
+    </p>
+    <h1 align="center">Mercury</h1>
+    <p align="center">
+       Halo Custom Edition Package Manager
+    </p>
+</html>
 
 ## What is Mercury?
 

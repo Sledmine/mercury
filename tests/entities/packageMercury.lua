@@ -3,6 +3,8 @@
 -- Author: Sledmine
 -- Tests for task entity
 ------------------------------------------------------------------------------
+package.path = package.path .. ";.\\Mercury\\?.lua"
+
 local lu = require "luaunit"
 local glue = require "glue"
 inspect = require "inspect"
@@ -26,56 +28,54 @@ function testUtils:setUp()
     self.testPackage1 = [[{
         "label": "test",
         "name": "Mercury Test Package",
-        "version": "1.0.0.r667.5769751",
+        "version": "1.0.0-r667",
         "author": "Sled",
         "files": {
-            "test.txt": "_HALOCE\\merctest\\",
-            "test2.txt": "_HALOCE\\merctest\\"
+            "test.txt": "$haloce\\merctest\\",
+            "test2.txt": "$haloce\\merctest\\"
         },
         "dependencies": [
-            {"label": "test2", "version":1}
+            {"label": "test2", "version": "1.0.0"}
         ]
     }]]
     self.expectedPackage1 = {
         label = "test",
         name = "Mercury Test Package",
-        version = "1.0.0.r667.5769751",
-        internalVersion = 1006675769751,
+        version = "1.0.0-r667",
         author = "Sled",
         files = {
             ["test.txt"] = GamePath .. "\\merctest\\",
             ["test2.txt"] = GamePath .. "\\merctest\\"
         },
         dependencies = {
-            {label = "test2", version = 1}
+            {label = "test2", version = "1.0.0"}
         }
     }
     ---@language JSON
     self.testPackage2 = [[{
         "label": "test",
         "name": "Mercury Test Package",
-        "version": "1234",
+        "version": "1.0.0",
         "author": "Sled",
         "files": {
-            "test.txt": "_HALOCE\\merctest\\",
-            "test2.txt": "_HALOCE\\merctest\\"
+            "test.txt": "$haloce\\merctest\\",
+            "test2.txt": "$haloce\\merctest\\"
         },
         "dependencies": [
-            {"label": "test2", "version":1}
+            {"label": "test2", "version": "1.0.0"}
         ]
     }]]
     self.expectedPackage2 = {
         label = "test",
         name = "Mercury Test Package",
-        version = "1234",
-        internalVersion = 1234,
+        version = "1.0.0",
         author = "Sled",
         files = {
             ["test.txt"] = GamePath .. "\\merctest\\",
             ["test2.txt"] = GamePath .. "\\merctest\\"
         },
         dependencies = {
-            {label = "test2", version = 1}
+            {label = "test2", version = "1.0.0"}
         }
     }
 end

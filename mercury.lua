@@ -41,6 +41,7 @@ api = require "modules.api"
 local remove = require "actions.remove"
 local list = require "actions.list"
 local luabundle = require "actions.luabundle"
+local insert = require "actions.insert"
 
 -- Global data
 environment = require "config.environment"
@@ -52,8 +53,7 @@ environment.get()
 environment.destroy()
 
 -- Create argument parser with Mercury info
-local parser = argparse("mercury", "Package Manager for Halo Custom Edition.",
-                        "Support mercury on: https://mercury.shadowmods.net")
+local parser = argparse("mercury", "Package Manager for Halo Custom Edition.")
 -- Disable command required message                        
 parser:require_command(false)
 
@@ -100,6 +100,21 @@ updateCmd:argument("packageLabel", "Label of the package you want to update.")
 updateCmd:action(function(args, name)
     flagsCheck(args)
     install.update(args.packageLabel)
+end)
+
+-- Insert command
+local insertCmd = parser:command("insert", "Insert a merc package into the game manually.")
+insertCmd:description("Attempts to insert the files from a mercury package.")
+insertCmd:argument("mercPath", "Path of the merc file to insert")
+insertCmd:flag("-f --force", "Remove any conflicting files without creating a backup.")
+-- update:argument("packageVersion", "Version of the package to update, latest by default."):args("?")
+insertCmd:action(function(args, name)
+    flagsCheck(args)
+    if (insert(args.mercPath, args.force)) then
+        cprint("Done, files have been inserted.")
+    else
+        cprint("Error, at inserting merc.")
+    end
 end)
 
 -- Bundle command

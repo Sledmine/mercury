@@ -13,15 +13,23 @@ local packageMercury = class "packageMercury"
 
 --- Replace all the environment related paths
 ---@param files table
-local function replaceEnvironmentPaths(files)
+local function replacePathVariables(files)
     if (files) then
+        local pathVariables = {
+            ["$haloce"] = GamePath,
+            ["$mygames"] = MyGamesPath
+        }
         local paths = {}
         for file, path in pairs(files) do
-            local replacedPath = path:gsub("_HALOCE", GamePath):gsub("_MYGAMES", MyGamesPath)
+            local replacedPath = path
+            for variable, value in pairs(pathVariables) do
+                replacedPath = replacedPath:gsub(variable, value)
+            end
             paths[file] = replacedPath
         end
         return paths
     end
+    return files
 end
 
 ---@class packageMercuryJson
@@ -34,7 +42,7 @@ end
 ---@field dependencies string[]
 
 --- Entity constructor
----@param jsonString packageMercuryJson
+---@param jsonString string
 function packageMercury:initialize(jsonString)
     local properties = json.decode(jsonString)
     ---@type string
@@ -48,9 +56,9 @@ function packageMercury:initialize(jsonString)
     ---@type number
     self.internalVersion = properties.internalVersion
     ---@type table
-    self.files = replaceEnvironmentPaths(properties.files)
+    self.files = replacePathVariables(properties.files)
     ---@type table
-    self.updates = replaceEnvironmentPaths(properties.updates)
+    self.updates = replacePathVariables(properties.updates)
     ---@type string[]
     self.dependencies = properties.dependencies
 end

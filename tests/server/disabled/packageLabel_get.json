@@ -1,9 +1,0 @@
-{
-    "name": "#{packageLabel}",
-    "label": "#{packageLabel}",
-    "author": "Sledmine",
-    "version": 1,
-    "mirrors": [
-        "http://#{HOST}/repository/#{packageLabel}.merc"
-    ]
-}

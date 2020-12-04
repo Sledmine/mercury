@@ -2,7 +2,7 @@
 #define NAME "Mercury"
 #define VERSION "1.0.0"
 #define AUTHOR "Sledmine, JerryBrick"
-#define WEBSITE "https://mercury.shadowmods.net/"
+;#define WEBSITE "https://mercury.shadowmods.net/"
 
 ;# Setup details
 [Setup]
@@ -19,6 +19,7 @@ DefaultGroupName={#NAME}
 DisableProgramGroupPage=yes
 LicenseFile=LICENSE
 ;PrivilegesRequired=lowest
+ArchitecturesInstallIn64BitMode=x64
 OutputDir=bin
 OutputBaseFilename=mercury-{#VERSION}-x64
 Compression=lzma

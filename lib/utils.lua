@@ -20,7 +20,7 @@ function cprint(text, nextLine)
         colorText = string.gsub(colorText, "Error", "[91mError[0m")
         colorText = string.gsub(colorText, "Warning", "[93mWarning[0m")
         colorText = string.gsub(colorText, "Unpacking", "[93mUnpacking[0m")
-        colorText = string.gsub(colorText, "Inserting", "[93mInstalling[0m")
+        colorText = string.gsub(colorText, "Inserting", "[93mInserting[0m")
         colorText = string.gsub(colorText, "Bundling", "[93mBundling[0m")
         colorText = string.gsub(colorText, "Compiling", "[93mCompiling[0m")
         colorText = string.gsub(colorText, "Removing", "[91mRemoving[0m")
@@ -104,12 +104,11 @@ function copyFile(sourceFile, destinationFile)
             return true
         end
         if (sourceF == nil) then
-            cprint("Error, " .. sourceFile .. " source file can't be opened.")
+            dprint("Error, " .. sourceFile .. " source file can't be opened.")
         end
         if (destinationF == nil) then
-            cprint("Error," .. destinationFile .. ", destination file can't be opened.")
+            dprint("Error, file: \"" .. destinationFile .. "\" can't be opened.")
         end
-        cprint("Error, one of the specified source or destination file can't be opened.")
         return false
     end
     cprint("Error, at trying to copy files, one of the specified paths is null.")

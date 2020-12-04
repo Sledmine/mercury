@@ -4,7 +4,7 @@
 	"version": "1.0.0",
 	"author": "Sled",
 	"files": {
-		"test.txt": "_HALOCE\\MERCURY_TEST\\",
-		"test2.txt": "_HALOCE\\MERCURY_TEST\\"
+		"test.txt": "$haloce\\MERCURY_TEST\\",
+		"test2.txt": "$haloce\\MERCURY_TEST\\"
 	}
 }

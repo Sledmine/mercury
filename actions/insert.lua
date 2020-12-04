@@ -45,7 +45,15 @@ local function insert(mercPath, forced)
                 -- // TODO Some version lookup should be done here for dependencies, not being forced
                 for dependencyIndex, dependency in pairs(mercuryPackage.dependencies) do
                     local existingDependency = search(dependency.label)
-                    if (existingDependency and existingDependency.version ~= dependency.version) then
+                    if (existingDependency) then
+                        if (existingDependency.version ~= dependency.version) then
+                            local result, error = install.package(dependency.label,
+                                                                  dependency.version, true)
+                            if (not result) then
+                                return false, errorTable.depedencyError
+                            end
+                        end
+                    else
                         local result, error = install.package(dependency.label, dependency.version,
                                                               true, true)
                         if (not result) then
@@ -75,8 +83,8 @@ local function insert(mercPath, forced)
 
                     if (exist(outputFile)) then
                         if (forced) then
-                            cprint("Warning, Forced mode was enabled, erasing conflict file: \"" .. file .. "\"... ",
-                                   true)
+                            cprint("Warning, Forced mode was enabled, erasing conflict file: \"" ..
+                                       file .. "\"... ", true)
                             local result, desc, error = delete(outputFile)
                             if (result) then
                                 cprint("done.")
@@ -85,7 +93,8 @@ local function insert(mercPath, forced)
                                 return false, errorTable.eraseFileError
                             end
                         else
-                            cprint("Warning, creating backup for conflict file: \"" .. file .. "\"... ", true)
+                            cprint("Warning, creating backup for conflict file: \"" .. file ..
+                                       "\"... ", true)
                             local result, desc, error = move(outputFile, outputFile .. ".bak")
                             if (result) then
                                 cprint("done.")

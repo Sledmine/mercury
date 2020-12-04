@@ -4,7 +4,7 @@
 -- Package Manager for Halo Custom Edition
 ------------------------------------------------------------------------------
 -- Constant definition.
-MERCURY_VERSION = "1.0.0"
+MERCURY_VERSION = "1.0.1"
 MERC_EXTENSION = ".merc"
 
 -- Global libraries

@@ -2,7 +2,7 @@
 #define NAME "Mercury"
 #define VERSION "1.0.0"
 #define AUTHOR "Sledmine, JerryBrick"
-;#define WEBSITE "https://mercury.shadowmods.net/"
+#define WEBSITE "https://mercury.vadam.net/"
 
 ;# Setup details
 [Setup]
@@ -25,7 +25,10 @@ OutputBaseFilename=mercury-{#VERSION}-x64
 Compression=lzma
 SolidCompression=yes
 WizardStyle=classic
-
+WizardImageFile="assets\images\WizardImageFile.bmp"
+WizardSmallImageFile="assets\images\WizardSmallImageFile.bmp"
+SetupIconFile="assets\icons\mercury.ico"
+UninstallDisplayIcon="assets\icons\mercury.ico"
 [Languages]
 Name: "english"; MessagesFile: "compiler:Default.isl"
 Name: "spanish"; MessagesFile: "compiler:Languages\Spanish.isl"

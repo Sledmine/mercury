@@ -17,13 +17,17 @@ Is a console program that gives you some features such as downloading an install
 ## What is the purpose of Mercury?
 
 - Get access into our package repository and download the latest or the oldest version of your favorite packages.
-- Manage your favorite mods or addons, install them, upgrade them,  etc, all from the Mercury repository.
-- Create different Halo Custom Edition versions in just seconds "mitosising" an existing version of the game.
+- Manage your favorite mods or addons perform different actions for them such as, install, update, remove, etc.
 
-## Installing Mercury
+# Installing Mercury
 
-To download and use Mercury in your computer you have to download Windows binaries from the [releases](https://github.com/Sledmine/Mercury/releases) tab or from the official site.
-**AN INSTALLER WILL BE AVAILABLE SOON!**
+To download and use Mercury in your computer you have to download Windows binaries from the [releases](https://github.com/Sledmine/Mercury/releases) tab or from the official site, there is an installer for easier installation.
+
+# Documentation
+
+We are working on a Wiki for Mercury, stay tuned, some markdowns will be hosted here as well:
+
+- [Mercury Packages](PACKAGE.md)
 
 # Contribute to Mercury
 
@@ -54,7 +58,7 @@ If you want to modify and verify code in this repository you will have a couple 
 test everything in your local environment, some unit testing is being added continuously.
 
 ## Run with LuaJIT
-Luapower follows a structure where everything must be inside the root folder to work, by just making a Symlink of your cloned respository into the Luapower folder you will be able to run, you can clone your repository directly in the Luapower folder but I would recommend you to create a Symlink.
+Luapower follows a structure where everything must be inside the root folder to work, by just making a Symlink of your cloned respository into the Luapower folder you will be able to run, you can clone your repository directly in the Luapower folder but we would like to recommend you to create a symlink.
 
 After that you can just use this command in the luapower folder to run it:
 ```
@@ -71,8 +75,13 @@ easymock
 
 # FAQ
 
-- **Luapower is a cross platform framework, why is this only working for Windows?**
+## Luapower is a cross platform framework, why is this only working for Windows?
 
 Halo Custom Edition only works in a Windows environment by native running or via emulation using
 Wine for example, so creating a package manager for Linux would be a little bit weird if the game
-itself only runs on Windows but after some work migration a Linux build would be possible.
+itself only runs on Windows, but after some work migration a Linux build would be possible in the future.
+
+## Why there are not Mercury 32-bit builds?
+
+At the beginning there were not plans to support 32-bit builds due to Mercury being built with the
+[luapower](https://luapower.com) framework, but since the this framework is laking on support and introducing innecesary issues, we will support 32 bit builds in the future after migrating Mercury to the [luarocks](https://luarocks.org/) packages ecosystem.

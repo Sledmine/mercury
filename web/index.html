@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8" />
+		<title>Mercury Simple Index Host</title>
+		<meta name="description" content="" />
+		<meta name="author" content="" />
+		<meta name="viewport" content="width=device-width, initial-scale=1" />
+		<link
+			href="http://fonts.googleapis.com/css?family=Raleway:400,300,600"
+			rel="stylesheet"
+			type="text/css"
+		/>
+		<link rel="stylesheet" href="css/skeleton.css" />
+		<link rel="icon" type="image/png" href="../assets/images/favicon.png" />
+		<script>
+			function filter() {
+				var input, filter, table, tr, td, i, txtValue;
+				input = document.getElementById("packageLabel");
+				var simple = input.value.toLowerCase() || "<packageLabel>";
+				filter = input.value.toUpperCase();
+				table = document.getElementById("packagesTable");
+				tr = table.getElementsByTagName("tr");
+				const installPre = document.getElementById("installPre");
+				const installExample = document.getElementById("installExample");
+				for (i = 0; i < tr.length; i++) {
+					td = tr[i].getElementsByTagName("td")[0];
+					if (td) {
+						txtValue = td.textContent || td.innerText;
+						if (txtValue.toUpperCase().indexOf(filter) > -1) {
+							tr[i].style.display = "";
+							installPre.style.display = "";
+						} else {
+							tr[i].style.display = "none";
+						}
+					}
+				}
+				installExample.innerText = "mercury install " + simple;
+			}
+		</script>
+	</head>
+	<body>
+		<div class="container">
+			<div style="text-align: center; margin-top: 10%">
+				<img src="../assets/images/mercury.png" width="15%" />
+				<h1>Mercury</h1>
+				<h5>A Package Manager for Halo Custom Edition</h5>
+				<p>
+					This is a simple index for the newest packages hosted in the Mercury repository, search
+					for any package you want.
+				</p>
+				<div class="row">
+					<a class="button" href="https://github.com/Sledmine/Mercury">GitHub</a>
+					<a class="button button-primary" href="https://github.com/Sledmine/Mercury/releases"
+						>Downloads</a
+					>
+				</div>
+				<input
+					class="u-full-width"
+					type="text"
+					placeholder="Search for packages..."
+					id="packageLabel"
+					onkeyup="filter()"
+				/>
+				<table class="u-full-width" id="packagesTable">
+					<thead>
+						<tr>
+							<th>Label</th>
+							<th>Version</th>
+						</tr>
+					</thead>
+					<tbody>
+						<tr>
+							<td>chimera</td>
+							<td>1.0.757</td>
+						</tr>
+						<tr>
+							<td>forgeisland</td>
+							<td>1.0.0-beta-1</td>
+						</tr>
+						<tr>
+							<td>dsoal</td>
+							<td>1.21.0-latest</td>
+						</tr>
+					</tbody>
+				</table>
+			</div>
+			You can install any package by using this line on the Mercury console:
+			<pre id="installPre"><code id="installExample">mercury install &ltpackageLabel&gt</code></pre>
+			<div style="text-align: center">
+				<h6>
+					Mercury is a simple package manager created with the Lua programming language by
+					modders for modders, the main goal of it is to provide an easy way to release mods
+					and provide updates between them, it is being developed and mantained under the
+					GNU General Public License v3.
+				</h6>
+			</div>
+		</div>
+	</body>
+</html>

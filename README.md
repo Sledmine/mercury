@@ -31,7 +31,7 @@ We are working on a Wiki for Mercury, stay tuned, some markdowns will be hosted 
 
 # Contribute to Mercury
 
-Feel free to fork and ask for pull requests to this repository also we are looking for an interface application for Mercury so any frontend developer is welcome! :)
+Feel free to fork and ask for pull requests to this repository, we are looking for an interface application for Mercury so any frontend developer is welcome!
 
 # Building Mercury
 

@@ -22,7 +22,7 @@ local errorTable = {
 }
 
 -- Install any mercury package
-local function insert(mercPath, forced)
+local function insert(mercPath, forced, noPurge)
     local _, mercFilename = splitPath(mercPath)
     if (exist(mercPath)) then
         -- Unpack merc file
@@ -66,11 +66,11 @@ local function insert(mercPath, forced)
             -- Insert new files into the game
             if (mercuryPackage.files) then
                 cprint("Inserting " .. mercFilename .. " files... ")
-                for file, filePath in pairs(mercuryPackage.files) do
+                for fileIndex, file in pairs(mercuryPackage.files) do
                     -- File path from mercury unpack path
-                    local inputFile = unpackPath .. "\\" .. file
+                    local inputFile = unpackPath .. "\\" .. file.path
                     -- File path for insertion
-                    local outputFile = filePath .. file
+                    local outputFile = file.outputPath .. file.path
                     local outputFilePath = splitPath(outputFile)
 
                     -- Create folder for current file
@@ -78,28 +78,28 @@ local function insert(mercPath, forced)
                         createFolder(outputFilePath)
                     end
 
-                    dprint("Inserting file \"" .. file .. "\" ...")
+                    dprint("Inserting file \"" .. file.path .. "\" ...")
                     dprint("Output: \"" .. outputFile .. "\" ...")
 
                     if (exist(outputFile)) then
                         if (forced) then
                             cprint("Warning, Forced mode was enabled, erasing conflict file: \"" ..
-                                       file .. "\"... ", true)
+                                       file.path .. "\"... ", true)
                             local result, desc, error = delete(outputFile)
                             if (result) then
                                 cprint("done.")
                             else
-                                cprint("Error, at trying to erase file: '" .. file .. "'")
+                                cprint("Error, at trying to erase file: '" .. file.path .. "'")
                                 return false, errorTable.eraseFileError
                             end
                         else
-                            cprint("Warning, creating backup for conflict file: \"" .. file ..
+                            cprint("Warning, creating backup for conflict file: \"" .. file.path ..
                                        "\"... ", true)
                             local result, desc, error = move(outputFile, outputFile .. ".bak")
                             if (result) then
                                 cprint("done.")
                             else
-                                cprint("Error, at trying to create a backup for: '" .. file .. "")
+                                cprint("Error, at trying to create a backup for: '" .. file.path .. "")
                                 return false, errorTable.backupCreationError
                             end
                         end
@@ -110,7 +110,7 @@ local function insert(mercPath, forced)
                         dprint("File succesfully installed.")
                         dprint(outputFile)
                     else
-                        cprint("Error, at trying to install file: '" .. file .. "'")
+                        cprint("Error, at trying to install file: '" .. file.path .. "'")
                         return false, errorTable.installationError
                     end
                 end

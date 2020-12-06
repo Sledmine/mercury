@@ -3,7 +3,7 @@
 -- Sledmine
 -- Script to simplify mercury bundle process
 ------------------------------------------------------------------------------
-local version = "1.0.0"
+local version = "1.0.1"
 
 local staticLibs = {
     "socket_core",
@@ -63,7 +63,7 @@ local outputPath = "Mercury\\bin\\mercury.exe"
 local bundleCmd = "mgit bundle -a '%s' -m '%s' -M '%s' -i '%s' -fv %s -vi '%s' -o '%s' -av " .. version
 
 local bundleBuild = string.format(bundleCmd, table.concat(staticLibs, " "),
-                                  table.concat(modules, " "), mainLua, iconPath, version,
+                                  table.concat(modules, " "), mainLua, iconPath, version .. ".0",
                                   table.concat(versionInfo, ";"), outputPath)
 print(bundleBuild)
 os.execute(bundleBuild)

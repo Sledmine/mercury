@@ -83,4 +83,4 @@ itself only runs on Windows, but after some work migration a Linux build would b
 
 ## Why there are not Mercury 32-bit builds?
 
-At the beginning there were not plans to support 32-bit builds due to Mercury being built with the [luapower](https://luapower.com) framework, but since the this framework is laking on support and introducing innecesary issues, we will support 32 bit builds in the future after migrating Mercury to the [luarocks](https://luarocks.org/) packages ecosystem.
+At the beginning there were not plans to support 32-bit builds due to Mercury being built with the [luapower](https://luapower.com) framework, but since this framework is laking on support and introducing innecesary issues, we will support 32 bit builds in the future after migrating Mercury to the [luarocks](https://luarocks.org/) packages ecosystem.

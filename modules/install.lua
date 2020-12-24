@@ -11,12 +11,12 @@ local download = require "modules.download"
 -- Entities
 local PackageMetadata = require "entities.packageMetadata"
 
-local errorTable = {
+local errors = {
     ["404"] = "package not found",
     ["connection refused"] = "no connection to repository",
     ["download error"] = "an error occurred while downloading",
     ["invalid host"] = "package host is invalid",
-    ["no update"] = "there is no update available for this package",
+    ["no update"] = "there is no update available for this package"
 }
 
 local function getError(error)
@@ -24,12 +24,17 @@ local function getError(error)
     if (type(error) == "table") then
         error = error[1]
     end
-    local errorDescription = errorTable[tostring(error)] or error or "unknown error"
+    local errorDescription = errors[tostring(error)] or error or "unknown error"
     dprint(error)
     cprint("Error, " .. errorDescription .. ".")
     return false, errorDescription
 end
 
+--- Attempt to install a package with the requrired operations
+---@param packageLabel string Label of the package to install
+---@param packageVersion string Version of the package to install
+---@param forced string Forced mode installation
+---@return boolean result
 function install.package(packageLabel, packageVersion, forced)
     if (search(packageLabel)) then
         if (forced) then
@@ -40,27 +45,24 @@ function install.package(packageLabel, packageVersion, forced)
         end
     end
     cprint("Searching for '" .. packageLabel .. "' in repository... ", true)
-    local error, response = api.getPackage(packageLabel, packageVersion)
+    -- Create local variables before implementation, it can be used to avoid too much else if
+    local error, result, response
+    error, response = api.getPackage(packageLabel, packageVersion)
     if (error == 200 and response) then
         cprint("done.")
         local packageMeta = PackageMetadata:new(response)
         if (packageMeta and packageMeta.mirrors) then
             local result, packagePath = download.package(packageMeta)
             if (result) then
-                local result, error = insert(packagePath, forced)
+                result, error = insert(packagePath, forced)
                 if (result) then
                     cprint("Success, package \"" .. packageLabel .. "\" has been installed.")
                     return true
-                else
-                    return getError(error)
                 end
             end
-        else
-            return getError(error)
         end
-    else
-        return getError(error)
     end
+    return false, getError(error)
 end
 
 function install.update(packageLabel)
@@ -70,36 +72,30 @@ function install.update(packageLabel)
         return false
     end
     cprint("Searching for '" .. packageLabel .. "' in repository... ", true)
-    local error, response = api.getPackage(packageLabel, currentPackage.version)
+    -- Create local variables before implementation, it can be used to avoid too much else if
+    local error, result, response
+    error, response = api.getPackage(packageLabel, currentPackage.version)
     if (error == 200 and response) then
         cprint("done.")
         local packageMeta = PackageMetadata:new(response)
         if (packageMeta and packageMeta.nextVersion) then
-            local error, response = api.getUpdate(packageLabel, packageMeta.nextVersion)
+            error, response = api.getUpdate(packageLabel, packageMeta.nextVersion)
             if (error == 200 and response) then
                 local packageMeta = PackageMetadata:new(response)
                 local result, packagePath = download.package(packageMeta)
                 if (result) then
-                    local result, error = insert(packagePath)
+                    result, error = insert(packagePath)
                     if (result) then
                         cprint("Success, package \"" .. packageLabel .. "\" has been updated.")
                         return true
-                    else
-                        return getError(error)
                     end
-                else
-                    return getError(error)
                 end
-            else
-                return getError(error)
             end
         else
             error = "no update"
-            return getError(error)
         end
-    else
-        return getError(error)
     end
+    return false, getError(error)
 end
 
 return install

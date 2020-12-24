@@ -6,19 +6,34 @@
 local json = require "cjson"
 local glue = require "glue"
 
-local search = require("Mercury.actions.search")
+local search = require "Mercury.actions.search"
+
+-- // TODO Migrate the return of this action to an errors table
+
+local function erasePackageFromIndex(packageLabel)
+    -- Get current instance packages
+    local installedPackages = environment.packages() or {}
+    -- Erase data for this package
+    installedPackages[packageLabel] = nil
+    -- Update current environment packages data with the new one
+    environment.packages(installedPackages)
+end
 
 --- Remove/uninstall a package from the game
----@param packageLabel string
----@param noRestore boolean
----@param eraseBackups boolean
----@param recursive boolean
-local function remove(packageLabel, noRestore, eraseBackups, recursive)
-    ---@type packageMercury[]
+---@param packageLabel string Label of the package to remove
+---@param noRestore boolean Do not restore previous backup files
+---@param eraseBackups boolean Erase previous backup files
+---@param recursive boolean Erase all the dependencies of this package
+---@param forced boolean Forced remove by erasing the package entry from the packages index
+local function remove(packageLabel, noRestore, eraseBackups, recursive, forced)
     if (search(packageLabel)) then
         local installedPackages = environment.packages()
         cprint("Removing package '" .. packageLabel .. "'...")
-        ---@type packageMercury
+        if (forced) then
+            erasePackageFromIndex(packageLabel)
+            cprint("Done, package '" .. packageLabel .. "' has been forced removed by entry.")
+            return true
+        end
         local packageMercury = installedPackages[packageLabel]
         -- Remove dependencies recursively
         if (recursive) then
@@ -26,20 +41,20 @@ local function remove(packageLabel, noRestore, eraseBackups, recursive)
             local packageDependencies = packageMercury.dependencies
             if (packageDependencies and #packageDependencies > 0) then
                 for dependency in each(packageDependencies) do
-                    remove(dependency.label, noRestore, eraseBackups, recursive)
+                    remove(dependency.label, noRestore, eraseBackups, recursive, forced)
                 end
             end
         end
-        for fileName, path in pairs(packageMercury.files) do
-            local filePath = path .. fileName
+        for fileIndex, file in pairs(packageMercury.files) do
+            local filePath = file.outputPath .. file.path
             -- Start erasing proccess
-            dprint("Erasing '" .. fileName .. "'... ", true)
+            dprint("Erasing '" .. file.path .. "'... ", true)
             local result, description, errorCode = delete(filePath)
             if (result) then
                 dprint("Done, file erased.")
                 if (exist(filePath .. ".bak") and not noRestore) then
                     if (not noRestore) then
-                        cprint("Warning, restoring '" .. fileName .. "' backup file... ", true)
+                        cprint("Warning, restoring '" .. file.path .. "' backup file... ", true)
                         move(filePath .. ".bak", filePath)
                         if (exist(filePath)) then
                             cprint("done.")
@@ -67,12 +82,7 @@ local function remove(packageLabel, noRestore, eraseBackups, recursive)
                 end
             end
         end
-        -- Get current instance packages
-        local installedPackages = environment.packages() or {}
-        -- Erase data for this package
-        installedPackages[packageLabel] = nil
-        -- Update current environment packages data with the new one
-        environment.packages(installedPackages)
+        erasePackageFromIndex(packageLabel)
         cprint("Done, package '" .. packageLabel .. "' has been removed.")
         return true
     end

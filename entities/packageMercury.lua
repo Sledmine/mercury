@@ -8,11 +8,37 @@ local glue = require "glue"
 
 local class = require "middleclass"
 
----@class packageMercury
 local packageMercury = class "packageMercury"
 
+---@class mercDependencies
+---@field label string
+---@field version string
+
+---@class mercFiles
+---@field path string
+---@field type string
+---@field outputPath string
+
+---@class mercUpdates
+---@field path string
+---@field diffPath string
+---@field type string
+---@field outputPath string
+
+---@class packageMercury
+---@field name string
+---@field label string
+---@field description string
+---@field author string
+---@field version string
+---@field internalVersion string
+---@field manifestVersion string
+---@field files mercFiles[]
+---@field updates mercUpdates[]
+---@field dependencies mercDependencies[]
+
 --- Replace all the environment related paths
----@param files table
+---@param files mercFiles[]
 local function replacePathVariables(files)
     if (files) then
         local pathVariables = {
@@ -20,58 +46,65 @@ local function replacePathVariables(files)
             ["$mygames"] = MyGamesPath
         }
         local paths = {}
-        for file, path in pairs(files) do
-            local replacedPath = path
+        for fileIndex, file in pairs(files) do
+            local outputPath = file.outputPath
             for variable, value in pairs(pathVariables) do
-                replacedPath = replacedPath:gsub(variable, value)
+                outputPath = outputPath:gsub(variable, value)
             end
-            paths[file] = replacedPath
+            file.outputPath = outputPath
+            paths[fileIndex] = file
         end
         return paths
     end
     return files
 end
 
----@class packageMercuryJson
----@field name string
----@field label string
----@field author string
----@field version string
----@field internalVersion string
----@field files table
----@field dependencies string[]
-
 --- Entity constructor
 ---@param jsonString string
 function packageMercury:initialize(jsonString)
     local properties = json.decode(jsonString)
     ---@type string
-    self.name = properties.name
-    ---@type string
     self.label = properties.label
+    
+    ---@type string
+    self.name = properties.name
+
+    ---@type string
+    self.description = properties.description
+
     ---@type string
     self.author = properties.author
+
     ---@type number
     self.version = properties.version
+
     ---@type number
     self.internalVersion = properties.internalVersion
-    ---@type table
+
+    ---@type string
+    self.manifestVersion = properties.manifestVersion
+
+    ---@type mercFiles
     self.files = replacePathVariables(properties.files)
-    ---@type table
+
+    ---@type mercUpdates
     self.updates = replacePathVariables(properties.updates)
+
     ---@type string[]
     self.dependencies = properties.dependencies
 end
 
 --- Return the public/raw properties of the package
----@return packageMercuryJson
+---@return packageMercury
 function packageMercury:getProperties()
     return {
         name = self.name,
         label = self.label,
+        description = self.description,
         author = self.author,
         version = self.version,
         internalVersion = self.internalVersion,
+        manifestVersion = self.manifestVersion,
         files = self.files,
         dependencies = self.dependencies
     }

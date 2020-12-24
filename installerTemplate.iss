@@ -1,6 +1,6 @@
 ;# Mercury info
 #define NAME "Mercury"
-#define VERSION "1.0.2"
+#define VERSION "$VNUMBER"
 #define AUTHOR "Sledmine"
 #define WEBSITE "https://mercury.vadam.net/"
 

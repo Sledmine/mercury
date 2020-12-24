@@ -25,7 +25,6 @@ if '%errorlevel%' NEQ '0' (
     exit /B
 
 :gotAdmin
-    pushd "%CD%"
-    CD /D "%~dp0"
-    cmd /Q /K title Mercury Console
+    pushd "%~dp0"
+    cmd /Q /K "title Mercury Console & ansicon -p"
 :--------------------------------------    

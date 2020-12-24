@@ -19,7 +19,7 @@ local environment = require "config.environment"
 environment.get()
 
 -- Entities
-local PackageMercury = require("Mercury.entities.packageMercury")
+local PackageMercury = require "entities.packageMercury"
 
 testUtils = {}
 
@@ -28,12 +28,23 @@ function testUtils:setUp()
     self.testPackage1 = [[{
         "label": "test",
         "name": "Mercury Test Package",
+        "description": "A test package data for Mercury",
         "version": "1.0.0-r667",
         "author": "Sled",
-        "files": {
-            "test.txt": "$haloce\\merctest\\",
-            "test2.txt": "$haloce\\merctest\\"
-        },
+        "internalVersion": "1.0.0-r667",
+        "manifestVersion": "1.0",
+        "files":  [
+            {
+                "path": "test.txt",
+                "outputPath": "$haloce\\test\\",
+                "type": "text"
+            },
+            {
+                "path": "test2.txt",
+                "outputPath": "$haloce\\test\\",
+                "type": "text"
+            }
+        ],
         "dependencies": [
             {"label": "test2", "version": "1.0.0"}
         ]
@@ -41,11 +52,22 @@ function testUtils:setUp()
     self.expectedPackage1 = {
         label = "test",
         name = "Mercury Test Package",
+        description = "A test package data for Mercury",
         version = "1.0.0-r667",
         author = "Sled",
+        internalVersion = "1.0.0-r667",
+        manifestVersion = "1.0",
         files = {
-            ["test.txt"] = GamePath .. "\\merctest\\",
-            ["test2.txt"] = GamePath .. "\\merctest\\"
+            {
+                path = "test.txt",
+                outputPath = GamePath .. "\\test\\",
+                type = "text"
+            },
+            {
+                path = "test2.txt",
+                outputPath = GamePath .. "\\test\\",
+                type = "text"
+            }
         },
         dependencies = {
             {label = "test2", version = "1.0.0"}
@@ -55,12 +77,20 @@ function testUtils:setUp()
     self.testPackage2 = [[{
         "label": "test",
         "name": "Mercury Test Package",
-        "version": "1.0.0",
+        "version": "1.0.0-r667",
         "author": "Sled",
-        "files": {
-            "test.txt": "$haloce\\merctest\\",
-            "test2.txt": "$haloce\\merctest\\"
-        },
+        "files":  [
+            {
+                "path": "test.txt",
+                "outputPath": "$haloce\\test\\",
+                "type": "text"
+            },
+            {
+                "path": "test2.txt",
+                "outputPath": "$haloce\\test\\",
+                "type": "text"
+            }
+        ],
         "dependencies": [
             {"label": "test2", "version": "1.0.0"}
         ]
@@ -68,11 +98,19 @@ function testUtils:setUp()
     self.expectedPackage2 = {
         label = "test",
         name = "Mercury Test Package",
-        version = "1.0.0",
+        version = "1.0.0-r667",
         author = "Sled",
         files = {
-            ["test.txt"] = GamePath .. "\\merctest\\",
-            ["test2.txt"] = GamePath .. "\\merctest\\"
+            {
+                path = "test.txt",
+                outputPath =   MyGamesPath .. "\\test\\",
+                type = "text"
+            },
+            {
+                path = "test2.txt",
+                outputPath = MyGamesPath .. "\\test\\",
+                type = "text"
+            }
         },
         dependencies = {
             {label = "test2", version = "1.0.0"}
@@ -85,18 +123,14 @@ function testUtils:testEntityConstructor()
     ---@type packageMercury
     local packageInstance = PackageMercury:new(self.testPackage1)
     local packageProperties = packageInstance:getProperties()
-    lu.assertEquals(packageProperties.author, self.expectedPackage1.author)
     lu.assertEquals(packageProperties.label, self.expectedPackage1.label)
-    lu.assertEquals(packageProperties.version, self.expectedPackage1.version)
     lu.assertEquals(packageProperties.name, self.expectedPackage1.name)
+    lu.assertEquals(packageProperties.description, self.expectedPackage1.description)
+    lu.assertEquals(packageProperties.version, self.expectedPackage1.version)
+    lu.assertEquals(packageProperties.author, self.expectedPackage1.author)
     lu.assertEquals(packageProperties.files, self.expectedPackage1.files)
     lu.assertEquals(packageProperties.dependencies, self.expectedPackage1.dependencies)
-end
-
-function testUtils:testEntityInternalVersion()
-    ---@type packageMercury
-    local packageInstance = PackageMercury:new(self.testPackage1)
-    lu.assertEquals(packageInstance.internalVersion, self.expectedPackage1.internalVersion)
+    lu.assertEquals(packageProperties.internalVersion, self.expectedPackage1.internalVersion)
 end
 
 local function runTests()

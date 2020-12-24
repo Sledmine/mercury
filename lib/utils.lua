@@ -89,7 +89,7 @@ function delete(fileOrFolderPath, recursive)
 end
 
 function copyFile(sourceFile, destinationFile)
-    if (sourceFile ~= nil and destinationFile ~= nil) then
+    if (sourceFile and destinationFile) then
         if (fs.is(sourceFile) == false) then
             cprint("Error, specified source file does not exist!")
             cprint(sourceFile)
@@ -97,16 +97,16 @@ function copyFile(sourceFile, destinationFile)
         end
         local sourceF = io.open(sourceFile, "rb")
         local destinationF = io.open(destinationFile, "wb")
-        if (sourceF ~= nil and destinationF ~= nil) then
+        if (sourceF and destinationF) then
             destinationF:write(sourceF:read("*a"))
             io.close(sourceF)
             io.close(destinationF)
             return true
         end
-        if (sourceF == nil) then
+        if (not sourceF) then
             dprint("Error, " .. sourceFile .. " source file can't be opened.")
         end
-        if (destinationF == nil) then
+        if (not destinationF) then
             dprint("Error, file: \"" .. destinationFile .. "\" can't be opened.")
         end
         return false

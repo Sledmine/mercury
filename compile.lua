@@ -3,7 +3,14 @@
 -- Sledmine
 -- Script to simplify mercury bundle process
 ------------------------------------------------------------------------------
-local version = "1.0.1"
+local glue = require "glue"
+
+-- Provide path to project modules
+package.path = package.path .. ";.\\Mercury\\?.lua"
+
+local constants = require "modules.constants"
+
+local version = constants.mercuryVersion
 
 local staticLibs = {
     "socket_core",
@@ -60,10 +67,22 @@ local mainLua = "mercury"
 
 local outputPath = "Mercury\\bin\\mercury.exe"
 
-local bundleCmd = "mgit bundle -a '%s' -m '%s' -M '%s' -i '%s' -fv %s -vi '%s' -o '%s' -av " .. version
+local bundleCmdLine = "mgit bundle -a '%s' -m '%s' -M '%s' -i '%s' -fv %s -vi '%s' -o '%s' -av " ..
+                          version
 
-local bundleBuild = string.format(bundleCmd, table.concat(staticLibs, " "),
-                                  table.concat(modules, " "), mainLua, iconPath, version .. ".0",
-                                  table.concat(versionInfo, ";"), outputPath)
-print(bundleBuild)
-os.execute(bundleBuild)
+local bundleCmd = string.format(bundleCmdLine, table.concat(staticLibs, " "),
+                                table.concat(modules, " "), mainLua, iconPath, version .. ".0",
+                                table.concat(versionInfo, ";"), outputPath)
+print(bundleCmd)
+os.execute(bundleCmd)
+
+---@type string
+local installerTemplate = glue.readfile("mercury\\installerTemplate.iss", "t")
+if (installerTemplate) then
+    installerTemplate = installerTemplate:gsub("$VNUMBER", version)
+    glue.writefile("mercury\\installer.iss", installerTemplate, "t")
+end
+
+local installerCmd = "cd mercury\\ & ISCC installer.iss && cd .."
+print(installerCmd)
+os.execute(installerCmd)

@@ -1,6 +1,6 @@
 # Mercury Packages
 
-Mercury packages are simple zip files with `.merc` extension, they can contain any kind of files required to install a Halo Custom Edition mod, the purpose of a Mercury package is to provide and easy and automated way to install mods without suffering in the attempt, every package has [semantic versioning](https://www.jvandemo.com/a-simple-guide-to-semantic-versioning/) to keep a track of every mod, also giving a way to provide updates between packages via binary of text difference, more info about this later on this documentation.
+Mercury packages are simple zip files with `.merc` extension, they can contain any kind of files required to install a Halo Custom Edition mod, the purpose of a Mercury package is to provide and easy and automated way to install mods without suffering in the attempt, every package has [semantic versioning](https://www.jvandemo.com/a-simple-guide-to-semantic-versioning/) to keep track of every mod, also giving a way to provide updates between packages via binary of text difference, more info about this later on this documentation.
 
 # Package Structure
 
@@ -22,7 +22,7 @@ on our `Halo Custom Edition\maps\` folder to play it as always.
 - `forge_island.lua`
 
 This is a more modern file in mods for Halo Custom Edition, the `forge_island.map` requires
- a lua script to work, this file should be placed in a path like `Documents\My Games\Halo CE\chimera\lua\scripts\map\` this sometimes can be kinda hard to install manually for some users, it can result in problems like the user placing it in the wrong folder and things like that, nobody wants angry people complaining about our mod not working by their mistakes.
+ a lua script to work, this file should be placed in a path like `Documents\My Games\Halo CE\chimera\lua\scripts\map\` this sometimes can be kind of hard to install for some users, it can result in problems like the user placing it in the wrong folder and similar scenarios, nobody wants angry people complaining about our mod not working by their mistakes.
 
 -  `manifest.json`
 
@@ -38,9 +38,11 @@ As explained above, a manifest file has different properties to tell Mercury how
 {
     "label": "forgeisland",
     "name": "Forge Island",
+    "description": "Forge Island for Halo Custom Edition",
     "version": "1.0.0-beta-1",
-    "internalVersion": "1.0.0-beta-1",
     "author": "Shadowmods Team",
+    "internalVersion": "1.0.0-beta-1",
+    "manifestVersion": "1.0",
     "files": [
         {
             "path": "maps\\forge_island.map",
@@ -72,17 +74,26 @@ This is the name used to identify the package in the respository, it's unique to
 
 This is the "large" name of the package, you can feel free to make it as big as you want, this is only for interface purposes, it does not affect the installation process.
 
+`description`
+
+This is the description for your package as the name you can feel free to leave here whatever you want, it is only used for interface purposes.
+
 `version`
 
 This value is really important because it represents the version of the package stored in the repository, for practical purposes your mods and software should used the same version, this version value should be always based on [semantic versioning](https://www.jvandemo.com/a-simple-guide-to-semantic-versioning/), it is used to provide forward updates for the package.
+
+`author`
+
+This is really obvious, just the name of the author of the package/mod.
 
 `internalVersion` 
 
 This value is optional and is not designed to be used directly, you can use it to represent a really specific version of a mod or software in another format that is not [semantic versioning](https://www.jvandemo.com/a-simple-guide-to-semantic-versioning/), it is used for interface purposes.
 
-`author`
+`manifestVersion` 
 
-This is really obvious, just the name of the author of the package/mod.
+This value represents which version of the current manifest is being used, manifests are supposed to receive simple changes so this number should not change too often.
+
 
 `files`
 
@@ -92,20 +103,23 @@ Here is another important property, this is the list of files inside the package
 {
     // Represents the relative path to a file inside the package
     "path": "examplemod.dll",
-    // This is the final path of the file after installation
-    "outputPath": "$haloce\\",
     // This is important for updates purposes, this tells Mercury how to update this file
-    "type": "binary"
+    "type": "binary",
+    // This is the final path of the file after installation
+    "outputPath": "$haloce\\"
 }
+
 ```
 
-There are by now 2 different values to use in the "type" property of every file:
+There are currently 2 different values to use in the "type" property of every file:
 
 - `optional`: This means that this file will not be updated between updates.
 
-- `binary`: This means that this file will be updated by binary difference.
+- `binary`: This file will be updated by binary difference.
 
-***Note:*** There are plans to support updating files by text difference in the future.
+- ~~- `text`: This file will be updated by text difference.~~
+
+***Note:*** Updating files by text difference is not supported yet, files with another type that is not in this list wiil be updated by sending the entire file.
 
 There are some variables you can use in your outputPath properties:
 
@@ -137,6 +151,8 @@ This is the list of dependencies required by this package, a dependency is anoth
     "label": "chimera",
     // Version of the dependency package
     "version": "3.14.16",
+    // This value can be nil resulting into getting the latest package available
+    // It is not recommended as it can result into uncompatible dependencies
 }
 ```
 

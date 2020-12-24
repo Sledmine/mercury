@@ -7,12 +7,15 @@ local json = require "cjson"
 local glue = require "glue"
 local path = require "path"
 
+local constants = require "modules.constants"
+
 local unpack = require "actions.unpack"
 local search = require "actions.search"
+local remove = require "actions.remove"
 
 local PackageMercury = require "entities.packageMercury"
 
-local errorTable = {
+local errors = {
     eraseFileError = "an error ocurred at erasing some files",
     backupCreationError = "an error ocurred at creating a backup file",
     installationError = "at trying to install a package",
@@ -26,8 +29,8 @@ local function insert(mercPath, forced, noPurge)
     local _, mercFilename = splitPath(mercPath)
     if (exist(mercPath)) then
         -- Unpack merc file
-        dprint("Trying to unpack '" .. mercFilename .. ".merc' ...")
-        local unpackPath = MERCURY_DEPACKED .. "\\" .. mercFilename
+        dprint("Trying to unpack \"" .. mercFilename .. ".merc\" ...")
+        local unpackPath = MercuryUnpacked .. "\\" .. mercFilename
         if (not exist(unpackPath)) then
             dprint("Creating folder: " .. unpackPath)
             createFolder(unpackPath)
@@ -42,22 +45,24 @@ local function insert(mercPath, forced, noPurge)
             -- Get other package dependencies
             if (mercuryPackage.dependencies) then
                 cprint("Checking for package dependencies...")
-                -- // TODO Some version lookup should be done here for dependencies, not being forced
                 for dependencyIndex, dependency in pairs(mercuryPackage.dependencies) do
                     local existingDependency = search(dependency.label)
+                    -- Check if we have this package dependency already installed
                     if (existingDependency) then
                         if (existingDependency.version ~= dependency.version) then
+                            -- // TODO We probably need some validation here
+                            remove(dependency.label, true)
                             local result, error = install.package(dependency.label,
-                                                                  dependency.version, true)
+                                                                  dependency.version)
                             if (not result) then
-                                return false, errorTable.depedencyError
+                                return false, errors.depedencyError
                             end
                         end
                     else
                         local result, error = install.package(dependency.label, dependency.version,
                                                               true, true)
                         if (not result) then
-                            return false, errorTable.depedencyError
+                            return false, errors.depedencyError
                         end
                     end
                 end
@@ -90,7 +95,7 @@ local function insert(mercPath, forced, noPurge)
                                 cprint("done.")
                             else
                                 cprint("Error, at trying to erase file: '" .. file.path .. "'")
-                                return false, errorTable.eraseFileError
+                                return false, errors.eraseFileError
                             end
                         else
                             cprint("Warning, creating backup for conflict file: \"" .. file.path ..
@@ -99,8 +104,9 @@ local function insert(mercPath, forced, noPurge)
                             if (result) then
                                 cprint("done.")
                             else
-                                cprint("Error, at trying to create a backup for: '" .. file.path .. "")
-                                return false, errorTable.backupCreationError
+                                cprint("Error, at trying to create a backup for: '" .. file.path ..
+                                           "")
+                                return false, errors.backupCreationError
                             end
                         end
                     end
@@ -111,40 +117,47 @@ local function insert(mercPath, forced, noPurge)
                         dprint(outputFile)
                     else
                         cprint("Error, at trying to install file: '" .. file.path .. "'")
-                        return false, errorTable.installationError
+                        return false, errors.installationError
                     end
                 end
             end
 
             -- Apply updates to files if available
             if (mercuryPackage.updates) then
-                for file, filePath in pairs(mercuryPackage.updates) do
-                    cprint("Updating " .. file .. " ... ", true)
+                for fileIndex, file in pairs(mercuryPackage.updates) do
+                    cprint("Updating " .. file.path .. " ... ", true)
                     -- File update from mercury unpack path
-                    local xD3FilePath = unpackPath .. "\\" .. file .. ".xd3"
+                    local diffFilePath = unpackPath .. "\\" .. file.diffPath
                     -- File path for insertion
-                    local sourceFilePath = filePath .. file
+                    local sourceFilePath = file.outputPath .. file.path
                     -- File path for temp updated file
                     local updatedFilePath = sourceFilePath .. ".updated"
-                    local xDelta3Cmd = "xdelta3 -d -s \"%s\" \"%s\" \"%s\""
-                    -- Update file using xdelta3
-                    dprint("xD3FilePath: " .. xD3FilePath)
+
+                    dprint("diffFilePath: " .. diffFilePath)
                     dprint("sourceFilePath: " .. sourceFilePath)
                     dprint("updatedFilePath: " .. updatedFilePath)
-                    dprint(xDelta3Cmd:format(xD3FilePath, sourceFilePath, updatedFilePath))
-                    local xD3Result = os.execute(xDelta3Cmd:format(sourceFilePath, xD3FilePath,
-                                                                   updatedFilePath))
-                    dprint("updatedFilePath: " .. updatedFilePath)
-                    if (exist(updatedFilePath)) then
-                        -- //TODO Add validation for these operations
-                        -- Rename updated file to source file
-                        move(sourceFilePath, sourceFilePath .. ".old")
-                        move(updatedFilePath, sourceFilePath)
-                        delete(sourceFilePath .. ".old")
-                        cprint("done.")
-                    else
-                        cprint("Error, at updating '" .. file .. "'")
-                        return false, errorTable.updateError
+
+                    if (file.type == "binary" or file.type == "text") then
+                        -- Update file using xdelta3
+                        local xD3CmdLine = constants.xD3CmdLine
+                        local xD3Cmd = xD3CmdLine:format(diffFilePath, sourceFilePath,
+                                                         updatedFilePath)
+                        dprint("xD3Cmd: " .. xD3Cmd)
+
+                        -- // TODO Append validation for update command
+                        local xD3Result = os.execute(xD3Cmd)
+                        if (exist(updatedFilePath)) then
+                            -- // TODO Add validation for these operations
+                            -- Rename updated file to source file
+                            local oldFilePath = sourceFilePath .. ".old"
+                            move(sourceFilePath, oldFilePath)
+                            move(updatedFilePath, sourceFilePath)
+                            delete(oldFilePath)
+                            cprint("done.")
+                        else
+                            cprint("Error, at updating \"" .. file.path .. "\"")
+                            return false, errors.updateError
+                        end
                     end
                 end
             end
@@ -156,9 +169,10 @@ local function insert(mercPath, forced, noPurge)
                 -- //TODO Check out this, there are probably better ways to do this
                 local updateProperties = mercuryPackage:getProperties()
                 updateProperties.updates = mercuryPackage.updates
-                ---@type packageMercuryJson
+
                 local oldProperties = installedPackages[mercuryPackage.label]
                 glue.merge(oldProperties.files, updateProperties.updates)
+
                 updateProperties.updates = nil
                 installedPackages[mercuryPackage.label] =
                     glue.update(oldProperties, updateProperties)
@@ -171,7 +185,7 @@ local function insert(mercPath, forced, noPurge)
         end
     end
     dprint("Error, " .. mercPath .. " does not exist.")
-    return false, errorTable.mercFileDoesNotExist
+    return false, errors.mercFileDoesNotExist
 end
 
 return insert

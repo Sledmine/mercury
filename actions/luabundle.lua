@@ -18,8 +18,11 @@ local codeBundler = require "lib.codeBundler"
 
 local function bundler(bundleName, compile)
     -- // TODO Add compilation feature based on the lua target
+    if (bundleName) then
+        bundleName = bundleName .. "Bundle.json"
+    end
     local bundleFileName = bundleName or "bundle.json"
-    if (exist(bundleFileName)) then
+    if (bundleFileName and exist(bundleFileName)) then
         ---@type bundle
         local project = json.decode(glue.readfile(bundleFileName, "t"))
         if (project) then

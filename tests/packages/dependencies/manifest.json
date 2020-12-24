@@ -3,9 +3,13 @@
 	"name": "Mercury Test Package Dependencies",
 	"version": "1.0.0",
 	"author": "Sled",
-	"files": {
-		"test3.txt": "$haloce\\MERCURY_TEST\\"
-	},
+	"files": [
+		{
+			"path": "test3.txt",
+			"outputPath": "$haloce\\test\\",
+			"type": "text"
+		}
+	],
 	"dependencies": [
 		{
 			"label": "test",

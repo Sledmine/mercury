@@ -1,11 +1,8 @@
 ------------------------------------------------------------------------------
 -- Mercury
--- JerryBrick, Sledmine
+-- Sledmine
 -- Package Manager for Halo Custom Edition
 ------------------------------------------------------------------------------
--- Constant definition.
-MERCURY_VERSION = "1.0.1"
-MERC_EXTENSION = ".merc"
 
 -- Global libraries
 argparse = require "argparse"
@@ -27,7 +24,7 @@ if (appBundle.appversion) then
     end
     require = crequire
 else
-    -- Provide path to project modules
+    -- Developer mode, provide path to project modules
     package.path = package.path .. ";.\\Mercury\\?.lua"
 end
 
@@ -43,14 +40,17 @@ local list = require "actions.list"
 local luabundle = require "actions.luabundle"
 local insert = require "actions.insert"
 
+local constants = require "modules.constants"
+
 -- Global data
 environment = require "config.environment"
 
 -- Get all environment variables and configurations
 environment.get()
 
+-- // FIXME There is a problem with temp files cleanup messing with package installation
 -- Cleanup
-environment.destroy()
+--environment.cleanTemp()
 
 -- Create argument parser with Mercury info
 local parser = argparse("mercury", "Package Manager for Halo Custom Edition.",
@@ -90,6 +90,7 @@ installCmd:flag("-f --force",
 installCmd:action(function(args, name)
     flagsCheck(args)
     install.package(args.packageLabel, args.packageVersion, args.force)
+    environment.cleanTemp()
 end)
 
 -- Update command
@@ -101,6 +102,7 @@ updateCmd:argument("packageLabel", "Label of the package you want to update.")
 updateCmd:action(function(args, name)
     flagsCheck(args)
     install.update(args.packageLabel)
+    environment.cleanTemp()
 end)
 
 -- Insert command
@@ -108,7 +110,6 @@ local insertCmd = parser:command("insert", "Insert a merc package into the game 
 insertCmd:description("Attempts to insert the files from a mercury package.")
 insertCmd:argument("mercPath", "Path of the merc file to insert")
 insertCmd:flag("-f --force", "Remove any conflicting files without creating a backup.")
--- update:argument("packageVersion", "Version of the package to update, latest by default."):args("?")
 insertCmd:action(function(args, name)
     flagsCheck(args)
     if (insert(args.mercPath, args.force)) then
@@ -116,32 +117,35 @@ insertCmd:action(function(args, name)
     else
         cprint("Error, at inserting merc.")
     end
+    environment.cleanTemp()
 end)
 
 -- Bundle command
 local luabundleCmd = parser:command("luabundle",
                                     "Bundle any lua mod into a single deployable script.")
 luabundleCmd:description("Merge any modular lua project into a single script with dependencies.")
+luabundleCmd:argument("bundleFile", "Name of the bundle file, \"bundle\" by default."):args("?")
 luabundleCmd:flag("-c --compile",
                   "Compile this project using the lua target compiler in the bundle file.")
 luabundleCmd:action(function(args, name)
     flagsCheck(args)
-    luabundle(nil, args.compile)
+    luabundle(args.bundleFile, args.compile)
 end)
 
--- "Remove command"
+-- Remove command
 local removeCmd = parser:command("remove", "Delete any currently installed package.")
 removeCmd:description("Remove will delete any package that is already installed.")
 removeCmd:argument("packageLabel", "Label of the package you want to remove.")
 removeCmd:flag("-n --norestore", "Prevent previous backups from being restored.")
 removeCmd:flag("-e --erasebackups", "Erase previously created backups.")
 removeCmd:flag("-r --recursive", "Remove all the dependencies of this package.")
+removeCmd:flag("-f --forced", "Forced remove by erasing entry from package index.")
 removeCmd:action(function(args, name)
     flagsCheck(args)
     remove(args.packageLabel, args.norestore, args.erasebackups, args.recursive)
 end)
 
--- "List command"
+-- List command
 local listCmd = parser:command("list", "Show already installed packages in this game instance.")
 listCmd:flag("-j --json", "Print the packages list in a json format.")
 listCmd:flag("-t --table", "Print the packages list in a lua table format.")
@@ -150,13 +154,13 @@ listCmd:action(function(args, name)
     list(args.json, args.table)
 end)
 
--- "Mitsosis command"
+-- Mitsosis command
 --[[local mitosis = parser:command("mitosis", "Create a new game instance with just core files.")
 mitosis:action(function(args, name)
     print("TODO!!!")
 end)]]
 
--- "Version command"
+-- About command
 local aboutCmd = parser:command("about", "Get Mercury information.")
 aboutCmd:action(function(args, name)
     cprint("Package manager for for Halo Custom Edition.")
@@ -165,10 +169,10 @@ aboutCmd:action(function(args, name)
     cprint("Current Halo CE path: \"" .. GamePath .. "\"")
 end)
 
--- "Version command"
+-- Version command
 local versionCmd = parser:command("version", "Get Mercury version.")
 versionCmd:action(function(args, name)
-    cprint("mercury version " .. MERCURY_VERSION)
+    cprint(constants.mercuryVersion)
 end)
 
 -- Show commands information if no args

@@ -3,7 +3,13 @@
 	"name": "Mercury Test Package",
 	"version": "2.0.0",
 	"author": "Sled",
-	"updates": {
-		"test2.txt": "$haloce\\MERCURY_TEST\\"
-	}
+	"updates": 
+	[
+		{
+			"path": "test2.txt",
+			"diffPath": "test2.txt.xd3",
+			"type": "text",
+			"outputPath": "$haloce\\test\\"
+		}
+	]
 }

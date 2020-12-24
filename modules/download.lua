@@ -11,7 +11,7 @@ local fdownload = require "lib.fdownload"
 
 function download.package(packageMeta)
     for index, packageUrl in pairs(packageMeta.mirrors) do
-        local outputPath = _MERCURY_DOWNLOADS .. "\\" .. packageMeta.label .. ".merc"
+        local outputPath = MercuryDownloads .. "\\" .. packageMeta.label .. ".merc"
         local result, error, headers, status = fdownload.get(packageUrl, outputPath)
         return error, outputPath
     end

@@ -3,12 +3,12 @@
 -- Editor: Sledmine
 -- Original Author: Diego Nehab
 -----------------------------------------------------------------------------
-local socket = require("socket")
-local http = require("socket.http")
-local https = require("socket.https")
-local ftp = require("socket.ftp")
-local url = require("socket.url")
-local ltn12 = require("ltn12")
+local socket = require "socket"
+local http = require "socket.http"
+local https = require "socket.https"
+local ftp = require "socket.ftp"
+local url = require "socket.url"
+local ltn12 = require "ltn12"
 
 local _M = {}
 
@@ -95,7 +95,7 @@ end
 function gethttpssize(u)
     local r, c, h = https.request {
         method = "HEAD",
-        url = u,
+        url = u
     }
     if c == 200 then
         return tonumber(h["content-length"])
@@ -106,7 +106,7 @@ end
 function gethttpsize(u)
     local r, c, h = http.request {
         method = "HEAD",
-        url = u,
+        url = u
     }
     if c == 200 then
         return tonumber(h["content-length"])
@@ -129,7 +129,7 @@ function getbyhttps(u, file)
     end
     local r, c, h, s = https.request {
         url = u,
-        sink = save,
+        sink = save
     }
     --[[if c ~= 200 then io.stderr:write(s or c, "\n")
     end]]
@@ -152,7 +152,7 @@ function getbyhttp(u, file)
     end
     local r, c, h, s = http.request {
         url = u,
-        sink = save,
+        sink = save
     }
     --[[if c ~= 200 then io.stderr:write(s or c, "\n")
     end]]

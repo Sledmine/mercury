@@ -3,10 +3,12 @@
 -- Sledmine
 -- Tests for api consumer
 ------------------------------------------------------------------------------
+package.path = package.path .. ";.\\Mercury\\?.lua"
+
 local lu = require "luaunit"
 inspect = require "inspect"
 
--- Global libraries
+-- Global modules
 require "lib.utils"
 
 local api = require "modules.api"
@@ -18,17 +20,17 @@ function testApi:setUp()
     api.httpProtocol = "http"
 
     self.expectedPackage =
-        [[{"name":"test","label":"test","author":"Sledmine","version":"1.0.0.0","fullVersion":"1.0.0.0","mirrors":["http://localhost:3000/repository/test/1.0.0.0/test.merc"],"nextVersion":"2.0.0.0"}]]
+        [[{"name":"test","label":"test","author":"Sledmine","version":"1.0.0","fullVersion":"1.0.0","mirrors":["http://localhost:3000/repository/test/1.0.0/test.merc"],"nextVersion":"2.0.0"}]]
 end
 
 function testApi:testGetPackage()
-    local error, response = api.getPackage("test", "1.0.0.0")
+    local error, response = api.getPackage("test", "1.0.0")
     lu.assertEquals(error, 200)
     lu.assertEquals(response, self.expectedPackage)
 end
 
 function testApi:testGetPackageFailureResponse()
-    local error, response = api.getPackage("nopackage", "1.0.0.0")
+    local error, response = api.getPackage("nopackage", "1.0.0")
     lu.assertEquals(error, 404)
 end
 

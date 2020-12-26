@@ -4,9 +4,10 @@
 -- Package Manager for Halo Custom Edition
 ------------------------------------------------------------------------------
 
--- Global libraries
-argparse = require "argparse"
+-- Global modules
 inspect = require "inspect"
+
+local argparse = require "argparse"
 
 -- Create custom require due to app bundle messing with the modules import
 local appBundle = require "bundle"
@@ -87,9 +88,10 @@ installCmd:argument("packageLabel", "Label of the package you want to download."
 installCmd:argument("packageVersion", "Version of the package to install."):args("?")
 installCmd:flag("-f --force",
                 "Force installation by removing packages and deleting conflicting files also avoid backup creation.")
+installCmd:flag("-o --skipOptionals", "Ignore optional files at installation.")
 installCmd:action(function(args, name)
     flagsCheck(args)
-    install.package(args.packageLabel, args.packageVersion, args.force)
+    install.package(args.packageLabel, args.packageVersion, args.force, args.skipOptionals)
     environment.cleanTemp()
 end)
 
@@ -110,9 +112,10 @@ local insertCmd = parser:command("insert", "Insert a merc package into the game 
 insertCmd:description("Attempts to insert the files from a mercury package.")
 insertCmd:argument("mercPath", "Path of the merc file to insert")
 insertCmd:flag("-f --force", "Remove any conflicting files without creating a backup.")
+insertCmd:flag("-o --skipOptionals", "Ignore optional files at installation.")
 insertCmd:action(function(args, name)
     flagsCheck(args)
-    if (insert(args.mercPath, args.force)) then
+    if (insert(args.mercPath, args.force, args.skipOptionals)) then
         cprint("Done, files have been inserted.")
     else
         cprint("Error, at inserting merc.")
@@ -142,7 +145,7 @@ removeCmd:flag("-r --recursive", "Remove all the dependencies of this package.")
 removeCmd:flag("-f --forced", "Forced remove by erasing entry from package index.")
 removeCmd:action(function(args, name)
     flagsCheck(args)
-    remove(args.packageLabel, args.norestore, args.erasebackups, args.recursive)
+    remove(args.packageLabel, args.norestore, args.erasebackups, args.recursive, args.forced)
 end)
 
 -- List command

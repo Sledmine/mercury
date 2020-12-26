@@ -180,3 +180,13 @@ mercury pack --nextMajor
 ```
 Something like this should do the trick,  however it is not that hard to build your own packages via bash scripting or someting similar.
 
+# TODO
+
+```json
+{
+  "path": "test2.txt",
+  "diffPath": "test2.txt.xd3",
+  "type": "text",
+  "outputPath": "$haloce\\test\\"
+}
+```

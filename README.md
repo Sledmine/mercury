@@ -35,14 +35,14 @@ Feel free to fork and ask for pull requests to this repository, we are looking f
 
 # Building Mercury
 
-Mercury uses [luapower](https://luapower.com) as the base of the project, this is needed to get the required amount of libraries and files to bundle/compile the code in this repository.
+Mercury uses [luapower](https://luapower.com) as the base of the project, this is needed to get the required amount of modules and files to bundle/compile the code in this repository.
 **There are known some problems with precompiled libs, try to compile your own ssl libs from LuaPower if you are having problems at bundle time.**
 
 Some libraries and tools are needed too:
 
 - [MinGW](http://mingw-w64.org/doku.php)
 
-These libraries are already included in the repository but you can check their own repository if needed:
+These modules are already included in the repository but you can check their own repository if needed:
 
 - [argparse](https://github.com/luarocks/argparse)
 - [registry](https://github.com/Tieske/registry)

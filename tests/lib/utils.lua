@@ -6,7 +6,7 @@
 local lu = require "luaunit"
 inspect = require "inspect"
 
--- Global libraries
+-- Global modules
 require "lib.utils"
 
 testUtils = {}

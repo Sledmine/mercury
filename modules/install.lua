@@ -33,9 +33,10 @@ end
 --- Attempt to install a package with the requrired operations
 ---@param packageLabel string Label of the package to install
 ---@param packageVersion string Version of the package to install
----@param forced string Forced mode installation
+---@param forced bool Forced mode installation
+---@param skipOptionals bool Ignore optional files at installation
 ---@return boolean result
-function install.package(packageLabel, packageVersion, forced)
+function install.package(packageLabel, packageVersion, forced, skipOptionals)
     if (search(packageLabel)) then
         if (forced) then
             remove(packageLabel, true, true)
@@ -54,7 +55,7 @@ function install.package(packageLabel, packageVersion, forced)
         if (packageMeta and packageMeta.mirrors) then
             local result, packagePath = download.package(packageMeta)
             if (result) then
-                result, error = insert(packagePath, forced)
+                result, error = insert(packagePath, forced, skipOptionals)
                 if (result) then
                     cprint("Success, package \"" .. packageLabel .. "\" has been installed.")
                     return true

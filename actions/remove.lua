@@ -74,7 +74,8 @@ local function remove(packageLabel, noRestore, eraseBackups, recursive, forced)
                 end
             else
                 if (errorCode == 2 or errorCode == 3) then
-                    cprint("Warning, erase file not found, probably misplaced or previously removed")
+                    cprint("Warning, file \"" .. file.path ..
+                               "\", probably misplaced or previously removed.")
                 else
                     cprint("Error, at trying to erase file.")
                     cprint("Reason, '" .. description .. "' aborting uninstallation now!")

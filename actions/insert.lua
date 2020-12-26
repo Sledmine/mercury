@@ -25,7 +25,7 @@ local errors = {
 }
 
 -- Install any mercury package
-local function insert(mercPath, forced, noPurge)
+local function insert(mercPath, forced, skipOptionals)
     local _, mercFilename = splitPath(mercPath)
     if (exist(mercPath)) then
         -- Unpack merc file
@@ -72,6 +72,12 @@ local function insert(mercPath, forced, noPurge)
             if (mercuryPackage.files) then
                 cprint("Inserting " .. mercFilename .. " files... ")
                 for fileIndex, file in pairs(mercuryPackage.files) do
+                    if (file.type == "optional" and skipOptionals) then
+                        cprint("Warning, skipping optional file: \"" .. file.path .. "\".")
+                        -- //TODO This should be moved to a better implementation
+                        goto continue
+                    end
+
                     -- File path from mercury unpack path
                     local inputFile = unpackPath .. "\\" .. file.path
                     -- File path for insertion
@@ -87,12 +93,17 @@ local function insert(mercPath, forced, noPurge)
                     dprint("Output: \"" .. outputFile .. "\" ...")
 
                     if (exist(outputFile)) then
-                        if (forced) then
-                            cprint("Warning, Forced mode was enabled, erasing conflict file: \"" ..
-                                       file.path .. "\"... ", true)
+                        if (forced or mercuryPackage.updates) then
+                            if (not mercuryPackage.updates) then
+                                cprint(
+                                    "Warning, Forced mode was enabled, erasing conflict file: \"" ..
+                                        file.path .. "\"... ", true)
+                            end
                             local result, desc, error = delete(outputFile)
                             if (result) then
-                                cprint("done.")
+                                if (not mercuryPackage.updates) then
+                                    cprint("done.")
+                                end
                             else
                                 cprint("Error, at trying to erase file: '" .. file.path .. "'")
                                 return false, errors.eraseFileError
@@ -119,6 +130,7 @@ local function insert(mercPath, forced, noPurge)
                         cprint("Error, at trying to install file: '" .. file.path .. "'")
                         return false, errors.installationError
                     end
+                    ::continue::
                 end
             end
 
@@ -139,13 +151,13 @@ local function insert(mercPath, forced, noPurge)
 
                     if (file.type == "binary" or file.type == "text") then
                         -- Update file using xdelta3
-                        local xD3CmdLine = constants.xD3CmdLine
-                        local xD3Cmd = xD3CmdLine:format(diffFilePath, sourceFilePath,
+                        local xd3CmdLine = constants.xd3CmdLine
+                        local xd3Cmd = xd3CmdLine:format(sourceFilePath, diffFilePath,
                                                          updatedFilePath)
-                        dprint("xD3Cmd: " .. xD3Cmd)
+                        dprint("xd3Cmd: " .. xd3Cmd)
 
                         -- // TODO Append validation for update command
-                        local xD3Result = os.execute(xD3Cmd)
+                        local xd3Result = os.execute(xd3Cmd)
                         if (exist(updatedFilePath)) then
                             -- // TODO Add validation for these operations
                             -- Rename updated file to source file
@@ -184,7 +196,7 @@ local function insert(mercPath, forced, noPurge)
             return true
         end
     end
-    dprint("Error, " .. mercPath .. " does not exist.")
+    cprint("Error, " .. mercPath .. " does not exist.")
     return false, errors.mercFileDoesNotExist
 end
 

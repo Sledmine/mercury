@@ -9,10 +9,10 @@ local lu = require "luaunit"
 local glue = require "glue"
 inspect = require "inspect"
 
--- Global libraries
+-- Global modules
 require "lib.utils"
 
--- Local function imports
+-- Local modules
 local environment = require "config.environment"
 
 -- Get all environment variables and configurations

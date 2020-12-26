@@ -5,6 +5,6 @@
     "version": "1.0.0",
     "fullVersion": "1.0.0",
     "mirrors": [
-        "http://#{HOST}/repository/dependencies/1.0.0/dependencies.merc"
+        "http://#{HOST}/repository/dependencies-1.0.0.merc"
     ]
 }

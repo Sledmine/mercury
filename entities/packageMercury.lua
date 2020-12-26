@@ -31,6 +31,7 @@ local packageMercury = class "packageMercury"
 ---@field description string
 ---@field author string
 ---@field version string
+---@field targetVersion string
 ---@field internalVersion string
 ---@field manifestVersion string
 ---@field files mercFiles[]
@@ -75,22 +76,25 @@ function packageMercury:initialize(jsonString)
     ---@type string
     self.author = properties.author
 
-    ---@type number
+    ---@type string
     self.version = properties.version
 
-    ---@type number
+    ---@type string
+    self.targetVersion = properties.targetVersion
+
+    ---@type string
     self.internalVersion = properties.internalVersion
 
     ---@type string
     self.manifestVersion = properties.manifestVersion
 
-    ---@type mercFiles
+    ---@type mercFiles[]
     self.files = replacePathVariables(properties.files)
 
-    ---@type mercUpdates
+    ---@type mercUpdates[]
     self.updates = replacePathVariables(properties.updates)
 
-    ---@type string[]
+    ---@type mercDependencies[]
     self.dependencies = properties.dependencies
 end
 

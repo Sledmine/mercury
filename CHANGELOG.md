@@ -1,5 +1,8 @@
 # Changelog
 
+# 1.0.3
+- Fixed a bug with remove where recursive flag was canceled by forced flag
+
 # 1.0.2
 - Added semantic version checking at installing dependencies
 - Fixed a bug with packages that did not specify a specific package dependency version

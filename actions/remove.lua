@@ -29,11 +29,6 @@ local function remove(packageLabel, noRestore, eraseBackups, recursive, forced)
     if (search(packageLabel)) then
         local installedPackages = environment.packages()
         cprint("Removing package \"" .. packageLabel .. "\"...")
-        if (forced) then
-            erasePackageFromIndex(packageLabel)
-            cprint("Done, package '" .. packageLabel .. "' has been forced removed by entry.")
-            return true
-        end
         local packageMercury = installedPackages[packageLabel]
         -- Remove dependencies recursively
         if (recursive) then
@@ -44,6 +39,11 @@ local function remove(packageLabel, noRestore, eraseBackups, recursive, forced)
                     remove(dependency.label, noRestore, eraseBackups, recursive, forced)
                 end
             end
+        end
+        if (forced) then
+            erasePackageFromIndex(packageLabel)
+            cprint("Done, package '" .. packageLabel .. "' has been forced removed by entry.")
+            return true
         end
         for fileIndex, file in pairs(packageMercury.files) do
             local filePath = file.outputPath .. file.path

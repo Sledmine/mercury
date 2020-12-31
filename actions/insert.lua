@@ -5,7 +5,7 @@
 ------------------------------------------------------------------------------
 local json = require "cjson"
 local glue = require "glue"
-local path = require "path"
+local v = require "semver"
 
 local constants = require "modules.constants"
 
@@ -49,18 +49,34 @@ local function insert(mercPath, forced, skipOptionals)
                     local existingDependency = search(dependency.label)
                     -- Check if we have this package dependency already installed
                     if (existingDependency) then
-                        if (existingDependency.version ~= dependency.version) then
-                            -- // TODO We probably need some validation here
-                            remove(dependency.label, true)
-                            local result, error = install.package(dependency.label,
-                                                                  dependency.version)
-                            if (not result) then
-                                return false, errors.depedencyError
+                        -- A specific package dependency was specified
+                        if (dependency.version) then
+                            -- Check semantic version
+                            if (v(existingDependency.version) < v(dependency.version)) then
+                                -- // TODO Allow user to decide for this step
+                                cprint(
+                                    "Warning, removing older dependency to install newer required dependency \"" ..
+                                        dependency.label .. "-" .. dependency.version .. "\"")
+                                -- // TODO Add skip optionals to remove action
+                                local result, error = remove(dependency.label, true)
+                                if (not result) then
+                                    remove(dependency.label, false, false, false, true)
+                                end
+                                result, error =
+                                    install.package(dependency.label, dependency.version)
+                                if (not result) then
+                                    return false, errors.depedencyError
+                                end
+                            else
+                                cprint(
+                                    "Warning, dependency installation for \"" .. dependency.label ..
+                                        "-" .. dependency.version ..
+                                        "\" is being skipped because there is a newer or equal version already installed.")
                             end
                         end
                     else
                         local result, error = install.package(dependency.label, dependency.version,
-                                                              true, true)
+                                                              false, false)
                         if (not result) then
                             return false, errors.depedencyError
                         end
@@ -96,7 +112,7 @@ local function insert(mercPath, forced, skipOptionals)
                         if (forced or mercuryPackage.updates) then
                             if (not mercuryPackage.updates) then
                                 cprint(
-                                    "Warning, Forced mode was enabled, erasing conflict file: \"" ..
+                                    "Warning, forced mode was enabled, erasing conflict file: \"" ..
                                         file.path .. "\"... ", true)
                             end
                             local result, desc, error = delete(outputFile)

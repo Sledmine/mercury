@@ -28,7 +28,7 @@ end
 local function remove(packageLabel, noRestore, eraseBackups, recursive, forced)
     if (search(packageLabel)) then
         local installedPackages = environment.packages()
-        cprint("Removing package '" .. packageLabel .. "'...")
+        cprint("Removing package \"" .. packageLabel .. "\"...")
         if (forced) then
             erasePackageFromIndex(packageLabel)
             cprint("Done, package '" .. packageLabel .. "' has been forced removed by entry.")

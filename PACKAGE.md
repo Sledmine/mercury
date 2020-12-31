@@ -151,10 +151,11 @@ This is the list of dependencies required by this package, a dependency is anoth
     "label": "chimera",
     // Version of the dependency package
     "version": "3.14.16",
-    // This value can be nil resulting into getting the latest package available
-    // It is not recommended as it can result into uncompatible dependencies
+    // This value can be nil or not present resulting into getting the latest package available
 }
 ```
+
+Right now mercury does not support operators to decide which version should be preferred over currently installed versions or a range of safe to use versions, a dependency with a higher version number always will be preferred over currenty installed one and the older will be removed.
 
 # FAQ
 
@@ -178,15 +179,4 @@ Sadly nope, but we are working on a new action for Mercury, someting like:
 cd MySuperModFolder\
 mercury pack --nextMajor
 ```
-Something like this should do the trick,  however it is not that hard to build your own packages via bash scripting or someting similar.
-
-# TODO
-
-```json
-{
-  "path": "test2.txt",
-  "diffPath": "test2.txt.xd3",
-  "type": "text",
-  "outputPath": "$haloce\\test\\"
-}
-```
+Something like this should do the trick in the future, however it is not that hard to build your own packages via bash scripting or someting similar.

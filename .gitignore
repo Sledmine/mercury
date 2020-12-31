@@ -49,3 +49,4 @@ luac.out
 
 # Mercury packages
 packages/
+*.mercu

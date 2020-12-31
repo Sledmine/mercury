@@ -1,6 +1,8 @@
 # Changelog
 
 # 1.0.2
+- Added semantic version checking at installing dependencies
+- Fixed a bug with packages that did not specify a specific package dependency version
 - Added flag to skip optional files at insert and install commands
 - Added flag to perform a forced remove with remove command
 - Changed how version number was printed with version command

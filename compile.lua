@@ -42,6 +42,7 @@ local modules = {
     "registry.lua",
     "argparse.lua",
     "middleclass.lua",
+    "semver.lua",
     -- Luaunit is just for testing purposes, not required for release
     -- Anyway, keep it here for tracking...
     -- "luaunit.lua",
@@ -81,8 +82,7 @@ local installerTemplate = glue.readfile("mercury\\installerTemplate.iss", "t")
 if (installerTemplate) then
     installerTemplate = installerTemplate:gsub("$VNUMBER", version)
     glue.writefile("mercury\\installer.iss", installerTemplate, "t")
+    local installerCmd = "cd mercury\\ & ISCC installer.iss && cd .."
+    print(installerCmd)
+    os.execute(installerCmd)
 end
-
-local installerCmd = "cd mercury\\ & ISCC installer.iss && cd .."
-print(installerCmd)
-os.execute(installerCmd)

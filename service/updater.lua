@@ -3,6 +3,8 @@
 --- Sledmine
 --- Script to provide updates between Mercury packages
 -------------------------------------------------------------------------------
+local path = require "path"
+
 local argparse = require "argparse"
 local glue = require "glue"
 local json = require "ljson"
@@ -76,12 +78,18 @@ if (manifestAreCompatible()) then
                     local oldFilePath = "temp/oldPackage/" .. oldFile.path
                     local newFilePath = "temp/newPackage/" .. newFile.path
                     local diffFilePath = "temp/updatedPackage/" .. newFile.path .. ".xd3"
+                    local standardDiffFilePath = diffFilePath:gsub("\\", "/")
+
+                    local outputDiffFileFolderPath = standardDiffFilePath:gsub(path.file(standardDiffFilePath), "")
+                    local createOutputPathCmd = "mkdir " .. outputDiffFileFolderPath
+                    print(createOutputPathCmd)
+                    os.execute(createOutputPathCmd:gsub("/", "\\"))
 
                     print("oldFilePath: " .. oldFilePath)
                     print("newFilePath: " .. newFilePath)
                     print("diffFilePath: " .. diffFilePath)
 
-                    local xd3Cmd = xd3CmdLine:format(oldFilePath, newFilePath, diffFilePath)
+                    local xd3Cmd = xd3CmdLine:format(oldFilePath, newFilePath, diffFilePath):gsub("\\", "/")
                     print("xd3Cmd: " .. xd3Cmd)
 
                     local xd3Result = os.execute(xd3Cmd)

@@ -41,13 +41,16 @@ local packageMercury = class "packageMercury"
 --- Replace all the environment related paths
 ---@param files mercFiles[]
 local function replacePathVariables(files)
-    if (files) then
+    if (files and #files > 0) then
         local pathVariables = {
             ["$haloce"] = GamePath,
             ["$mygames"] = MyGamesPath
         }
-        local paths = {}
+        local paths
         for fileIndex, file in pairs(files) do
+            if (not paths) then
+                paths = {}
+            end
             local outputPath = file.outputPath
             for variable, value in pairs(pathVariables) do
                 outputPath = outputPath:gsub(variable, value)
@@ -57,7 +60,7 @@ local function replacePathVariables(files)
         end
         return paths
     end
-    return files
+    return nil
 end
 
 --- Entity constructor

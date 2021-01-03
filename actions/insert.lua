@@ -195,15 +195,18 @@ local function insert(mercPath, forced, skipOptionals)
             -- Substract required package properties and store them
             if (mercuryPackage.updates) then
                 -- //TODO Check out this, there are probably better ways to do this
-                local updateProperties = mercuryPackage:getProperties()
-                updateProperties.updates = mercuryPackage.updates
+                local updateProps = mercuryPackage:getProperties()
+                updateProps.updates = mercuryPackage.updates
 
-                local oldProperties = installedPackages[mercuryPackage.label]
-                glue.merge(oldProperties.files, updateProperties.updates)
+                local oldProps = installedPackages[mercuryPackage.label]
 
-                updateProperties.updates = nil
-                installedPackages[mercuryPackage.label] =
-                    glue.update(oldProperties, updateProperties)
+                if (updateProps.files) then
+                    glue.extend(oldProps.files, updateProps.files)
+                end
+
+                -- Remove updates property from the final package properties
+                updateProps.updates = nil
+                installedPackages[mercuryPackage.label] = glue.update(oldProps, updateProps)
             else
                 installedPackages[mercuryPackage.label] = mercuryPackage:getProperties()
             end

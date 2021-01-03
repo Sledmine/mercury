@@ -1,5 +1,8 @@
 # Changelog
 
+# 1.0.4
+- Fixed a bug with the update command where it was erasing the "files" property from the package index
+
 # 1.0.3
 - Fixed a bug with remove where recursive flag was canceled by forced flag
 

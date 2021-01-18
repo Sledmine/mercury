@@ -1,0 +1,74 @@
+/**
+ * termynal.js
+ *
+ * @author Ines Montani <ines@ines.io>
+ * @version 0.0.1
+ * @license MIT
+ */
+
+:root {
+    --color-bg: #252a33;
+    --color-text: #eee;
+    --color-text-subtle: #70bcff;
+}
+
+[data-termynal] {
+    width: 750px;
+    max-width: 100%;
+    background: var(--color-bg);
+    color: var(--color-text);
+    font-size: 18px;
+    font-family: 'Fira Mono', Consolas, Menlo, Monaco, 'Courier New', Courier, monospace;
+    border-radius: 4px;
+    padding: 25px 35px 25px;
+    position: relative;
+    -webkit-box-sizing: border-box;
+    box-sizing: border-box;
+}
+
+[data-ty] {
+    display: block;
+    line-height: 2;
+}
+
+[data-ty]:before {
+    /* Set up defaults and ensure empty lines are displayed. */
+    content: '';
+    display: inline-block;
+    vertical-align: middle;
+}
+
+[data-ty="input"]:before, [data-ty-prompt]:before {
+    margin-right: 0.75em;
+    color: var(--color-text-subtle);
+}
+
+[data-ty="input"]:before {
+    content: '$';
+}
+
+[data-ty][data-ty-prompt]:before {
+    content: attr(data-ty-prompt);
+}
+
+[data-ty-cursor]:after {
+    content: "|";
+    font-family: monospace;
+    margin-left: 0.5em;
+    -webkit-animation: blink 1s infinite;
+    animation: blink 1s infinite;
+}
+
+/* Cursor animation */
+
+@-webkit-keyframes blink {
+    50% {
+        opacity: 0;
+    }
+}
+
+@keyframes blink {
+    50% {
+        opacity: 0;
+    }
+}

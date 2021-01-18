@@ -3,7 +3,6 @@
 -- Sledmine
 -- Package Manager for Halo Custom Edition
 ------------------------------------------------------------------------------
-
 -- Global modules
 inspect = require "inspect"
 
@@ -51,7 +50,7 @@ environment.get()
 
 -- // FIXME There is a problem with temp files cleanup messing with package installation
 -- Cleanup
---environment.cleanTemp()
+-- environment.cleanTemp()
 
 -- Create argument parser with Mercury info
 local parser = argparse("mercury", "Package Manager for Halo Custom Edition.",
@@ -89,8 +88,13 @@ installCmd:argument("packageVersion", "Version of the package to install."):args
 installCmd:flag("-f --force",
                 "Force installation by removing packages and deleting conflicting files also avoid backup creation.")
 installCmd:flag("-o --skipOptionals", "Ignore optional files at installation.")
+installCmd:option("-r --repository", "Specify a custom repository to use.")
 installCmd:action(function(args, name)
     flagsCheck(args)
+    -- //TODO Add parsing for custom repository protocol
+    if (args.repository) then
+        api.repositoryHost = args.repository
+    end
     install.package(args.packageLabel, args.packageVersion, args.force, args.skipOptionals)
     environment.cleanTemp()
 end)

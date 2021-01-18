@@ -52,7 +52,7 @@
 }
 
 [data-ty-cursor]:after {
-    content: "|";
+    content: "_";
     font-family: monospace;
     margin-left: 0.5em;
     -webkit-animation: blink 1s infinite;

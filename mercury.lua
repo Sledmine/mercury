@@ -88,7 +88,7 @@ installCmd:argument("packageVersion", "Version of the package to install."):args
 installCmd:flag("-f --force",
                 "Force installation by removing packages and deleting conflicting files also avoid backup creation.")
 installCmd:flag("-o --skipOptionals", "Ignore optional files at installation.")
-installCmd:option("-r --repository", "Specify a custom repository to use.")
+installCmd:option("--repository", "Specify a custom repository to use.")
 installCmd:action(function(args, name)
     flagsCheck(args)
     -- //TODO Add parsing for custom repository protocol
@@ -103,10 +103,14 @@ end)
 local updateCmd = parser:command("update", "Update any installed package in this game instance.")
 updateCmd:description("Update any package in your game by binary difference.")
 updateCmd:argument("packageLabel", "Label of the package you want to update.")
+updateCmd:option("--repository", "Specify a custom repository to use.")
 -- update:argument("packageVersion", "Version of the package to update, latest by default."):args("?")
 -- update:flag("-f --force", "Remove any existing package and force new package installation.")
 updateCmd:action(function(args, name)
     flagsCheck(args)
+    if (args.repository) then
+        api.repositoryHost = args.repository
+    end
     install.update(args.packageLabel)
     environment.cleanTemp()
 end)

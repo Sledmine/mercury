@@ -47,6 +47,10 @@ luac.out
 # Server files
 *.db
 
+# OpenResty folders
+openresty/logs
+openresty/*temp/
+
 # Mercury packages
 packages/
 *.mercu

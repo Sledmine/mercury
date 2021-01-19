@@ -1,5 +1,8 @@
 # Changelog
 
+# 1.0.5
+- Added a flag to specify an alternative repository to download and update packages
+
 # 1.0.4
 - Fixed a bug with the update command where it was erasing the "files" property from the package index
 

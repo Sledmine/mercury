@@ -807,7 +807,7 @@ a.uk-link-reset,
   color: #1e87f0 !important;
 }
 .uk-list-secondary > ::before {
-  color: #222 !important;
+  color: #252a33 !important;
 }
 /* Image bullet modifier
  ========================================================================== */
@@ -2041,20 +2041,20 @@ select.uk-form-width-xsmall {
  * Secondary
  */
 .uk-button-secondary {
-  background-color: #222;
+  background-color: #252a33;
   color: #fff;
   border: 1px solid transparent;
 }
 /* Hover + Focus */
 .uk-button-secondary:hover,
 .uk-button-secondary:focus {
-  background-color: #151515;
+  background-color: #1a1e24;
   color: #fff;
 }
 /* OnClick + Active */
 .uk-button-secondary:active,
 .uk-button-secondary.uk-active {
-  background-color: #080808;
+  background-color: #101215;
   color: #fff;
 }
 /*
@@ -2367,7 +2367,7 @@ select.uk-form-width-xsmall {
  * Secondary
  */
 .uk-section-secondary {
-  background: #222;
+  background: #252a33;
 }
 /* Overlap modifier
  ========================================================================== */
@@ -2625,7 +2625,7 @@ select.uk-form-width-xsmall {
  * Secondary
  */
 .uk-tile-secondary {
-  background: #222;
+  background: #252a33;
 }
 /* ========================================================================
    Component: Card
@@ -2744,7 +2744,7 @@ select.uk-form-width-xsmall {
  * Secondary
  */
 .uk-card-secondary {
-  background: #222;
+  background: #252a33;
   color: #fff;
   box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
 }
@@ -2752,7 +2752,7 @@ select.uk-form-width-xsmall {
   color: #fff;
 }
 .uk-card-secondary.uk-card-hover:hover {
-  background-color: #222;
+  background-color: #252a33;
   box-shadow: 0 14px 25px rgba(0, 0, 0, 0.16);
 }
 /* Size modifier
@@ -2956,7 +2956,7 @@ select.uk-form-width-xsmall {
  */
 .uk-marker {
   padding: 5px;
-  background: #222;
+  background: #252a33;
   color: #fff;
   border-radius: 500px;
 }
@@ -3174,7 +3174,7 @@ select.uk-form-width-xsmall {
  * Primary
  */
 .uk-overlay-primary {
-  background: rgba(34, 34, 34, 0.8);
+  background: rgba(37, 42, 51, 0.8);
 }
 /* ========================================================================
    Component: Article
@@ -4095,7 +4095,7 @@ select.uk-form-width-xsmall {
   box-sizing: border-box;
   width: 270px;
   padding: 20px 20px;
-  background: #222;
+  background: #252a33;
   /* 3 */
   overflow-y: auto;
   -webkit-overflow-scrolling: touch;
@@ -7263,7 +7263,7 @@ ul.uk-nav-sub {
   color: #1e87f0 !important;
 }
 .uk-text-secondary {
-  color: #222 !important;
+  color: #252a33 !important;
 }
 .uk-text-success {
   color: #32d296 !important;
@@ -7595,7 +7595,7 @@ iframe.uk-cover {
   background-color: #1e87f0;
 }
 .uk-background-secondary {
-  background-color: #222;
+  background-color: #252a33;
 }
 /* Size
  ========================================================================== */

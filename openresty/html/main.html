@@ -1,13 +1,10 @@
 <!DOCTYPE html>
 <html lang="en">
 	<head>
-		<!-- Primary Meta Tags -->
 		<title>Mercury Packages Index</title>
 		<meta charset="utf-8" />
 		<meta name="title" content="Mercury Packages Index" />
 		<meta name="description" content="Mercury Packages Index, search for your favorite packages." />
-
-		<!-- Open Graph / Facebook -->
 		<meta property="og:type" content="website" />
 		<meta property="og:url" content="http://mercuryce.com/" />
 		<meta property="og:title" content="Mercury Packages Index" />
@@ -16,8 +13,6 @@
 			content="Mercury Packages Index, search for your favorite packages."
 		/>
 		<meta property="og:image" content="http://mercuryce.com/img/metaImage.png" />
-
-		<!-- Twitter -->
 		<meta property="twitter:card" content="summary_large_image" />
 		<meta property="twitter:url" content="http://mercuryce.com/" />
 		<meta property="twitter:title" content="Mercury Packages Index" />
@@ -27,13 +22,11 @@
 		/>
 		<meta property="twitter:image" content="http://mercuryce.com/img/metaImage.png" />
 		<meta name="viewport" content="width=device-width, initial-scale=1" />
-
 		<script src="js/uikit.min.js"></script>
 		<script src="js/uikit-icons.min.js"></script>
-
 		<link rel="stylesheet" href="css/uikit.min.css" />
 		<link rel="stylesheet" href="css/termynal.css" />
-		<link rel="stylesheet" href="css/mercury.css" />
+		<link rel="stylesheet" href="css/platform.css" />
 		<link rel="icon" type="image/png" href="img/favicon.png" />
 	</head>
 	<body>
@@ -43,7 +36,7 @@
 			>
 				<nav class="uk-navbar-container" style="background-color: #252a33" uk-navbar>
 					<div class="uk-navbar-left">
-						<a class="uk-navbar-item uk-logo" href="#">
+						<a class="uk-navbar-item uk-logo" href="/">
 							<img data-src="img/mercury.png" width="50px" height="20px" alt="" uk-img />
 							<p style="color: #fff">Mercury</p>
 						</a>
@@ -58,7 +51,7 @@
 							<span uk-icon="github"></span>
 							<div class="uk-margin uk-margin-left">GitHub</div>
 						</a>
-						<a style="color: #fff" href="https://shadowmods.net/discord" class="uk-navbar-item">
+						<a style="color: #fff" href="https://discord.shadowmods.net/" class="uk-navbar-item">
 							<span uk-icon="discord"></span>
 							<div class="uk-margin uk-margin-left">Discord</div>
 						</a>
@@ -90,30 +83,18 @@
 					<span uk-icon="download"></span>
 					Downloads
 				</a>
-				<a href="" class="uk-button uk-button-secondary">
+				<a href="/packages" class="uk-button uk-button-secondary">
 					<span uk-icon="search"></span>
 					Search packages
 				</a>
 				<p>
-					<b>NOTE:</b> By now Mercury only works for installable versions of Halo Custom Edition (portable
-					installations does not work) in a 64 bits Windows system.
+					<b>NOTE:</b> By now Mercury only works for installable versions of Halo Custom Edition
+					(portable installations does not work) in a 64 bits Windows system.
 				</p>
 			</div>
 
 			<script src="js/termynal.js" data-termynal-container="#termynal"></script>
 		</div>
 	</body>
-	<footer id="page-footer" class="uk-tile-secondary uk-margin-top" uk-sticky>
-		<div class="uk-container uk-padding-small uk-text-center">
-			<p style="font-size: 60%" class="uk-text-bold uk-text-uppercase">Powered by</p>
-			<img data-src="img/openresty.png" width="10%" height="20px" alt="" uk-img />
-			<img data-src="img/uikit.png" width="10%" height="20px" alt="" uk-img />
-			<div class="uk-margin"></div>
-			<a
-				class="uk-link uk-text-small"
-				href="https://github.com/Sledmine/Mercury/graphs/contributors"
-				>2021 - Mercury Development Team.</a
-			>
-		</div>
-	</footer>
+	{(components/footer.html)}
 </html>

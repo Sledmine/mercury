@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<title>Mercury Packages Index</title>
+		<meta charset="utf-8" />
+		<meta name="title" content="Mercury Packages Index" />
+		<meta name="description" content="Mercury Packages Index, search for your favorite packages." />
+		<meta property="og:type" content="website" />
+		<meta property="og:url" content="http://mercuryce.com/" />
+		<meta property="og:title" content="Mercury Packages Index" />
+		<meta
+			property="og:description"
+			content="Mercury Packages Index, search for your favorite packages."
+		/>
+		<meta property="og:image" content="http://mercuryce.com/img/metaImage.png" />
+		<meta property="twitter:card" content="summary_large_image" />
+		<meta property="twitter:url" content="http://mercuryce.com/" />
+		<meta property="twitter:title" content="Mercury Packages Index" />
+		<meta
+			property="twitter:description"
+			content="Mercury Packages Index, search for your favorite packages."
+		/>
+		<meta property="twitter:image" content="http://mercuryce.com/img/metaImage.png" />
+		<meta name="viewport" content="width=device-width, initial-scale=1" />
+		<script src="js/uikit.min.js"></script>
+		<script src="js/uikit-icons.min.js"></script>
+		<script src="js/search.js"></script>
+		<link rel="stylesheet" href="css/uikit.min.css" />
+		<link rel="stylesheet" href="css/termynal.css" />
+		<link rel="stylesheet" href="css/platform.css" />
+		<link rel="icon" type="image/png" href="img/favicon.png" />
+	</head>
+	<body>
+		<div id="page-wrapper">
+			<div
+				uk-sticky="sel-target: .uk-navbar-container; cls-active: uk-navbar-sticky; bottom: #transparent-sticky-navbar"
+			>
+				<nav class="uk-background-secondary" uk-navbar>
+					<div class="uk-navbar-left">
+						<a class="uk-navbar-item uk-logo" href="/">
+							<img data-src="img/mercury.png" width="50px" height="20px" alt="" uk-img />
+							<p style="color: #fff">Mercury</p>
+						</a>
+					</div>
+					<div class="uk-navbar-center">
+						<form class="uk-search uk-search-navbar uk-dark uk-background-muted">
+							<a uk-search-icon></a>
+							<input
+								id="searchBar"
+								style="font-size: 95%"
+								class="uk-search-input"
+								type="search"
+								placeholder="Search packages by label or category..."
+								autocomplete="false"
+								autofocus="true"
+								onkeyup="search()"
+							/>
+						</form>
+					</div>
+					<div style="margin-right: 10px" class="uk-navbar-right">
+						<a
+							style="color: #fff"
+							href="https://github.com/Sledmine/Mercury"
+							class="uk-navbar-item"
+						>
+							<span uk-icon="github"></span>
+							<div class="uk-margin uk-margin-left">GitHub</div>
+						</a>
+						<a style="color: #fff" href="https://discord.shadowmods.net/" class="uk-navbar-item">
+							<span uk-icon="discord"></span>
+							<div class="uk-margin uk-margin-left">Discord</div>
+						</a>
+					</div>
+				</nav>
+			</div>
+			<div class="uk-container uk-padding">
+				<b class="uk-text-large"><span class="uk-badge">{{#packages}}</span> Packages</b>
+				<div class="uk-margin-small"></div>
+				Here is a list of packages hosted in the mercury repository, currently you can just search
+				for the latest version available on the repository, even though if you know the exact
+				version number of an old package you can still download it from Mercury.
+				<div class="uk-margin-small"></div>
+				<hr />
+				<div id="packagesList">
+					{% for _, package in pairs(packages) do %}
+						{(components/mercuryPackage.html, {package = package})}
+					{% end %}
+				</div>
+			</div>
+		</div>
+	</body>
+	{(components/footer.html)}
+</html>

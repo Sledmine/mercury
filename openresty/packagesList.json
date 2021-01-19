@@ -2,11 +2,19 @@
     {
         "label": "chimera",
         "version": "1.0.0-r836",
-        "author": "Kavawuvi"
+        "description": "Chimera is the update to Halo Custom Edition/Halo Combat Evolved for PC that
+        we should have had but never got.",
+        "image": "https://chimera.opencarnage.net/logo.png",
+        "author": "Kavawuvi",
+        "category": "addon"
     },
     {
         "label": "dsoal",
         "version": "1.0.0",
-        "author": "kcat"
+        "description": "It implements the
+        DirectSound interfaces by translating the calls to OpenAL, and fools
+        applications into thinking there is a hardware accelerated sound device.",
+        "author": "kcat",
+        "category": "addon"
     }
 ]

@@ -16,14 +16,14 @@ html, body {
 
 #page-wrapper {
     min-height: calc(100% - 20px);
-    margin-bottom: -170px;
+    margin-bottom: -180px;
 }
 #page-wrapper:after {
     content: "";
     display: block;
 }
 #page-footer, #page-wrapper:after {
-    height: 170px;
+    height: 180px;
 }
 #page-footer {
     background-color:  #252a33;

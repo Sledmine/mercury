@@ -16,5 +16,12 @@
         applications into thinking there is a hardware accelerated sound device.",
         "author": "kcat",
         "category": "addon"
+    },
+    {
+        "label": "hrp",
+        "version": "1.0.0",
+        "description": "Discord Rich Presence for Halo Custom Edition",
+        "author": "giraffe",
+        "category": "addon"
     }
 ]

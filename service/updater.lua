@@ -80,7 +80,8 @@ if (manifestAreCompatible()) then
                     local diffFilePath = "temp/updatedPackage/" .. newFile.path .. ".xd3"
                     local standardDiffFilePath = diffFilePath:gsub("\\", "/")
 
-                    local outputDiffFileFolderPath = standardDiffFilePath:gsub(path.file(standardDiffFilePath), "")
+                    local outputDiffFileFolderPath =
+                        standardDiffFilePath:gsub(path.file(standardDiffFilePath), "")
                     local createOutputPathCmd = "mkdir " .. outputDiffFileFolderPath
                     print(createOutputPathCmd)
                     os.execute(createOutputPathCmd:gsub("/", "\\"))
@@ -89,7 +90,8 @@ if (manifestAreCompatible()) then
                     print("newFilePath: " .. newFilePath)
                     print("diffFilePath: " .. diffFilePath)
 
-                    local xd3Cmd = xd3CmdLine:format(oldFilePath, newFilePath, diffFilePath):gsub("\\", "/")
+                    local xd3Cmd = xd3CmdLine:format(oldFilePath, newFilePath, diffFilePath):gsub(
+                                       "\\", "/")
                     print("xd3Cmd: " .. xd3Cmd)
 
                     local xd3Result = os.execute(xd3Cmd)
@@ -111,6 +113,13 @@ if (manifestAreCompatible()) then
                 elseif (newFile.type == "optional") then
                     -- File is optional we need to remove it from installation files
                     newManifest.files[newFileIndex] = nil
+                end
+            end
+        end
+        for oldDependencyIndex, oldDependency in pairs(oldManifest.dependencies) do
+            for newDependencyIndex, newDependency in pairs(newManifest.dependencies) do
+                if (newDependency.label == oldDependency.label and newDependency.version == oldDependency.version) then
+                    newManifest.dependencies[newDependencyIndex] = nil
                 end
             end
         end

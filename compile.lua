@@ -5,11 +5,12 @@
 ------------------------------------------------------------------------------
 local glue = require "glue"
 
+------------ Bundle configuration ------------
+
 -- Provide path to project modules
 package.path = package.path .. ";.\\Mercury\\?.lua"
 
 local constants = require "modules.constants"
-
 local version = constants.mercuryVersion
 
 local staticLibs = {
@@ -68,21 +69,62 @@ local mainLua = "mercury"
 
 local outputPath = "Mercury\\bin\\mercury.exe"
 
-local bundleCmdLine = "mgit bundle -a '%s' -m '%s' -M '%s' -i '%s' -fv %s -vi '%s' -o '%s' -av " ..
-                          version
+------------ Compilation process ------------
 
-local bundleCmd = string.format(bundleCmdLine, table.concat(staticLibs, " "),
-                                table.concat(modules, " "), mainLua, iconPath, version .. ".0",
-                                table.concat(versionInfo, ";"), outputPath)
-print(bundleCmd)
-os.execute(bundleCmd)
+local function compileMercury(compilationArch)
+    local removeCache = [[rm -rf .bundle-tmp\]]
+    os.execute(removeCache)
 
----@type string
-local installerTemplate = glue.readfile("mercury\\installerTemplate.iss", "t")
-if (installerTemplate) then
-    installerTemplate = installerTemplate:gsub("$VNUMBER", version)
-    glue.writefile("mercury\\installer.iss", installerTemplate, "t")
-    local installerCmd = "cd mercury\\ & ISCC installer.iss && cd .."
-    print(installerCmd)
-    os.execute(installerCmd)
+    local removeSmlink = [[rmdir D:\mingw\]]
+    os.execute(removeSmlink)
+
+    local removeMercury = [[rm -rf mercury\bin\mercury.exe]]
+    os.execute(removeMercury)
+
+    local makeSmlinkMingw = [[mklink /d D:\mingw\ C:\%s\]]
+    local archFlag = ""
+    local luajitWrapper = glue.readfile("luajit")
+    if (compilationArch == "x86") then
+        archFlag = "-m32"
+        os.execute(makeSmlinkMingw:format("mingw32"))
+        glue.writefile("luajit", luajitWrapper:gsub("mingw64", "mingw32"))
+    else
+        os.execute(makeSmlinkMingw:format("mingw64"))
+        glue.writefile("luajit", luajitWrapper:gsub("mingw32", "mingw64"))
+    end
+
+    local bundleCmdLine =
+        "mgit bundle %s -a '%s' -m '%s' -M '%s' -i '%s' -fv %s -vi '%s' -o '%s' -av %s"
+
+    local bundleCmd = string.format(bundleCmdLine, archFlag, table.concat(staticLibs, " "),
+                                    table.concat(modules, " "), mainLua, iconPath, version .. ".0",
+                                    table.concat(versionInfo, ";"), outputPath, version)
+    return os.execute(bundleCmd)
 end
+
+local function compileInstaller(compilationArch)
+    ---@type string
+    local installerTemplate = glue.readfile("mercury\\installerTemplate.iss", "t")
+    if (installerTemplate) then
+        installerTemplate = installerTemplate:gsub("$VNUMBER", version)
+        local arch64 = compilationArch
+        local arch = compilationArch
+        if (compilationArch == "x86") then
+            arch64 = ""
+        else
+            installerTemplate = installerTemplate:gsub(";Source", "Source")
+        end
+        installerTemplate = installerTemplate:gsub("$ARCH64", arch64)
+        installerTemplate = installerTemplate:gsub("$ARCH", arch)
+        glue.writefile("mercury\\installer.iss", installerTemplate, "t")
+        local installerCmd = "cd mercury\\ & ISCC installer.iss && cd .."
+        print(installerCmd .. "\n")
+        os.execute(installerCmd)
+    end
+end
+
+compileMercury("x86")
+compileInstaller("x86")
+
+compileMercury("x64")
+compileInstaller("x64")

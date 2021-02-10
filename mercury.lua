@@ -174,7 +174,7 @@ end)]]
 -- About command
 local aboutCmd = parser:command("about", "Get Mercury information.")
 aboutCmd:action(function(args, name)
-    cprint("Package manager for for Halo Custom Edition.")
+    cprint("Package manager for Halo Custom Edition.")
     cprint("Licensed in GNU General Public License v3.0\n")
     cprint("My Games path: \"" .. MyGamesPath .. "\"")
     cprint("Current Halo CE path: \"" .. GamePath .. "\"")

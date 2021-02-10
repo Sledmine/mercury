@@ -35,8 +35,9 @@ end
 ---@param packageVersion string Version of the package to install
 ---@param forced bool Forced mode installation
 ---@param skipOptionals bool Ignore optional files at installation
+---@param skipDependencies bool Ignore dependencies at installation
 ---@return boolean result
-function install.package(packageLabel, packageVersion, forced, skipOptionals)
+function install.package(packageLabel, packageVersion, forced, skipOptionals, skipDependencies)
     if (search(packageLabel)) then
         if (forced) then
             remove(packageLabel, true, true)
@@ -45,19 +46,20 @@ function install.package(packageLabel, packageVersion, forced, skipOptionals)
             return false
         end
     end
-    cprint("Searching for '" .. packageLabel .. "' in repository... ", true)
+    cprint("Searching for \"" .. packageLabel .. "\" in repository... ", true)
     -- Create local variables before implementation, it can be used to avoid too much else if
     local error, result, response
     error, response = api.getPackage(packageLabel, packageVersion)
     if (error == 200 and response) then
-        cprint("done.")
         local packageMeta = PackageMetadata:new(response)
         if (packageMeta and packageMeta.mirrors) then
+            cprint("done, found version " .. packageMeta.version .. ".")
             local result, packagePath = download.package(packageMeta)
             if (result) then
                 result, error = insert(packagePath, forced, skipOptionals)
                 if (result) then
-                    cprint("Success, package \"" .. packageLabel .. "\" has been installed.")
+                    cprint("Success, package \"" .. packageLabel ..
+                               "\" has been installed.")
                     return true
                 end
             end
@@ -87,7 +89,8 @@ function install.update(packageLabel)
                 if (result) then
                     result, error = insert(packagePath)
                     if (result) then
-                        cprint("Success, package \"" .. packageLabel .. "\" has been updated.")
+                        cprint("Success, package \"" .. packageLabel ..
+                                   "\" has been updated.")
                         return true
                     end
                 end

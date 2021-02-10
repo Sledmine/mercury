@@ -1,5 +1,12 @@
 # Changelog
 
+# 1.0.6
+- Support for 32 bit builds
+- Added flag on installer to add Mecury folder to PATH
+- Fixed a typo on the about command
+- Fixed a problem with some installer entries
+- Fixed an installer problem with a path for the desktop shortcut
+
 # 1.0.5
 - Added a flag to specify an alternative repository to download and update packages
 

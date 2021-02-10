@@ -32,7 +32,6 @@ luac.out
 *.dylib
 
 # Executables
-*.exe
 *.out
 *.app
 *.i*86
@@ -50,6 +49,10 @@ luac.out
 # OpenResty folders
 openresty/logs
 openresty/*temp/
+
+# Compilation files
+installer.iss
+bin/mercury*
 
 # Mercury packages
 packages/

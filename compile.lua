@@ -75,28 +75,29 @@ local function compileMercury(compilationArch)
     local removeCache = [[rm -rf .bundle-tmp\]]
     os.execute(removeCache)
 
-    local removeSmlink = [[rmdir D:\mingw\]]
+    local removeSmlink = [[rmdir C:\mingw\]]
     os.execute(removeSmlink)
 
-    local removeMercury = [[rm -rf mercury\bin\mercury.exe]]
-    os.execute(removeMercury)
+    local removeMercuryBin = [[rm -rf mercury\bin\mercury.exe]]
+    os.execute(removeMercuryBin)
 
-    local makeSmlinkMingw = [[mklink /d D:\mingw\ C:\%s\]]
-    local archFlag = ""
+    local makeMingwSmlink = [[mklink /d C:\mingw\ C:\%s\]]
+    local x86Flag = ""
+    -- //TODO Reimplement this wrapper as a file that knows wich arch you are trying to compile
     local luajitWrapper = glue.readfile("luajit")
     if (compilationArch == "x86") then
-        archFlag = "-m32"
-        os.execute(makeSmlinkMingw:format("mingw32"))
+        x86Flag = "-m32"
+        os.execute(makeMingwSmlink:format("mingw32"))
         glue.writefile("luajit", luajitWrapper:gsub("mingw64", "mingw32"))
     else
-        os.execute(makeSmlinkMingw:format("mingw64"))
+        os.execute(makeMingwSmlink:format("mingw64"))
         glue.writefile("luajit", luajitWrapper:gsub("mingw32", "mingw64"))
     end
 
-    local bundleCmdLine =
+    local bundleCmdTemplate =
         "mgit bundle %s -a '%s' -m '%s' -M '%s' -i '%s' -fv %s -vi '%s' -o '%s' -av %s"
 
-    local bundleCmd = string.format(bundleCmdLine, archFlag, table.concat(staticLibs, " "),
+    local bundleCmd = string.format(bundleCmdTemplate, x86Flag, table.concat(staticLibs, " "),
                                     table.concat(modules, " "), mainLua, iconPath, version .. ".0",
                                     table.concat(versionInfo, ";"), outputPath, version)
     return os.execute(bundleCmd)
@@ -112,6 +113,7 @@ local function compileInstaller(compilationArch)
         if (compilationArch == "x86") then
             arch64 = ""
         else
+            -- Enable optional binary sources for x64
             installerTemplate = installerTemplate:gsub(";Source", "Source")
         end
         installerTemplate = installerTemplate:gsub("$ARCH64", arch64)

@@ -42,11 +42,12 @@ Mingw-w64 is required to compile the project, at least for Windows builds.
 
 - [Mingw-w64](http://mingw-w64.org/doku.php)
 
-These modules are already included in the repository but you can check their own repository if needed:
+These modules are required for the project, they are already included on my fork of luapower as [luapower-all-x86-x64](https://github.com/Sledmine/luapower-all-x86-x64):
 
 - [argparse](https://github.com/luarocks/argparse)
 - [registry](https://github.com/Tieske/registry)
 - [middleclass](https://github.com/kikito/middleclass)
+- [semver](https://github.com/kikito/semver.lua)
 - [luaunit](https://github.com/bluebird75/luaunit)
 
 However using luapower was a bad decision due to the lack of documentation and support of it, so we are working to migrate this

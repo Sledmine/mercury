@@ -54,6 +54,7 @@ openresty/*temp/
 installer.iss
 bin/mercury*
 
-# Mercury packages
+# Mercury tools and stuff
 packages/
+service/
 *.mercu

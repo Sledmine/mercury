@@ -17,7 +17,7 @@ local codeBundler = require "lib.codeBundler"
 ---@field output string
 
 local function bundler(bundleName, compile)
-    -- // TODO Add compilation feature based on the lua target
+    --  TODO Add compilation feature based on the lua target
     if (bundleName) then
         bundleName = bundleName .. "Bundle.json"
     end

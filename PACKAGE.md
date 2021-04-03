@@ -1,6 +1,6 @@
 # Mercury Packages
 
-Mercury packages are simple zip files with `.merc` extension, they can contain any kind of files required to install a Halo Custom Edition mod, the purpose of a Mercury package is to provide and easy and automated way to install mods without suffering in the attempt, every package has [semantic versioning](https://www.jvandemo.com/a-simple-guide-to-semantic-versioning/) to keep track of every mod, also giving a way to provide updates between packages via binary of text difference, more info about this later on this documentation.
+Mercury packages are simple zip files with `.merc` extension, they can contain any kind of files required to install a Halo Custom Edition mod, the purpose of a Mercury package is to provide an easy and automated way to install mods without suffering in the attempt, every package has [semantic versioning](https://www.jvandemo.com/a-simple-guide-to-semantic-versioning/) to keep track of every mod, also giving a way to provide updates between packages via binary or text difference, more info about this later on this documentation.
 
 # Package Structure
 
@@ -26,7 +26,7 @@ This is a more modern file in mods for Halo Custom Edition, the `forge_island.ma
 
 -  `manifest.json`
 
-This is the most important file for a Mercury package, this json file contains all the data about the package, it has in it different properties to tell Mercury where to place all the files in the `.merc` file, giving a easy way to install any kind of mod, leaving the installation process to a program instead of leaving it to users.
+This is the most important file for a Mercury package, this json file contains all the information about the package, it has in it different properties to tell Mercury where to place all the files from the `.merc` package, giving an easy way to install any kind of mod, leaving the installation process to a program instead of leaving it to users.
 
 ***Note:*** There are some plans to support `.yml` files in the future as manifest files. 
 

@@ -20,7 +20,7 @@ local errors = {
 }
 
 local function getError(error)
-    -- // TODO: Add better error array handling
+    --  TODO: Add better error array handling
     if (type(error) == "table") then
         error = error[1]
     end
@@ -37,7 +37,11 @@ end
 ---@param skipOptionals bool Ignore optional files at installation
 ---@param skipDependencies bool Ignore dependencies at installation
 ---@return boolean result
-function install.package(packageLabel, packageVersion, forced, skipOptionals, skipDependencies)
+function install.package(packageLabel,
+                         packageVersion,
+                         forced,
+                         skipOptionals,
+                         skipDependencies)
     if (search(packageLabel)) then
         if (forced) then
             remove(packageLabel, true, true)
@@ -53,7 +57,7 @@ function install.package(packageLabel, packageVersion, forced, skipOptionals, sk
     if (error == 200 and response) then
         local packageMeta = PackageMetadata:new(response)
         if (packageMeta and packageMeta.mirrors) then
-            cprint("done, found version " .. packageMeta.version .. ".")
+            cprint("done. Found version " .. packageMeta.version .. ".")
             local result, packagePath = download.package(packageMeta)
             if (result) then
                 result, error = insert(packagePath, forced, skipOptionals)
@@ -79,8 +83,8 @@ function install.update(packageLabel)
     local error, result, response
     error, response = api.getPackage(packageLabel, currentPackage.version)
     if (error == 200 and response) then
-        cprint("done.")
         local packageMeta = PackageMetadata:new(response)
+        cprint("done. Found version " .. packageMeta.nextVersion .. ".")
         if (packageMeta and packageMeta.nextVersion) then
             error, response = api.getUpdate(packageLabel, packageMeta.nextVersion)
             if (error == 200 and response) then

@@ -31,7 +31,7 @@ end
 utils = require "lib.utils"
 
 -- Project modules
--- // FIXME Install is a global module due to recursive calls, a better solution should be provided
+-- FIXME Install is a global module due to recursive calls, a better solution should be provided
 install = require "modules.install"
 api = require "modules.api"
 
@@ -48,7 +48,7 @@ environment = require "config.environment"
 -- Get all environment variables and configurations
 environment.get()
 
--- // FIXME There is a problem with temp files cleanup messing with package installation
+--  FIXME There is a problem with temp files cleanup messing with package installation
 -- Cleanup
 -- environment.cleanTemp()
 
@@ -91,7 +91,7 @@ installCmd:flag("-o --skipOptionals", "Ignore optional files at installation.")
 installCmd:option("--repository", "Specify a custom repository to use.")
 installCmd:action(function(args, name)
     flagsCheck(args)
-    -- //TODO Add parsing for custom repository protocol
+    -- TODO Add parsing for custom repository protocol
     if (args.repository) then
         api.repositoryHost = args.repository
     end
@@ -133,8 +133,8 @@ end)
 
 -- Bundle command
 local luabundleCmd = parser:command("luabundle",
-                                    "Bundle any lua mod into a single deployable script.")
-luabundleCmd:description("Merge any modular lua project into a single script with dependencies.")
+                                    "Bundle lua script into single distributable script.")
+luabundleCmd:description("Merge any modular lua project into a single script with dependencies built-in.")
 luabundleCmd:argument("bundleFile", "Name of the bundle file, \"bundle\" by default."):args("?")
 luabundleCmd:flag("-c --compile",
                   "Compile this project using the lua target compiler in the bundle file.")
@@ -157,7 +157,7 @@ removeCmd:action(function(args, name)
 end)
 
 -- List command
-local listCmd = parser:command("list", "Show already installed packages in this game instance.")
+local listCmd = parser:command("list", "Shows already installed packages in this game instance.")
 listCmd:flag("-j --json", "Print the packages list in a json format.")
 listCmd:flag("-t --table", "Print the packages list in a lua table format.")
 listCmd:action(function(args, name)

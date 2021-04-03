@@ -9,9 +9,14 @@ local fdownload = require "lib.fdownload"
 
 api.repositoryHost = "genesis.vadam.net"
 api.httpProtocol = "https"
-api.librarianPath = "api/vulcano"
+api.vulcanoPath = "api/vulcano"
 
+--- Generate an URL using api definitions
+local function vulcanoUrl()
+    return api.httpProtocol .. "://" .. api.repositoryHost .. "/" .. api.vulcanoPath
+end
 
+--- Simple GET HTTP method
 local function get(url)
     local result, error, headers, status, response = fdownload.get(url)
     return error, response
@@ -20,8 +25,7 @@ end
 ---@param packageLabel string
 ---@param packageVersion string
 function api.getPackage(packageLabel, packageVersion)
-    local librarianUrl = api.httpProtocol .. "://" .. api.repositoryHost .. "/" .. api.librarianPath
-    local packageUrl = librarianUrl .. "/" .. packageLabel
+    local packageUrl = vulcanoUrl() .. "/" .. packageLabel
     local apiUrl = packageUrl
     if (packageVersion) then
         apiUrl = packageUrl .. "/" .. packageVersion
@@ -30,9 +34,10 @@ function api.getPackage(packageLabel, packageVersion)
     return get(apiUrl)
 end
 
+---@param packageLabel string
+---@param packageVersion string
 function api.getUpdate(packageLabel, packageVersion)
-    local librarianURL = api.httpProtocol .. "://" .. api.repositoryHost .. "/" .. api.librarianPath
-    local packageUrl = librarianURL .. "/" .. packageLabel .. "/update" 
+    local packageUrl = vulcanoUrl() .. "/" .. packageLabel .. "/update" 
     local apiUrl = packageUrl .. "/" .. packageVersion
     dprint(apiUrl)
     return get(apiUrl)

@@ -8,7 +8,7 @@ local glue = require "glue"
 
 local search = require "Mercury.actions.search"
 
--- // TODO Migrate the return of this action to an errors table
+--  TODO Migrate the return of this action to an errors table
 
 local function erasePackageFromIndex(packageLabel)
     -- Get current instance packages

@@ -9,7 +9,7 @@ local lfs = require "lfs"
 local glue = require "glue"
 local json = require "cjson"
 
--- // TODO Move this to a local module
+--  TODO Move this to a local module
 local registry = require "registry"
 
 -- Registry keys declaration

@@ -4,7 +4,7 @@
 -- Script to simplify mercury bundle process
 ------------------------------------------------------------------------------
 local glue = require "glue"
-
+local fs = require "fs"
 ------------ Bundle configuration ------------
 
 -- Provide path to project modules
@@ -38,21 +38,23 @@ local modules = {
     "ssl.lua",
     "glue.lua",
     "minizip*.lua",
-    -- Project libs
-    "mercury.lua",
+    -- Custom modules
     "registry.lua",
     "argparse.lua",
     "middleclass.lua",
     "semver.lua",
-    -- Luaunit is just for testing purposes, not required for release
-    -- Anyway, keep it here for tracking...
-    -- "luaunit.lua",
+    -- "luaunit.lua", -- Testing purposes only, keep it here for tracking, not needed for release
+    -- Mercury modules
     "Mercury/actions/*.lua",
     "Mercury/modules/*.lua",
     "Mercury/config/*.lua",
     "Mercury/entities/*.lua",
     "Mercury/internal/*.lua",
-    "Mercury/lib/*.lua"
+    "Mercury/lib/*.lua",
+    -- Main file
+    -- For some reaseon this causes the program to fail if running on certain folders
+    -- "Mercury/mercury.lua",
+    "mercury.lua"
 }
 
 local versionInfo = {
@@ -65,41 +67,43 @@ local versionInfo = {
 
 local iconPath = "Mercury/assets/icons/mercury.ico"
 
+-- This requires a certain link on the luapower root
 local mainLua = "mercury"
 
 local outputPath = "Mercury\\bin\\mercury.exe"
 
 ------------ Compilation process ------------
+local luapowerArchs = {x64 = "64", x86 = "32"}
 
 local function compileMercury(compilationArch)
     local removeCache = [[rm -rf .bundle-tmp\]]
     os.execute(removeCache)
 
-    local removeSmlink = [[rmdir C:\mingw\]]
-    os.execute(removeSmlink)
+    if (fs.is([[C:\mingw\]])) then
+        local removeSmlink = [[rmdir C:\mingw\]]
+        os.execute(removeSmlink)
+    end
 
     local removeMercuryBin = [[rm -rf mercury\bin\mercury.exe]]
     os.execute(removeMercuryBin)
 
     local makeMingwSmlink = [[mklink /d C:\mingw\ C:\%s\]]
     local x86Flag = ""
-    -- //TODO Reimplement this wrapper as a file that knows wich arch you are trying to compile
-    local luajitWrapper = glue.readfile("luajit")
     if (compilationArch == "x86") then
         x86Flag = "-m32"
         os.execute(makeMingwSmlink:format("mingw32"))
-        glue.writefile("luajit", luajitWrapper:gsub("mingw64", "mingw32"))
     else
         os.execute(makeMingwSmlink:format("mingw64"))
-        glue.writefile("luajit", luajitWrapper:gsub("mingw32", "mingw64"))
     end
 
     local bundleCmdTemplate =
-        "mgit bundle %s -a '%s' -m '%s' -M '%s' -i '%s' -fv %s -vi '%s' -o '%s' -av %s"
+        "set LUAJIT_PATH=bin/mingw%s/luajit.exe && mgit bundle %s -a \"%s\" -m \"%s\" -M \"%s\" -i \"%s\" -fv %s -vi \"%s\" -o \"%s\" -av %s"
 
-    local bundleCmd = string.format(bundleCmdTemplate, x86Flag, table.concat(staticLibs, " "),
-                                    table.concat(modules, " "), mainLua, iconPath, version .. ".0",
-                                    table.concat(versionInfo, ";"), outputPath, version)
+    local bundleCmd = string.format(bundleCmdTemplate, luapowerArchs[compilationArch],x86Flag, table.concat(staticLibs, " "),
+                                    table.concat(modules, " "), mainLua, iconPath,
+                                    version .. ".0", table.concat(versionInfo, ";"),
+                                    outputPath, version)
+    print(bundleCmd)
     return os.execute(bundleCmd)
 end
 
@@ -127,6 +131,5 @@ end
 
 compileMercury("x86")
 compileInstaller("x86")
-
 compileMercury("x64")
 compileInstaller("x64")

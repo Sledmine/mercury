@@ -22,7 +22,8 @@ local staticLibs = {
     "lfs",
     "cjson",
     "z",
-    "minizip"
+    "minizip",
+    "md5"
 }
 
 local modules = {
@@ -43,6 +44,9 @@ local modules = {
     "argparse.lua",
     "middleclass.lua",
     "semver.lua",
+    "mime.lua",
+    "md5.lua",
+    "requests.lua",
     -- "luaunit.lua", -- Testing purposes only, keep it here for tracking, not needed for release
     -- Mercury modules
     "Mercury/actions/*.lua",

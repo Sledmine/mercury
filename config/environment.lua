@@ -33,9 +33,10 @@ end
 local function getGamePath()
     local registryPath
     local arch = os.getenv("PROCESSOR_ARCHITECTURE")
-    registryPath = registry.getkey(registryEntries.haloce64)
     if (arch == "x86") then
         registryPath = registry.getkey(registryEntries.haloce32)
+    else
+        registryPath = registry.getkey(registryEntries.haloce64)
     end
     if (registryPath) then
         return registryPath.values["EXE Path"]["value"]
@@ -51,6 +52,10 @@ function environment.get()
     local temp = os.getenv("TEMP")
     local sourceFolder = lfs.currentdir()
     local appData = os.getenv("APPDATA")
+    Arch = os.getenv("PROCESSOR_ARCHITECTURE")
+    if (Arch ~= "x86") then
+        Arch = "x64"
+    end
     GamePath = getGamePath()
     MyGamesPath = getMyGamesPath()
     MercuryTemp = temp .. "\\mercury"

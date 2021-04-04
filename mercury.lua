@@ -39,6 +39,7 @@ local remove = require "actions.remove"
 local list = require "actions.list"
 local luabundle = require "actions.luabundle"
 local insert = require "actions.insert"
+local latest = require "actions.latest"
 
 local constants = require "modules.constants"
 
@@ -101,7 +102,7 @@ end)
 
 -- Update command
 local updateCmd = parser:command("update", "Update any installed package in this game instance.")
-updateCmd:description("Update any package in your game by binary difference.")
+updateCmd:description("Update any package to a next version by downloading difference.")
 updateCmd:argument("packageLabel", "Label of the package you want to update.")
 updateCmd:option("--repository", "Specify a custom repository to use.")
 -- update:argument("packageVersion", "Version of the package to update, latest by default."):args("?")
@@ -112,6 +113,15 @@ updateCmd:action(function(args, name)
         api.repositoryHost = args.repository
     end
     install.update(args.packageLabel)
+    environment.cleanTemp()
+end)
+
+-- Upgrade command
+local latestCmd = parser:command("latest", "Get latest Mercury version from GitHub.")
+latestCmd:description("Open GitHub release page if there is a newer Mercury version available.")
+latestCmd:action(function(args, name)
+    flagsCheck(args)
+    latest()
     environment.cleanTemp()
 end)
 

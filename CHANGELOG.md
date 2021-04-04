@@ -1,5 +1,11 @@
 # Changelog
 
+# 1.1.0
+- Added **"latest"** command to get the latest Mercury version available on GitHub
+```
+mercury latest
+```
+
 # 1.0.6
 - Support for 32 bit builds
 - Added flag on installer to add Mecury folder to PATH

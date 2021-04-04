@@ -12,7 +12,7 @@
 			<div class="uk-width-expand">
 				<h3 class="uk-card-title uk-margin-remove-bottom">
 					{{package.label}}
-					<span class="uk-label">{{package.category or "generic"}}</span>
+					<span class="uk-label">{{package.category}}</span>
 				</h3>
 				<p class="uk-text-meta uk-margin-remove-top">{{package.version}}</p>
 			</div>
@@ -22,10 +22,6 @@
 		<p>{{package.description or "No description was provided"}}.</p>
 	</div>
 	<div class="uk-card-footer">
-		<b>Install this package using the following command:</b>
-		<div class="uk-margin"></div>
-		<div data-termynal>
-			<span data-ty="input" data-ty-prompt="C:\Users\117>">mercury install {{package.label}}</span>
-		</div>
+		<code>mercury install {{package.label}}</code>
 	</div>
 </div>

@@ -6,7 +6,7 @@ function search() {
 	packages = packagesList.getElementsByClassName("uk-card");
 	// Loop through all list items, and hide those who don't match the search query
 	for (i = 0; i < packages.length; i++) {
-        mercuryPackage = packages[i].getElementsByClassName("uk-card-title")[0];
+		mercuryPackage = packages[i].getElementsByClassName("uk-card-title")[0];
 		text = mercuryPackage.textContent || mercuryPackage.innerText;
 		if (text.toUpperCase().indexOf(filter) > -1) {
 			packages[i].style.display = "";

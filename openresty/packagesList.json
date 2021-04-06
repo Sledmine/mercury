@@ -1,1 +1,44 @@
-[{"version":"1.0.0-r874","category":"addon","description":"Chimera is the update to Halo: Combat Evolved for the PC that we should have had but never got","label":"chimera","author":"Kavawuvi"},{"version":"1.0.0","category":"addon","description":"Direct Sound binding to OpenAL","label":"dsoal","author":"kcat"},{"version":"0.1.0","category":"addon","description":"HAC2 Optic reimplementation for Chimera with some extra features","label":"harmony","author":"Jerry"},{"version":"1.0.0","category":"script","description":"Hitmarker script example for Harmony","label":"hitmarker","author":"Jerry"},{"version":"1.0.0","category":"addon","description":"Discord Rich Presence for Halo Custom Edition","label":"hrp","author":"giraffe"},{"version":"1.0.1","category":"map","description":"Sandbox map for IA sync coop","label":"snowedout","author":"Shadowmods Team"},{"version":"1.0.0","category":"script","description":"AI Sync for Halo Custom Edition using Chimera","label":"uais","author":"IceCrow14&Sled"}]
+[
+    {
+        "version": "1.0.0-r875",
+        "category": "addon",
+        "description": "Chimera is the update to Halo: Combat Evolved for the PC that we should have had but never got",
+        "label": "chimera",
+        "author": "SnowyMouse"
+    },
+    {
+        "version": "1.0.0",
+        "category": "addon",
+        "description": "Direct Sound binding to OpenAL",
+        "label": "dsoal",
+        "author": "kcat"
+    },
+    {
+        "version": "0.1.0",
+        "category": "addon",
+        "description": "HAC2 Optic reimplementation for Chimera with some extra features",
+        "label": "harmony",
+        "author": "Jerry"
+    },
+    {
+        "version": "1.0.0",
+        "category": "script",
+        "description": "Hitmarker script example for Harmony",
+        "label": "hitmarker",
+        "author": "Jerry"
+    },
+    {
+        "version": "1.0.0",
+        "category": "addon",
+        "description": "Discord Rich Presence for Halo Custom Edition",
+        "label": "hrp",
+        "author": "giraffe"
+    },
+    {
+        "version": "1.0.1",
+        "category": "map",
+        "description": "Sandbox map for IA sync coop",
+        "label": "snowedout",
+        "author": "Shadowmods Team"
+    }
+]

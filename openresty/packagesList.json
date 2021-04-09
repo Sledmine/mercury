@@ -40,5 +40,12 @@
         "description": "Sandbox map for IA sync coop",
         "label": "snowedout",
         "author": "Shadowmods Team"
+    },
+    {
+        "version": "1.0.0-alpha.1",
+        "category": "map",
+        "description": "Insurrection UI project for Halo Custom Edition",
+        "label": "insurrection",
+        "author": "Sledmine"
     }
 ]

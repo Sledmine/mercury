@@ -2,7 +2,7 @@
 
 # 1.2.0
 - Added `-t --template` flag to the `luabundle` command, this will create a template of a
-manifest.json file in the current directory
+bundle.json file in the current directory
 ```
 mercury luabundle --template
 ```

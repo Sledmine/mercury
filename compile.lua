@@ -47,6 +47,8 @@ local modules = {
     "mime.lua",
     "md5.lua",
     "requests.lua",
+    "pretty/*.lua",
+    "pretty/json/*.lua",
     -- "luaunit.lua", -- Testing purposes only, keep it here for tracking, not needed for release
     -- Mercury modules
     "Mercury/actions/*.lua",

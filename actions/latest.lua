@@ -1,5 +1,5 @@
 local json = require "cjson"
-local requests = require "lua-requests"
+local requests = require "requests"
 local constants = require "modules.constants"
 local v = require "semver"
 

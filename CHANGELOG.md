@@ -1,7 +1,14 @@
 # Changelog
 
+# 1.2.0
+- Added `-t --template` flag to the `luabundle` command, this will create a template of a
+manifest.json file in the current directory
+```
+mercury luabundle --template
+```
+
 # 1.1.0
-- Added **"latest"** command to get the latest Mercury version available on GitHub
+- Added `latest` command to get the latest Mercury version available on GitHub
 ```
 mercury latest
 ```
@@ -12,7 +19,7 @@ mercury latest
 - Fixed a typo on the about command
 - Fixed a problem with some installer entries
 - Fixed an installer problem with a path for the desktop shortcut
-- Added version info on install and update commands at getting latest package available.
+- Added version info on install and update commands at getting latest package available
 
 # 1.0.5
 - Added a flag to specify an alternative repository to download and update packages

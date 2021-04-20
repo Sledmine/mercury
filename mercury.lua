@@ -37,10 +37,10 @@ api = require "modules.api"
 
 local remove = require "actions.remove"
 local list = require "actions.list"
-local luabundle = require "actions.luabundle"
 local insert = require "actions.insert"
 local latest = require "actions.latest"
 
+local luabundler = require "modules.luabundle"
 local constants = require "modules.constants"
 
 -- Global data
@@ -55,7 +55,7 @@ environment.get()
 
 -- Create argument parser with Mercury info
 local parser = argparse("mercury", "Package Manager for Halo Custom Edition.",
-                        "Support mercury on: https://mercury.vadam.net")
+                        "Mercury Webpage: http://mercuryce.com\nJoin us on Discord: https://discord.shadowmods.net/\nSupport Mercury on GitHub: https://github.com/Sledmine/Mercury")
 -- Disable command required message                        
 parser:require_command(false)
 
@@ -83,7 +83,8 @@ end
 
 -- Install command
 local installCmd = parser:command("install", "Install any package into the game.")
-installCmd:description("Install will download and add any package from Mercury repository.")
+installCmd:description(
+    "Install will download and add any package from Mercury repository.")
 installCmd:argument("packageLabel", "Label of the package you want to download.")
 installCmd:argument("packageVersion", "Version of the package to install."):args("?")
 installCmd:flag("-f --force",
@@ -101,7 +102,8 @@ installCmd:action(function(args, name)
 end)
 
 -- Update command
-local updateCmd = parser:command("update", "Update any installed package in this game instance.")
+local updateCmd = parser:command("update",
+                                 "Update any installed package in this game instance.")
 updateCmd:description("Update any package to a next version by downloading difference.")
 updateCmd:argument("packageLabel", "Label of the package you want to update.")
 updateCmd:option("--repository", "Specify a custom repository to use.")
@@ -118,7 +120,8 @@ end)
 
 -- Upgrade command
 local latestCmd = parser:command("latest", "Get latest Mercury version from GitHub.")
-latestCmd:description("Open GitHub release page if there is a newer Mercury version available.")
+latestCmd:description(
+    "Open GitHub release page if there is a newer Mercury version available.")
 latestCmd:action(function(args, name)
     flagsCheck(args)
     latest()
@@ -126,7 +129,8 @@ latestCmd:action(function(args, name)
 end)
 
 -- Insert command
-local insertCmd = parser:command("insert", "Insert a merc package into the game manually.")
+local insertCmd =
+    parser:command("insert", "Insert a merc package into the game manually.")
 insertCmd:description("Attempts to insert the files from a mercury package.")
 insertCmd:argument("mercPath", "Path of the merc file to insert")
 insertCmd:flag("-f --force", "Remove any conflicting files without creating a backup.")
@@ -143,14 +147,21 @@ end)
 
 -- Bundle command
 local luabundleCmd = parser:command("luabundle",
-                                    "Bundle lua script into single distributable script.")
-luabundleCmd:description("Merge any modular lua project into a single script with dependencies built-in.")
-luabundleCmd:argument("bundleFile", "Name of the bundle file, \"bundle\" by default."):args("?")
+                                    "Bundle lua scripts into a single distributable script.")
+luabundleCmd:description(
+    "Merge any modular lua project into a single script with built-in modules.")
+luabundleCmd:argument("bundleFile", "Bundle file name, \"bundle\" by default."):args("?")
 luabundleCmd:flag("-c --compile",
                   "Compile this project using the lua target compiler in the bundle file.")
+luabundleCmd:flag("-t --template",
+                  "Create a manifest.json template in the current directory.")
 luabundleCmd:action(function(args, name)
     flagsCheck(args)
-    luabundle(args.bundleFile, args.compile)
+    if (args.template) then
+        luabundler.template()
+        return
+    end
+    luabundler.bundle(args.bundleFile, args.compile)
 end)
 
 -- Remove command
@@ -163,11 +174,13 @@ removeCmd:flag("-r --recursive", "Remove all the dependencies of this package.")
 removeCmd:flag("-f --forced", "Forced remove by erasing entry from package index.")
 removeCmd:action(function(args, name)
     flagsCheck(args)
-    remove(args.packageLabel, args.norestore, args.erasebackups, args.recursive, args.forced)
+    remove(args.packageLabel, args.norestore, args.erasebackups, args.recursive,
+           args.forced)
 end)
 
 -- List command
-local listCmd = parser:command("list", "Shows already installed packages in this game instance.")
+local listCmd = parser:command("list",
+                               "Shows already installed packages in this game instance.")
 listCmd:flag("-j --json", "Print the packages list in a json format.")
 listCmd:flag("-t --table", "Print the packages list in a lua table format.")
 listCmd:action(function(args, name)

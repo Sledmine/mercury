@@ -1,4 +1,4 @@
-# Mercury Luabundler
+# Mercury Packages
 
 Mercury packages are simple zip files with `.merc` extension, they can contain any kind of files required to install a Halo Custom Edition mod, the purpose of a Mercury package is to provide an easy and automated way to install mods without suffering in the attempt, every package has [semantic versioning](https://www.jvandemo.com/a-simple-guide-to-semantic-versioning/) to keep track of every mod, also giving a way to provide updates between packages via binary or text difference, more info about this later on this documentation.
 

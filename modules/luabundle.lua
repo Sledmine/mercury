@@ -65,9 +65,9 @@ function luabundler.bundle(bundleName, compile)
     return false
 end
 
---- Attempt to create a manifest file template
+--- Attempt to create a bundle file template
 function luabundler.template()
-    if (not fs.is("manifest.json")) then
+    if (not fs.is("bundle.json")) then
         local template = {
             name = "",
             target = "lua53",
@@ -76,7 +76,7 @@ function luabundler.template()
             main = "",
             output = "dist\\.lua"
         }
-        glue.writefile("manifest.json", pjson.stringify(template, nil, 4), "t")
+        glue.writefile("bundle.json", pjson.stringify(template, nil, 4), "t")
         cprint("Success, manifest.json template has been created successfully.")
     else
         cprint("Warning, there is already a manifest in this folder!")

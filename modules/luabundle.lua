@@ -77,7 +77,7 @@ function luabundler.template()
             output = "dist\\.lua"
         }
         glue.writefile("bundle.json", pjson.stringify(template, nil, 4), "t")
-        cprint("Success, manifest.json template has been created successfully.")
+        cprint("Success, bundle.json template has been created successfully.")
     else
         cprint("Warning, there is already a manifest in this folder!")
     end

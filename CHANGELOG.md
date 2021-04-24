@@ -14,32 +14,43 @@ mercury latest
 ```
 
 # 1.0.6
-- Support for 32 bit builds
+- Added support for 32 bit builds
 - Added flag on installer to add Mecury folder to PATH
-- Fixed a typo on the about command
+- Fixed a typo on the `about` command
 - Fixed a problem with some installer entries
 - Fixed an installer problem with a path for the desktop shortcut
-- Added version info on install and update commands at getting latest package available
+- Added package version message on `install` and `update` commands at getting latest package available
 
 # 1.0.5
-- Added a flag to specify an alternative repository to download and update packages
+- Added `--repository` flag to specify an alternative repository to download and update packages
+```cmd
+mercury install chimera --repository alternative.repo.com
+```
 
 # 1.0.4
-- Fixed a bug with the update command where it was erasing the "files" property from the package index
+- Fixed a bug with the `update` command where it was erasing the `files` property from the package index
 
 # 1.0.3
-- Fixed a bug with remove where recursive flag was canceled by forced flag
+- Fixed a bug with the `remove` command where `-r --recursive` flag was canceled by `-f --forced` flag
 
 # 1.0.2
 - Added semantic version checking at installing dependencies
-- Fixed a bug with packages that did not specify a specific package dependency version
-- Added flag to skip optional files at insert and install commands
-- Added flag to perform a forced remove with remove command
+- Added `-o --skipOptionals` flag to skip optional files installation at `insert` and `install` commands
+```cmd
+mercury install chimera -o
+```
+Command above will omit optional files like `chimera.ini` and similars.
+- Added `-f --force` flag to perform a forced package removal with `remove` command, this will erase the package entry in the Mercury packages index
+```cmd
+mercury remove chimera -f
+```
+Command above will keep chimera files in place but remove Mercury awareness of the package.
+- Added ansicolor to support text color printing in old Windows versions
 - Changed how version number was printed with version command
 - Fixed a problem for different bundle files in luabundle command
 - Fixed a bug with the new Mercury packages standard
-- Added ansicolor to support text color printing in old Windows versions
 - Fixed a bug related to temporary files not being deleted
+- Fixed a bug with packages that did not specify a specific package dependency version
 
 # 1.0.1
 - Fixed a bug with package dependencies version validation

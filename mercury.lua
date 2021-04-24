@@ -147,14 +147,11 @@ end)
 
 -- Bundle command
 local luabundleCmd = parser:command("luabundle",
-                                    "Bundle lua scripts into a single distributable script.")
-luabundleCmd:description(
-    "Merge any modular lua project into a single script with built-in modules.")
+                                    "Bundle lua files into one distributable script.")
+luabundleCmd:description("Bundle modular lua projects into a single script.")
 luabundleCmd:argument("bundleFile", "Bundle file name, \"bundle\" by default."):args("?")
-luabundleCmd:flag("-c --compile",
-                  "Compile this project using the lua target compiler in the bundle file.")
-luabundleCmd:flag("-t --template",
-                  "Create a manifest.json template in the current directory.")
+luabundleCmd:flag("-c --compile", "Compile output file using target compiler.")
+luabundleCmd:flag("-t --template", "Create a bundle template file on current directory.")
 luabundleCmd:action(function(args, name)
     flagsCheck(args)
     if (args.template) then
@@ -171,11 +168,11 @@ removeCmd:argument("packageLabel", "Label of the package you want to remove.")
 removeCmd:flag("-n --norestore", "Prevent previous backups from being restored.")
 removeCmd:flag("-e --erasebackups", "Erase previously created backups.")
 removeCmd:flag("-r --recursive", "Remove all the dependencies of this package.")
-removeCmd:flag("-f --forced", "Forced remove by erasing entry from package index.")
+removeCmd:flag("-f --force", "Force remove by erasing entry from package index.")
 removeCmd:action(function(args, name)
     flagsCheck(args)
     remove(args.packageLabel, args.norestore, args.erasebackups, args.recursive,
-           args.forced)
+           args.force)
 end)
 
 -- List command

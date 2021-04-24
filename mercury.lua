@@ -84,7 +84,7 @@ end
 -- Install command
 local installCmd = parser:command("install", "Install any package into the game.")
 installCmd:description(
-    "Install will download and add any package from Mercury repository.")
+    "Install will download and insert any package from Mercury repository.")
 installCmd:argument("packageLabel", "Label of the package you want to download.")
 installCmd:argument("packageVersion", "Version of the package to install."):args("?")
 installCmd:flag("-f --force",
@@ -131,7 +131,7 @@ end)
 -- Insert command
 local insertCmd =
     parser:command("insert", "Insert a merc package into the game manually.")
-insertCmd:description("Attempts to insert the files from a mercury package.")
+insertCmd:description("Attempts to insert the files from a Mercury package.")
 insertCmd:argument("mercPath", "Path of the merc file to insert")
 insertCmd:flag("-f --force", "Remove any conflicting files without creating a backup.")
 insertCmd:flag("-o --skipOptionals", "Ignore optional files at installation.")

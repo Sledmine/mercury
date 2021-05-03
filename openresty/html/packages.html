@@ -43,19 +43,7 @@
 						</a>
 					</div>
 					<div class="uk-navbar-center">
-						<form class="uk-search uk-search-navbar uk-dark uk-background-muted">
-							<a uk-search-icon></a>
-							<input
-								id="searchBar"
-								style="font-size: 95%"
-								class="uk-search-input"
-								type="search"
-								placeholder="Search packages by label or category..."
-								autocomplete="false"
-								autofocus="true"
-								onkeyup="search()"
-							/>
-						</form>
+						
 					</div>
 					<div style="margin-right: 10px" class="uk-navbar-right">
 						<a
@@ -74,6 +62,24 @@
 				</nav>
 			</div>
 			<div class="uk-container uk-padding">
+				<div class="uk-flex uk-flex-center">
+					<div>
+						<form class="uk-search uk-search-navbar uk-dark">
+							<a uk-search-icon></a>
+							<input
+								id="searchBar"
+								style="font-size: 95%"
+								class="uk-search-input"
+								type="search"
+								placeholder="Search packages by label or category..."
+								autocomplete="false"
+								autofocus="true"
+								onkeyup="search()"
+							/>
+						</form>
+					</div>
+				</div>
+				<div class="uk-margin-small"></div>
 				<b class="uk-text-large"><span class="uk-badge">{{#packages}}</span> Packages</b>
 				<div class="uk-margin-small"></div>
 				Here is a list of packages hosted in the mercury repository, currently you can just search

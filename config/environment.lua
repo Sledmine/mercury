@@ -24,8 +24,14 @@ local function getMyGamesPath()
     if (documentsPath) then
         return documentsPath.values["Personal"]["value"] .. "\\My Games\\Halo CE"
     else
-        print("Error at trying to get \"My Documents\" path...")
-        os.exit()
+        -- Linux support
+        documentsPath = os.getenv("HOME")
+        if (not documentsPath) then
+            print("Error at trying to get \"My Games\" path...")
+            os.exit()
+        else
+            documentsPath = documentsPath .. "/Documents/My Games"
+        end
     end
     return nil
 end
@@ -41,8 +47,14 @@ local function getGamePath()
     if (registryPath) then
         return registryPath.values["EXE Path"]["value"]
     else
-        print("Error at getting game path, Mercury does not support portable installations.")
-        os.exit()
+        -- Linux support
+        -- TODO Add a better standard for defining Halo CE Path
+        registryPath = os.getenv("HALOCE_PATH")
+        if (not registryPath) then
+            print(
+                "Error at getting game path, Mercury does not support portable installations.")
+            os.exit()
+        end
     end
     return nil
 end

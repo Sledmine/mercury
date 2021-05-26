@@ -25,7 +25,7 @@ if (appBundle.appversion) then
     require = crequire
 else
     -- Developer mode, provide path to project modules
-    package.path = package.path .. ";.\\Mercury\\?.lua"
+    package.path = package.path .. ";./Mercury/?.lua"
 end
 
 utils = require "lib.utils"
@@ -75,7 +75,7 @@ local function flagsCheck(args)
         IsTestModeEnabled = true
         -- Override respository connection data
         api.repositoryHost = "localhost:3000"
-        api.httpProtocol = "http"
+        api.protocol = "http"
         api.librarianPath = "api/vulcano"
         cprint("Warning, Test mode enabled.")
     end
@@ -98,7 +98,7 @@ installCmd:action(function(args, name)
         api.repositoryHost = args.repository
     end
     install.package(args.packageLabel, args.packageVersion, args.force, args.skipOptionals)
-    environment.cleanTemp()
+    --environment.cleanTemp()
 end)
 
 -- Update command
@@ -178,8 +178,8 @@ end)
 -- List command
 local listCmd = parser:command("list",
                                "Shows already installed packages in this game instance.")
-listCmd:flag("-j --json", "Print the packages list in a json format.")
-listCmd:flag("-t --table", "Print the packages list in a lua table format.")
+listCmd:flag("-j --json", "Show list in json format.")
+listCmd:flag("-t --table", "Show list in a lua table format.")
 listCmd:action(function(args, name)
     flagsCheck(args)
     list(args.json, args.table)
@@ -209,6 +209,8 @@ end)
 -- Show commands information if no args
 if (not arg[1]) then
     print(parser:get_help())
+    print("\nGame Path: " .. GamePath)
+    print("My Games Data Path: " .. MyGamesPath)
 end
 
 -- Override args array with parser ones

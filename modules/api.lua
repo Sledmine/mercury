@@ -8,12 +8,12 @@ local api = {}
 local fdownload = require "lib.fdownload"
 
 api.repositoryHost = "genesis.vadam.net"
-api.httpProtocol = "https"
+api.protocol = "https"
 api.vulcanoPath = "api/vulcano"
 
 --- Generate an URL using api definitions
 local function vulcanoUrl()
-    return api.httpProtocol .. "://" .. api.repositoryHost .. "/" .. api.vulcanoPath
+    return api.protocol .. "://" .. api.repositoryHost .. "/" .. api.vulcanoPath
 end
 
 --- Simple GET HTTP method

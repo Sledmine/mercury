@@ -21,7 +21,8 @@ local errors = {
     installationError = "at trying to install a package",
     updateError = "at trying to update a file",
     depedencyError = "at trying to install a package dependency",
-    mercFileDoesNotExist = "mercury local package does not exist"
+    mercFileDoesNotExist = "mercury local package does not exist",
+    manifestError = "error at trying to read manifest.json from the package"
 }
 
 -- Install any mercury package
@@ -30,15 +31,18 @@ local function insert(mercPath, forced, skipOptionals)
     if (exist(mercPath)) then
         -- Unpack merc file
         dprint("Trying to unpack \"" .. mercFilename .. ".merc\" ...")
-        local unpackPath = MercuryUnpacked .. "\\" .. mercFilename
+        local unpackPath = MercuryUnpacked .. "/" .. mercFilename
         if (not exist(unpackPath)) then
-            dprint("Creating folder: " .. unpackPath)
+            
             createFolder(unpackPath)
         end
         local unpackResult = merc.unpack(mercPath, unpackPath)
         if (unpackResult) then
             -- Load package manifest data
-            local manifestJson = glue.readfile(unpackPath .. "\\manifest.json")
+            local manifestJson = glue.readfile(unpackPath .. "/manifest.json")
+            if (not manifestJson) then
+                return false, errors.manifestError
+            end
             ---@type packageMercury
             local mercuryPackage = PackageMercury:new(manifestJson)
 
@@ -95,7 +99,7 @@ local function insert(mercPath, forced, skipOptionals)
                     end
 
                     -- File path from mercury unpack path
-                    local inputFile = unpackPath .. "\\" .. file.path
+                    local inputFile = unpackPath .. "/" .. file.path
                     -- File path for insertion
                     local outputFile = file.outputPath .. file.path
                     local outputFilePath = splitPath(outputFile)

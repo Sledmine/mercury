@@ -8,60 +8,64 @@ local environment = {}
 local lfs = require "lfs"
 local glue = require "glue"
 local json = require "cjson"
-
---  TODO Move this to a local module
 local registry = require "registry"
 
--- Registry keys declaration
+-- Windows required registry keys
 local registryEntries = {
     documents = "HKEY_CURRENT_USER\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Explorer\\Shell Folders",
     haloce32 = "HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\Microsoft Games\\Halo CE",
     haloce64 = "HKEY_LOCAL_MACHINE\\SOFTWARE\\WOW6432Node\\Microsoft\\Microsoft Games\\Halo CE"
 }
 
-local function getMyGamesPath()
-    local documentsPath = registry.getkey(registryEntries.documents)
-    if (documentsPath) then
-        return documentsPath.values["Personal"]["value"] .. "\\My Games\\Halo CE"
-    else
-        -- Linux support
-        documentsPath = os.getenv("HOME")
-        if (not documentsPath) then
-            print("Error at trying to get \"My Games\" path...")
-            os.exit()
+local function getGamePath()
+    -- Override game path using environment variables
+    local gamePath = os.getenv("HALO_CE_PATH")
+    if (jit.os == "Windows" and not gamePath) then
+        local query
+        local arch = os.getenv("PROCESSOR_ARCHITECTURE")
+        if (arch == "x86") then
+            query = registry.getkey(registryEntries.haloce32)
         else
-            documentsPath = documentsPath .. "/Documents/My Games"
+            query = registry.getkey(registryEntries.haloce64)
+        end
+        if (query) then
+            gamePath = query.values["EXE Path"]["value"]
         end
     end
-    return nil
+    if (not gamePath) then
+        cprint("Error, Halo Custom Edition path was not found on the system.")
+        cprint("Force game path by setting \"HALO_CE_PATH\" as an environment variable.\n")
+        cprint("Example:")
+        cprint([[On Linux: export HALO_CE_PATH="/home/117/.wine/c/Halo Custom Edition"]])
+        cprint([[On Windows: set HALO_CE_PATH="D:\Games\Halo Custom Edition"]])
+        os.exit()
+    end
+    return gamePath
 end
 
-local function getGamePath()
-    local registryPath
-    local arch = os.getenv("PROCESSOR_ARCHITECTURE")
-    if (arch == "x86") then
-        registryPath = registry.getkey(registryEntries.haloce32)
-    else
-        registryPath = registry.getkey(registryEntries.haloce64)
-    end
-    if (registryPath) then
-        return registryPath.values["EXE Path"]["value"]
-    else
-        -- Linux support
-        -- TODO Add a better standard for defining Halo CE Path
-        registryPath = os.getenv("HALOCE_PATH")
-        if (not registryPath) then
-            print(
-                "Error at getting game path, Mercury does not support portable installations.")
-            os.exit()
+local function getMyGamesPath()
+    -- Override documents path using environment variables
+    local documentsPath = os.getenv("MY_GAMES_PATH") or os.getenv("HALO_CE_DATA_PATH")
+    if (jit.os == "Windows" and not documentsPath) then
+        local query = registry.getkey(registryEntries.documents)
+        if (query) then
+            documentsPath = query.values["Personal"]["value"] .. "\\My Games\\Halo CE"
         end
     end
-    return nil
+    if (not documentsPath) then
+        cprint("Error, at trying to get \"My Games\" path from the system.")
+        cprint("Force game path by setting \"MY_GAMES_PATH\" or \"HALO_CE_DATA_PATH\" as an environment variable.\n")
+        cprint("Example:")
+        cprint([[On Linux: export MY_GAMES_PATH="/home/117/Documents/My Games/Halo CE"]])
+        cprint([[On Windows: set MY_GAMES_PATH="D:\Users\117\Documents\My Games\Halo CE"]])
+        os.exit()
+    end
+    return documentsPath
 end
 
 --- Setup environment to work, environment variables, configuration folder, etc
 function environment.get()
-    local temp = os.getenv("TEMP")
+    local tempFolder = os.getenv("TEMP") or "/tmp"
     local sourceFolder = lfs.currentdir()
     local appData = os.getenv("APPDATA")
     Arch = os.getenv("PROCESSOR_ARCHITECTURE")
@@ -70,21 +74,21 @@ function environment.get()
     end
     GamePath = getGamePath()
     MyGamesPath = getMyGamesPath()
-    MercuryTemp = temp .. "\\mercury"
-    MercuryPackages = MercuryTemp .. "\\packages"
+    MercuryTemp = tempFolder .. "/mercury"
+    MercuryPackages = MercuryTemp .. "/packages"
     if (not exist(MercuryPackages)) then
         createFolder(MercuryPackages)
     end
-    MercuryDownloads = MercuryPackages .. "\\downloaded"
+    MercuryDownloads = MercuryPackages .. "/downloaded"
     if (not exist(MercuryDownloads)) then
         createFolder(MercuryDownloads)
     end
-    MercuryUnpacked = MercuryPackages .. "\\unpacked"
+    MercuryUnpacked = MercuryPackages .. "/unpacked"
     if (not exist(MercuryUnpacked)) then
         createFolder(MercuryUnpacked)
     end
-    MercuryInstalled = GamePath .. "\\mercury\\installed"
-    MercuryIndex = GamePath .. "\\mercury\\installed\\packages.json"
+    MercuryInstalled = GamePath .. "/mercury/installed"
+    MercuryIndex = GamePath .. "/mercury/installed/packages.json"
 end
 
 --- Clean temp data, temp folders, trash files...

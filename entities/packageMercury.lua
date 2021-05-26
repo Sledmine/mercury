@@ -55,7 +55,8 @@ local function replacePathVariables(files)
             for variable, value in pairs(pathVariables) do
                 outputPath = outputPath:gsub(variable, value)
             end
-            file.outputPath = outputPath
+            file.path = upath(file.path)
+            file.outputPath = upath(outputPath)
             paths[fileIndex] = file
         end
         return paths

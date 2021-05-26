@@ -48,13 +48,13 @@ local function remove(packageLabel, noRestore, eraseBackups, recursive, forced)
         for fileIndex, file in pairs(packageMercury.files) do
             local filePath = file.outputPath .. file.path
             -- Start erasing proccess
-            dprint("Erasing '" .. file.path .. "'... ", true)
+            dprint("Erasing \"" .. file.path .. "\"... ", true)
             local result, description, errorCode = delete(filePath)
             if (result) then
                 dprint("Done, file erased.")
                 if (exist(filePath .. ".bak") and not noRestore) then
                     if (not noRestore) then
-                        cprint("Warning, restoring '" .. file.path .. "' backup file... ", true)
+                        cprint("Warning, restoring \"" .. file.path .. "\" backup file... ", true)
                         move(filePath .. ".bak", filePath)
                         if (exist(filePath)) then
                             cprint("done.")

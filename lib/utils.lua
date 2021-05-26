@@ -8,23 +8,28 @@ local path = require "path"
 local glue = require "glue"
 
 --- Overloaded color printing function
-function cprint(text, nextLine)
-    if (type(text) ~= "string") then
-        print(inspect(text))
+function cprint(message, nextLine)
+    if (type(message) == "table" or not message) then
+        print(inspect(message))
     else
-        local colorText = string.gsub(text, "Done", "[92mDone[0m")
-        colorText = string.gsub(colorText, "done.", "[92mdone[0m.")
-        colorText = string.gsub(colorText, "Downloading", "[94mDownloading[0m")
-        colorText = string.gsub(colorText, "Success", "[92mSuccess[0m")
-        colorText = string.gsub(colorText, "Searching", "[94mSearching[0m")
-        colorText = string.gsub(colorText, "Error", "[91mError[0m")
-        colorText = string.gsub(colorText, "Warning", "[93mWarning[0m")
-        colorText = string.gsub(colorText, "Unpacking", "[93mUnpacking[0m")
-        colorText = string.gsub(colorText, "Inserting", "[93mInserting[0m")
-        colorText = string.gsub(colorText, "Bundling", "[93mBundling[0m")
-        colorText = string.gsub(colorText, "Compiling", "[93mCompiling[0m")
-        colorText = string.gsub(colorText, "Removing", "[91mRemoving[0m")
-        io.write(colorText)
+        local messageWithColor = string.gsub(message, "Done", "[92mDone[0m")
+        messageWithColor = string.gsub(messageWithColor, "done.", "[92mdone[0m.")
+        messageWithColor = string.gsub(messageWithColor, "Downloading",
+                                       "[94mDownloading[0m")
+        messageWithColor = string.gsub(messageWithColor, "Success", "[92mSuccess[0m")
+        messageWithColor =
+            string.gsub(messageWithColor, "Searching", "[94mSearching[0m")
+        messageWithColor = string.gsub(messageWithColor, "Error", "[91mError[0m")
+        messageWithColor = string.gsub(messageWithColor, "Warning", "[93mWarning[0m")
+        messageWithColor =
+            string.gsub(messageWithColor, "Unpacking", "[93mUnpacking[0m")
+        messageWithColor =
+            string.gsub(messageWithColor, "Inserting", "[93mInserting[0m")
+        messageWithColor = string.gsub(messageWithColor, "Bundling", "[93mBundling[0m")
+        messageWithColor =
+            string.gsub(messageWithColor, "Compiling", "[93mCompiling[0m")
+        messageWithColor = string.gsub(messageWithColor, "Removing", "[91mRemoving[0m")
+        io.write(messageWithColor)
         if (not nextLine) then
             io.write("\n")
         end
@@ -38,7 +43,6 @@ function dprint(value)
             print(inspect(value))
         else
             cprint(value)
-            print("\n")
         end
     end
 end
@@ -55,14 +59,19 @@ function each(t)
     end
 end
 
-function splitPath(fileOrFolderPath)
-    if (fileOrFolderPath) then
-        local directory = path.dir(fileOrFolderPath)
+function splitPath(inputPath)
+    local inputPath = upath(inputPath)
+    dprint("Splitting path: " .. inputPath)
+    if (inputPath) then
+        local directory = path.dir(inputPath)
         if (directory == ".") then
             directory = nil
         end
-        local extension = path.ext(fileOrFolderPath)
-        local fileName = path.file(fileOrFolderPath)
+        local fileName = path.file(inputPath)
+        local extension = path.ext(inputPath)
+        dprint("directory:  " .. directory)
+        dprint("fileName:  " .. fileName)
+        dprint("extension:  " .. extension)
         if (fileName and fileName ~= "" and extension) then
             fileName = string.gsub(fileName, "." .. extension, "")
         else
@@ -74,6 +83,7 @@ function splitPath(fileOrFolderPath)
 end
 
 function createFolder(folderPath)
+    dprint("Creating folder: " .. folderPath)
     return fs.mkdir(folderPath, true)
 end
 
@@ -121,4 +131,14 @@ end
 
 function isFile(filePath)
     return path.ext(filePath)
+end
+
+--- Return a Unix like path from a Windows path
+function upath(wpath)
+    return wpath:gsub("\\", "/")
+end
+
+--- Return a Windows path from a Unix path
+function wpath(upath)
+    return upath:gsub("/", "\\")
 end

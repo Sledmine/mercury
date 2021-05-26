@@ -17,7 +17,7 @@ testApi = {}
 
 function testApi:setUp()
     api.repositoryHost = "localhost:3000"
-    api.httpProtocol = "http"
+    api.protocol = "http"
 
     self.expectedPackage =
         [[{"name":"test","label":"test","author":"Sledmine","version":"1.0.0","fullVersion":"1.0.0","mirrors":["http://localhost:3000/repository/test/1.0.0/test.merc"],"nextVersion":"2.0.0"}]]

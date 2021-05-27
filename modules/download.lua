@@ -7,7 +7,7 @@ local download = {}
 
 local json = require "cjson"
 local glue = require "glue"
-local fdownload = require "lib.fdownload"
+local fdownload = require "Mercury.lib.fdownload"
 
 ---@param packageMeta packageMetadata
 function download.package(packageMeta)

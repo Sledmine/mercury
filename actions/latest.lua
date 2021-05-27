@@ -1,6 +1,6 @@
 local json = require "cjson"
 local requests = require "requests"
-local constants = require "modules.constants"
+local constants = require "Mercury.modules.constants"
 local v = require "semver"
 
 local function latest()

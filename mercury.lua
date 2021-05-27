@@ -9,42 +9,25 @@ inspect = require "inspect"
 local argparse = require "argparse"
 
 -- Create custom require due to app bundle messing with the modules import
-local appBundle = require "bundle"
-local orequire = require
--- Running in compiled mode
-if (appBundle.appversion) then
-    local function crequire(import)
-        local result, error = pcall(function()
-            orequire(import)
-        end)
-        if (result == false) then
-            return orequire("Mercury." .. import)
-        end
-        return orequire(import)
-    end
-    require = crequire
-else
-    -- Developer mode, provide path to project modules
-    package.path = package.path .. ";./Mercury/?.lua"
-end
+--local appBundle = require "bundle"
 
-utils = require "lib.utils"
+utils = require "Mercury.modules.utils"
 
 -- Project modules
 -- FIXME Install is a global module due to recursive calls, a better solution should be provided
-install = require "modules.install"
-api = require "modules.api"
+install = require "Mercury.modules.install"
+api = require "Mercury.modules.api"
 
-local remove = require "actions.remove"
-local list = require "actions.list"
-local insert = require "actions.insert"
-local latest = require "actions.latest"
+local remove = require "Mercury.actions.remove"
+local list = require "Mercury.actions.list"
+local insert = require "Mercury.actions.insert"
+local latest = require "Mercury.actions.latest"
 
-local luabundler = require "modules.luabundle"
-local constants = require "modules.constants"
+local luabundler = require "Mercury.modules.luabundle"
+local constants = require "Mercury.modules.constants"
 
 -- Global data
-environment = require "config.environment"
+environment = require "Mercury.config.environment"
 
 -- Get all environment variables and configurations
 environment.get()
@@ -98,7 +81,7 @@ installCmd:action(function(args, name)
         api.repositoryHost = args.repository
     end
     install.package(args.packageLabel, args.packageVersion, args.force, args.skipOptionals)
-    --environment.cleanTemp()
+    environment.cleanTemp()
 end)
 
 -- Update command

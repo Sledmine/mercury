@@ -7,7 +7,7 @@ local lu = require "luaunit"
 inspect = require "inspect"
 
 -- Global modules
-require "lib.utils"
+require "Mercury.lib.utils"
 
 testUtils = {}
 

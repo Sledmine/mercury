@@ -7,16 +7,13 @@ local glue = require "glue"
 local fs = require "fs"
 ------------ Bundle configuration ------------
 
--- Provide path to project modules
-package.path = package.path .. ";.\\Mercury\\?.lua"
-
-local constants = require "modules.constants"
+local constants = require "Mercury.modules.constants"
 local version = constants.mercuryVersion
 
 local staticLibs = {
     "socket_core",
     "mime_core",
-    "ssl",
+    "luasec",
     "libssl",
     "libcrypto",
     "lfs",
@@ -76,66 +73,98 @@ local iconPath = "Mercury/assets/icons/mercury.ico"
 -- This requires a certain link on the luapower root
 local mainLua = "mercury"
 
-local outputPath = "Mercury\\bin\\mercury.exe"
+local outputPath = "Mercury/bin/mercury.exe"
 
 ------------ Compilation process ------------
 local luapowerArchs = {x64 = "64", x86 = "32"}
 
 local function compileMercury(compilationArch)
-    local removeCache = [[rm -rf .bundle-tmp\]]
-    os.execute(removeCache)
-
-    if (fs.is([[C:\mingw\]])) then
-        local removeSmlink = [[rmdir C:\mingw\]]
-        os.execute(removeSmlink)
+    if (not fs.is("Mercury/bin")) then
+        fs.mkdir("Mercury/bin")
     end
-
-    local removeMercuryBin = [[rm -rf mercury\bin\mercury.exe]]
-    os.execute(removeMercuryBin)
-
-    local makeMingwSmlink = [[mklink /d C:\mingw\ C:\%s\]]
-    local x86Flag = ""
-    if (compilationArch == "x86") then
-        x86Flag = "-m32"
-        os.execute(makeMingwSmlink:format("mingw32"))
-    else
-        os.execute(makeMingwSmlink:format("mingw64"))
-    end
-
     local bundleCmdTemplate =
         "set LUAJIT_PATH=bin/mingw%s/luajit.exe && mgit bundle %s -a \"%s\" -m \"%s\" -M \"%s\" -i \"%s\" -fv %s -vi \"%s\" -o \"%s\" -av %s"
 
-    local bundleCmd = string.format(bundleCmdTemplate, luapowerArchs[compilationArch],x86Flag, table.concat(staticLibs, " "),
-                                    table.concat(modules, " "), mainLua, iconPath,
-                                    version .. ".0", table.concat(versionInfo, ";"),
-                                    outputPath, version)
-    print(bundleCmd)
-    return os.execute(bundleCmd)
+    -- No x86 flag
+    local bundleBashTemplate =
+        "export LUAJIT_PATH=bin/linux%s/luajit && ./mgit bundle -a \"%s\" -m \"%s\" -M \"%s\" -i \"%s\" -fv %s -vi \"%s\" -o \"%s\" -av %s"
+
+    local removeCache = [[rm -rf bundle-tmp/]]
+    os.execute(removeCache)
+    if (jit.os == "Linux") then
+        -- Fix lib names on Linux
+        for _,libname in pairs(staticLibs) do
+            staticLibs[_] = libname:gsub("lib", "")
+        end
+        local bundleBash = string.format(bundleBashTemplate,
+                                         luapowerArchs[compilationArch],
+                                         table.concat(staticLibs, " "),
+                                         table.concat(modules, " "), mainLua, iconPath,
+                                         version .. ".0", table.concat(versionInfo, ";"),
+                                         outputPath:gsub(".exe", ""), version)
+        print(bundleBash)
+        return os.execute(bundleBash)
+    else
+        -- Multi arch compilation using same folder with different symlinks for x86 and x64 builds
+        -- If symlink exists, erase it
+        if (fs.is([[C:\mingw\]])) then
+            local removeSmlink = [[rmdir C:\mingw\]]
+            os.execute(removeSmlink)
+        end
+
+        local removeMercuryBin = [[rm -rf mercury\bin\mercury.exe]]
+        os.execute(removeMercuryBin)
+
+        -- Create new symlink for current arch
+        local makeMingwSmlink = [[mklink /d C:\mingw\ C:\%s\]]
+        local x86Flag = ""
+        if (compilationArch == "x86") then
+            x86Flag = "-m32"
+            os.execute(makeMingwSmlink:format("mingw32"))
+        else
+            os.execute(makeMingwSmlink:format("mingw64"))
+        end
+
+        local bundleCmd = string.format(bundleCmdTemplate, luapowerArchs[compilationArch],
+                                        x86Flag, table.concat(staticLibs, " "),
+                                        table.concat(modules, " "), mainLua, iconPath,
+                                        version .. ".0", table.concat(versionInfo, ";"),
+                                        outputPath, version)
+        print(bundleCmd)
+        return os.execute(bundleCmd)
+    end
+
 end
 
 local function compileInstaller(compilationArch)
-    ---@type string
-    local installerTemplate = glue.readfile("mercury\\installerTemplate.iss", "t")
-    if (installerTemplate) then
-        installerTemplate = installerTemplate:gsub("$VNUMBER", version)
-        local arch64 = compilationArch
-        local arch = compilationArch
-        if (compilationArch == "x86") then
-            arch64 = ""
-        else
-            -- Enable optional binary sources for x64
-            installerTemplate = installerTemplate:gsub(";Source", "Source")
+    if (jit.os == "Windows") then
+        ---@type string
+        local installerTemplate = glue.readfile("mercury\\installerTemplate.iss", "t")
+        if (installerTemplate) then
+            installerTemplate = installerTemplate:gsub("$VNUMBER", version)
+            local arch64 = compilationArch
+            local arch = compilationArch
+            if (compilationArch == "x86") then
+                arch64 = ""
+            else
+                -- Enable optional binary sources for x64
+                installerTemplate = installerTemplate:gsub(";Source", "Source")
+            end
+            installerTemplate = installerTemplate:gsub("$ARCH64", arch64)
+            installerTemplate = installerTemplate:gsub("$ARCH", arch)
+            glue.writefile("mercury\\installer.iss", installerTemplate, "t")
+            local installerCmd = "cd mercury\\ & ISCC installer.iss && cd .."
+            print(installerCmd .. "\n")
+            return os.execute(installerCmd)
         end
-        installerTemplate = installerTemplate:gsub("$ARCH64", arch64)
-        installerTemplate = installerTemplate:gsub("$ARCH", arch)
-        glue.writefile("mercury\\installer.iss", installerTemplate, "t")
-        local installerCmd = "cd mercury\\ & ISCC installer.iss && cd .."
-        print(installerCmd .. "\n")
-        os.execute(installerCmd)
+    else
+        print("Installer compilation for Linux is not supported yet, aiming for a .deb package!")
     end
 end
 
-compileMercury("x86")
-compileInstaller("x86")
+if (jit.os == "Windows") then
+    compileMercury("x86")
+    compileInstaller("x86")
+end
 compileMercury("x64")
 compileInstaller("x64")

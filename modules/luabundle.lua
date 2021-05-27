@@ -9,7 +9,7 @@ local pjson = require "pretty.json"
 local bundle = require "bundle"
 local fs = require "fs"
 
-local codeBundler = require "lib.codeBundler"
+local codeBundler = require "Mercury.lib.codeBundler"
 
 local luabundler = {}
 

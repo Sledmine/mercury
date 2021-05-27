@@ -1,15 +1,15 @@
 local install = {}
 
 -- Actions
-local search = require "actions.search"
-local remove = require "actions.remove"
-local insert = require "actions.insert"
+local search = require "Mercury.actions.search"
+local remove = require "Mercury.actions.remove"
+local insert = require "Mercury.actions.insert"
 
 -- Modules
-local download = require "modules.download"
+local download = require "Mercury.modules.download"
 
 -- Entities
-local PackageMetadata = require "entities.packageMetadata"
+local PackageMetadata = require "Mercury.entities.packageMetadata"
 
 local errors = {
     ["404"] = "package not found",

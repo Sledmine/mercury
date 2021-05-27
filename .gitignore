@@ -58,3 +58,4 @@ bin/mercury*
 packages/
 service/
 *.mercu
+cert/

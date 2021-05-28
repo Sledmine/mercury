@@ -3,7 +3,7 @@ function search() {
 	input = document.getElementById("searchBar");
 	filter = input.value.toUpperCase();
 	packagesList = document.getElementById("packagesList");
-	packages = packagesList.getElementsByClassName("uk-card");
+	packages = packagesList.getElementsByTagName("li");
 	// Loop through all list items, and hide those who don't match the search query
 	for (i = 0; i < packages.length; i++) {
 		mercuryPackage = packages[i].getElementsByClassName("uk-card-title")[0];

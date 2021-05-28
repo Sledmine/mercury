@@ -1,5 +1,5 @@
-<div class="uk-card uk-card-default uk-card-small uk-card-body uk-margin">
-	<div class="uk-card-header">
+<li class="uk-card uk-card-default uk-card-small uk-card-body">
+	<a class="uk-accordion-title">
 		<div class="uk-grid-small uk-flex-middle" uk-grid>
 			<div class="uk-width-auto">
 				<img
@@ -17,15 +17,20 @@
 				<p class="uk-text-meta uk-margin-remove-top">{{package.version}}</p>
 			</div>
 		</div>
-	</div>
-	<div class="uk-card-body">
-		<p>{{package.description or "No description was provided"}}.</p>
-	</div>
-	<div class="uk-card-footer">
-		<b>Install this package using the following command:</b>
-		<div class="uk-margin"></div>
-		<div data-termynal>
-			<span data-ty="input" data-ty-prompt="C:\Users\117>">mercury install {{package.label}}</span>
+	</a>
+	<div class="uk-accordion-content">
+		
+		<div class="uk-card-body">
+			<p>{{package.description or "No description was provided"}}.</p>
+		</div>
+		<div class="uk-card-footer" tabindex="0">
+			<p>Install this package using the following command:</p>
+			<div class="uk-margin"></div>
+			<div class="uk-animation-toggle" data-termynal>
+				<span class="uk-animation-shake" data-ty="input" data-ty-prompt="C:\Users\117>"
+					>mercury install {{package.label}}</span
+				>
+			</div>
 		</div>
 	</div>
-</div>
+</li>

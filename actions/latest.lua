@@ -15,8 +15,11 @@ local function latest()
             if (v(constants.mercuryVersion) < v(version)) then
                 cprint(string.format("done. Found version %s.", version))
                 local latestRelease = constants.gitHubReleases:gsub("{tagName}", tagName)
-                local openReleaseCmd = string.format("explorer \"%s\"", latestRelease)
-                os.execute(openReleaseCmd)
+                if (jit.os =="Windows") then
+                    os.execute(("explorer \"%s\""):format(latestRelease))
+                else
+                    os.execute(("open \"%s\""):format(latestRelease))
+                end
                 return true
                 --[[for _, asset in pairs(release.assets) do
                     if (asset.name and asset.name:find(Arch)) then

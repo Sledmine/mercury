@@ -7,8 +7,9 @@ local glue = require "glue"
 local fs = require "fs"
 ------------ Bundle configuration ------------
 
+local v = require "semver"
 local constants = require "Mercury.modules.constants"
-local version = constants.mercuryVersion
+local version = v(constants.mercuryVersion)
 
 local staticLibs = {
     "socket_core",
@@ -55,15 +56,18 @@ local modules = {
     "Mercury/internal/*.lua",
     "Mercury/lib/*.lua",
     -- Main file
-    -- For some reaseon this causes the program to fail if running on certain folders
+    -- For some reason this causes the program to fail if running on certain folders
     -- "Mercury/mercury.lua",
+    -- So main file should on the root folder for compilation purposes
     "mercury.lua"
 }
 
+local windowsVersion = table.concat({version.major, version.minor, version.patch}, ".")
+
 local versionInfo = {
-    "FileVersion=" .. version,
-    "ProductVersion=" .. version,
-    "FileDescription=Halo CE Package Manager",
+    "FileVersion=" .. windowsVersion,
+    "ProductVersion=" .. tostring(version),
+    "FileDescription=Halo Custom Edition Package Manager",
     "ProductName=Mercury",
     "InternalName=Mercury"
 }
@@ -100,8 +104,8 @@ local function compileMercury(compilationArch)
                                          luapowerArchs[compilationArch],
                                          table.concat(staticLibs, " "),
                                          table.concat(modules, " "), mainLua, iconPath,
-                                         version .. ".0", table.concat(versionInfo, ";"),
-                                         outputPath:gsub(".exe", ""), version)
+                                         version, table.concat(versionInfo, ";"),
+                                         outputPath:gsub(".exe", ""), tostring(version))
         print(bundleBash)
         return os.execute(bundleBash)
     else
@@ -112,7 +116,7 @@ local function compileMercury(compilationArch)
             os.execute(removeSmlink)
         end
 
-        local removeMercuryBin = [[rm -rf mercury\bin\mercury.exe]]
+        local removeMercuryBin = [[rm mercury\bin\mercury.exe]]
         os.execute(removeMercuryBin)
 
         -- Create new symlink for current arch
@@ -128,8 +132,8 @@ local function compileMercury(compilationArch)
         local bundleCmd = string.format(bundleCmdTemplate, luapowerArchs[compilationArch],
                                         x86Flag, table.concat(staticLibs, " "),
                                         table.concat(modules, " "), mainLua, iconPath,
-                                        version .. ".0", table.concat(versionInfo, ";"),
-                                        outputPath, version)
+                                        windowsVersion .. ".0", table.concat(versionInfo, ";"),
+                                        outputPath, tostring(version))
         print(bundleCmd)
         return os.execute(bundleCmd)
     end
@@ -141,7 +145,7 @@ local function compileInstaller(compilationArch)
         ---@type string
         local installerTemplate = glue.readfile("mercury\\installerTemplate.iss", "t")
         if (installerTemplate) then
-            installerTemplate = installerTemplate:gsub("$VNUMBER", version)
+            installerTemplate = installerTemplate:gsub("$VNUMBER", tostring(version))
             local arch64 = compilationArch
             local arch = compilationArch
             if (compilationArch == "x86") then

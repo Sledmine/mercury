@@ -1,5 +1,9 @@
 # Changelog
 
+# 1.3.0
+- Added support for Linux 64 bit builds
+- Added `fetch` command to retrieve the latest package index available on the respository
+
 # 1.2.0
 - Added `-t --template` flag to the `luabundle` command, this will create a template of a
 bundle.json file in the current directory

@@ -8,7 +8,7 @@
     </p>
 </html>
 
-# Mercury v1.2.0
+# Mercury v1.3.0-beta
 
 ## What is Mercury?
 

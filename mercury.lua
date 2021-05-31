@@ -3,38 +3,30 @@
 -- Sledmine
 -- Package Manager for Halo Custom Edition
 ------------------------------------------------------------------------------
--- Global modules
+-- Luapower modules
+local argparse = require "argparse"
 inspect = require "inspect"
 
-local argparse = require "argparse"
-
--- Create custom require due to app bundle messing with the modules import
---local appBundle = require "bundle"
-
+-- Global data and utils for different operations
 utils = require "Mercury.modules.utils"
+-- Get all environment variables and configurations
+environment = require "Mercury.config.environment"
+environment.paths()
 
--- Project modules
+-- Modules
 -- FIXME Install is a global module due to recursive calls, a better solution should be provided
 install = require "Mercury.modules.install"
 api = require "Mercury.modules.api"
 
+-- Commands to expose on Mercury
 local remove = require "Mercury.actions.remove"
 local list = require "Mercury.actions.list"
 local insert = require "Mercury.actions.insert"
 local latest = require "Mercury.actions.latest"
+local fetch = require "Mercury.actions.fetch"
 
 local luabundler = require "Mercury.modules.luabundle"
 local constants = require "Mercury.modules.constants"
-
--- Global data
-environment = require "Mercury.config.environment"
-
--- Get all environment variables and configurations
-environment.get()
-
---  FIXME There is a problem with temp files cleanup messing with package installation
--- Cleanup
--- environment.cleanTemp()
 
 -- Create argument parser with Mercury info
 local parser = argparse("mercury", "Package Manager for Halo Custom Edition.",
@@ -81,7 +73,14 @@ installCmd:action(function(args, name)
         api.repositoryHost = args.repository
     end
     install.package(args.packageLabel, args.packageVersion, args.force, args.skipOptionals)
-    environment.cleanTemp()
+    environment.clean()
+end)
+
+local fetchCmd = parser:command("fetch", "Fetch the most recent package index from the repository.")
+fetchCmd:description("Fetch will return the latest package index available on vulcano.")
+fetchCmd:action(function(args, name)
+    flagsCheck(args)
+    fetch()
 end)
 
 -- Update command
@@ -98,7 +97,7 @@ updateCmd:action(function(args, name)
         api.repositoryHost = args.repository
     end
     install.update(args.packageLabel)
-    environment.cleanTemp()
+    environment.clean()
 end)
 
 -- Upgrade command
@@ -108,7 +107,7 @@ latestCmd:description(
 latestCmd:action(function(args, name)
     flagsCheck(args)
     latest()
-    environment.cleanTemp()
+    environment.clean()
 end)
 
 -- Insert command
@@ -125,7 +124,7 @@ insertCmd:action(function(args, name)
     else
         cprint("Error, at inserting merc.")
     end
-    environment.cleanTemp()
+    environment.clean()
 end)
 
 -- Bundle command
@@ -167,12 +166,6 @@ listCmd:action(function(args, name)
     flagsCheck(args)
     list(args.json, args.table)
 end)
-
--- Mitsosis command
---[[local mitosis = parser:command("mitosis", "Create a new game instance with just core files.")
-mitosis:action(function(args, name)
-    print("TODO!!!")
-end)]]
 
 -- About command
 local aboutCmd = parser:command("about", "Get Mercury information.")

@@ -54,7 +54,8 @@ local function getMyGamesPath()
     end
     if (not documentsPath) then
         cprint("Error, at trying to get \"My Games\" path from the system.")
-        cprint("Force game path by setting \"MY_GAMES_PATH\" or \"HALO_CE_DATA_PATH\" as an environment variable.\n")
+        cprint(
+            "Force game path by setting \"MY_GAMES_PATH\" or \"HALO_CE_DATA_PATH\" as an environment variable.\n")
         cprint("Example:")
         cprint([[On Linux: export MY_GAMES_PATH="/home/117/Documents/My Games/Halo CE"]])
         cprint([[On Windows: set MY_GAMES_PATH="D:\Users\117\Documents\My Games\Halo CE"]])
@@ -64,35 +65,46 @@ local function getMyGamesPath()
 end
 
 --- Setup environment to work, environment variables, configuration folder, etc
-function environment.get()
-    local tempFolder = os.getenv("TEMP") or "/tmp"
-    local sourceFolder = lfs.currentdir()
-    local appData = os.getenv("APPDATA")
+function environment.paths()
+    -- local sourceFolder = lfs.currentdir()
+    -- local appData = os.getenv("APPDATA")
     Arch = os.getenv("PROCESSOR_ARCHITECTURE")
     if (Arch ~= "x86") then
         Arch = "x64"
     end
     GamePath = getGamePath()
     MyGamesPath = getMyGamesPath()
-    MercuryTemp = tempFolder .. "/mercury"
+    MercuryTemp = (os.getenv("TEMP") or "/tmp") .. "/mercury"
     MercuryPackages = MercuryTemp .. "/packages"
+    MercuryDownloads = MercuryPackages .. "/downloads"
+    MercuryUnpacked = MercuryPackages .. "/unpacked"
+    MercuryInstalled = GamePath .. "/mercury/installed"
+    MercuryOldIndex = GamePath .. "/mercury/installed/packages.json"
+    MercuryIndex = GamePath .. "/mercury.json"
     if (not exist(MercuryPackages)) then
         createFolder(MercuryPackages)
     end
-    MercuryDownloads = MercuryPackages .. "/downloaded"
     if (not exist(MercuryDownloads)) then
         createFolder(MercuryDownloads)
     end
-    MercuryUnpacked = MercuryPackages .. "/unpacked"
     if (not exist(MercuryUnpacked)) then
         createFolder(MercuryUnpacked)
     end
-    MercuryInstalled = GamePath .. "/mercury/installed"
-    MercuryIndex = GamePath .. "/mercury/installed/packages.json"
+    return {
+        gamePath = GamePath,
+        myGamesPath = MyGamesPath,
+        mercuryTemp = MercuryTemp,
+        mercuryPackages = MercuryPackages,
+        mercuryUnpacked = MercuryUnpacked,
+        mercuryDownloads = MercuryDownloads,
+        mercuryUnpacked = MercuryUnpacked,
+        mercuryInstalled = MercuryInstalled,
+        mercuryIndex = MercuryIndex
+    }
 end
 
 --- Clean temp data, temp folders, trash files...
-function environment.cleanTemp()
+function environment.clean()
     dprint("MercuryTemp: " .. MercuryTemp)
     delete(MercuryTemp, true)
 end

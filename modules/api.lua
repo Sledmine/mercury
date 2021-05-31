@@ -6,6 +6,7 @@
 local api = {}
 
 local fdownload = require "Mercury.lib.fdownload"
+local requests = require "requests"
 
 api.repositoryHost = "genesis.vadam.net"
 api.protocol = "https"
@@ -18,8 +19,9 @@ end
 
 --- Simple GET HTTP method
 local function get(url)
-    local result, error, headers, status, response = fdownload.get(url)
-    return error, response
+    --local result, error, headers, status, response = fdownload.get(url)
+    local response = requests.get(url)
+    return response.status_code, response.text
 end
 
 ---@param packageLabel string
@@ -41,6 +43,11 @@ function api.getUpdate(packageLabel, packageVersion)
     local apiUrl = packageUrl .. "/" .. packageVersion
     dprint(apiUrl)
     return get(apiUrl)
+end
+
+function api.fetch()
+    local response = requests.get("http://mercuryce.com/pindex")
+    return response.status_code, response.text
 end
 
 return api

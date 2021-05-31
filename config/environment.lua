@@ -103,12 +103,6 @@ function environment.paths()
     }
 end
 
---- Clean temp data, temp folders, trash files...
-function environment.clean()
-    dprint("MercuryTemp: " .. MercuryTemp)
-    delete(MercuryTemp, true)
-end
-
 --- Get mercury local installed packages
 ---@param newPackages packageMercury[]
 ---@return packageMercury[] packages
@@ -128,5 +122,21 @@ function environment.packages(newPackages)
     end
     return nil
 end
+
+--- Clean temp data, temp folders, trash files...
+function environment.clean()
+    dprint("MercuryTemp: " .. MercuryTemp)
+    delete(MercuryTemp, true)
+end
+
+--- Migrate deprecated or old files and paths
+function environment.migrate()
+    if (exist(MercuryOldIndex)) then
+        cprint("Warning, migrating old packages index path to new index path!")
+        move(MercuryOldIndex, MercuryIndex)
+        delete(MercuryInstalled, true)
+    end
+end
+
 
 return environment

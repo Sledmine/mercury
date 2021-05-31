@@ -12,6 +12,8 @@ utils = require "Mercury.modules.utils"
 -- Get all environment variables and configurations
 environment = require "Mercury.config.environment"
 environment.paths()
+-- Migrate old paths and files to newer ones if needed
+environment.migrate()
 
 -- Modules
 -- FIXME Install is a global module due to recursive calls, a better solution should be provided
@@ -78,9 +80,10 @@ end)
 
 local fetchCmd = parser:command("fetch", "Fetch the most recent package index from the repository.")
 fetchCmd:description("Fetch will return the latest package index available on vulcano.")
+fetchCmd:flag("-j --json", "Show list in json format.")
 fetchCmd:action(function(args, name)
     flagsCheck(args)
-    fetch()
+    fetch(args.json)
 end)
 
 -- Update command

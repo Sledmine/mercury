@@ -3,8 +3,6 @@
 -- Sledmine
 -- Tests for api consumer
 ------------------------------------------------------------------------------
-package.path = package.path .. ";.\\Mercury\\?.lua"
-
 local lu = require "luaunit"
 inspect = require "inspect"
 

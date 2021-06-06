@@ -1,0 +1,16 @@
+{
+    "label": "unpacked",
+    "name": "Unpacked Test Package",
+    "description": "A test package for packing Mercury packages",
+    "version": "1.0.0",
+    "author": "Sledmine",
+    "internalVersion": "1.0.0",
+    "manifestVersion": "1.0",
+    "files": [
+        {
+            "path": "test.txt",
+            "outputPath": "$haloce\\",
+            "type": "binary"
+        }
+    ]
+}

@@ -12,8 +12,8 @@ local minizip = require "minizip"
 local glue = require "glue"
 
 --- Unpack a merc package
----@param mercPath string
----@param unpackPath string
+---@param mercPath string Path to the merc package that will be unpacked
+---@param unpackPath string Path of the output files unpacked from the merc package
 ---@return boolean result
 function merc.unpack(mercPath, unpackPath)
     local dir, fileName, ext = splitPath(mercPath)
@@ -66,6 +66,10 @@ function merc.unpack(mercPath, unpackPath)
     end
     cprint("Error, there was a problem at unpacking \"" .. mercPath .. "\".")
     return false
+end
+
+function merc.pack()
+
 end
 
 return merc

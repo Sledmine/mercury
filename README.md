@@ -69,7 +69,10 @@ If you want to modify and verify code in this repository you will have a couple 
 test everything in your local environment, some unit testing is being added continuously.
 
 ## Run with LuaJIT
-Luapower follows a structure where everything must be inside the root folder to work, by just making a Symlink of your cloned respository into the Luapower folder you will be able to run, you can clone your repository directly in the Luapower folder but we would like to recommend you to create a symlink.
+Luapower follows a structure where everything must be inside the root folder to work, by just making
+a Symlink of your cloned respository into the Luapower folder you will be able to run, you can
+clone your repository directly in the Luapower folder but we would like to recommend you to create a
+symlink.
 
 After that you can just use this command in the luapower folder to run it:
 ```cmd
@@ -78,7 +81,8 @@ luajit mercury\mercury.lua
 
 ## Mocking Vulcano API and Server
 
-You can run a mock of a Vulcano API with a testing repository server using [easymock](https://github.com/CyberAgent/node-easymock) and the commands below:
+You can run a mock of a Vulcano API with a testing repository server using
+[easymock](https://github.com/CyberAgent/node-easymock) and the commands below:
 ```cmd
 cd tests\server
 easymock
@@ -86,17 +90,21 @@ easymock
 
 # FAQ
 
-## Luapower is a cross platform framework, why is this only working for Windows?
-
-Halo Custom Edition only works in a Windows environment by native running or via emulation using
-Wine for example, so creating a package manager for Linux would be a little bit weird if the game
-itself only runs on Windows, but after some work migration a Linux build would be possible in the future.
-
 ## I use a portable version of Halo Custom Edition, can I use Mercury?
 
-Not right now, Mercury aims to bring the most easy way to install mods into Halo Custom Edition
-without the needs of setting and defining paths or values into any file or directory, a support for
-those portable installations will come later.
+Yes, you can by setting a environment variable pointing to your Halo Custom Edition path,
+environment variables have a different way for being set on Linux and Windows:
 
-As a "fix" you can try to register your portable installation path into the Windows registry in
-order to allow Mercury find the path of your Halo Custom Edition installation.
+On Linux:
+```bash
+export HALO_CE_PATH="/home/.wine/drive_c/Halo Custom Edition"
+export HALO_CE_DATA_PATH="/home/Documents/My Games"
+```
+Do not forget to add those lines to your .bashrc or .zshrc file make them permanent variables.
+
+On Windows:
+```bash
+set HALO_CE_PATH="D:\Games\Halo Custom Edition"
+set HALO_CE_DATA_PATH="D:\Users\Sledmine\Documents\My Games\Halo CE"
+```
+These variables will not remain permanent, look into how to set them permanently.

@@ -5,7 +5,7 @@
 ----------------------------------------------------------------------
 local api = {}
 
-local fdownload = require "Mercury.lib.fdownload"
+local fdownload = require "Mercury.modules.fdownload"
 local requests = require "requests"
 
 api.repositoryHost = "genesis.vadam.net"

@@ -12,11 +12,13 @@ local search = require "Mercury.actions.search"
 
 local function erasePackageFromIndex(packageLabel)
     -- Get current instance packages
-    local installedPackages = environment.packages() or {}
-    -- Erase data for this package
-    installedPackages[packageLabel] = nil
-    -- Update current environment packages data with the new one
-    environment.packages(installedPackages)
+    local installedPackages = environment.packages()
+    if (installedPackages) then
+        -- Erase data for this package
+        installedPackages[packageLabel] = nil
+        -- Update current environment packages data with the new one
+        environment.packages(installedPackages)
+    end
 end
 
 --- Remove/uninstall a package from the game

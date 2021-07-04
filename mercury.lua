@@ -11,7 +11,7 @@ inspect = require "inspect"
 utils = require "Mercury.modules.utils"
 -- Get all environment variables and configurations
 environment = require "Mercury.config.environment"
-environment.paths()
+local paths = environment.paths()
 -- Migrate old paths and files to newer ones if needed
 environment.migrate()
 
@@ -39,9 +39,10 @@ parser:require_command(false)
 -- Catch command name as "command" on the args object
 parser:command_target("command")
 
--- Developer flags
-parser:flag("-d --debug", "Debug mode will be enabled to print debug messages.")
-parser:flag("-t --test", "Test mode will be enabled, some testing behaviour will occur.")
+-- General flags
+parser:flag("-v --version", "Print mercury version and exit.")
+parser:flag("-d --debug", "Enable debug mode, some extra printing will show.")
+parser:flag("-t --test", "Enable test mode, testing behaviour will occur.")
 
 local function flagsCheck(args)
     if (args.debug) then
@@ -60,8 +61,7 @@ end
 
 -- Install command
 local installCmd = parser:command("install", "Install any package into the game.")
-installCmd:description(
-    "Install will download and insert any package from Mercury repository.")
+installCmd:description("Install will download and insert any package from Mercury repository.")
 installCmd:argument("packageLabel", "Label of the package you want to download.")
 installCmd:argument("packageVersion", "Version of the package to install."):args("?")
 installCmd:flag("-f --force",
@@ -87,8 +87,7 @@ fetchCmd:action(function(args, name)
 end)
 
 -- Update command
-local updateCmd = parser:command("update",
-                                 "Update any installed package in this game instance.")
+local updateCmd = parser:command("update", "Update any installed package in this game instance.")
 updateCmd:description("Update any package to a next version by downloading difference.")
 updateCmd:argument("packageLabel", "Label of the package you want to update.")
 updateCmd:option("--repository", "Specify a custom repository to use.")
@@ -105,8 +104,7 @@ end)
 
 -- Upgrade command
 local latestCmd = parser:command("latest", "Get latest Mercury version from GitHub.")
-latestCmd:description(
-    "Open GitHub release page if there is a newer Mercury version available.")
+latestCmd:description("Open GitHub release page if there is a newer Mercury version available.")
 latestCmd:action(function(args, name)
     flagsCheck(args)
     latest()
@@ -114,8 +112,7 @@ latestCmd:action(function(args, name)
 end)
 
 -- Insert command
-local insertCmd =
-    parser:command("insert", "Insert a merc package into the game manually.")
+local insertCmd = parser:command("insert", "Insert a merc package into the game manually.")
 insertCmd:description("Attempts to insert the files from a Mercury package.")
 insertCmd:argument("mercPath", "Path of the merc file to insert")
 insertCmd:flag("-f --force", "Remove any conflicting files without creating a backup.")
@@ -131,8 +128,7 @@ insertCmd:action(function(args, name)
 end)
 
 -- Bundle command
-local luabundleCmd = parser:command("luabundle",
-                                    "Bundle lua files into one distributable script.")
+local luabundleCmd = parser:command("luabundle", "Bundle lua files into one distributable script.")
 luabundleCmd:description("Bundle modular lua projects into a single script.")
 luabundleCmd:argument("bundleFile", "Bundle file name, \"bundle\" by default."):args("?")
 luabundleCmd:flag("-c --compile", "Compile output file using target compiler.")
@@ -156,13 +152,11 @@ removeCmd:flag("-r --recursive", "Remove all the dependencies of this package.")
 removeCmd:flag("-f --force", "Force remove by erasing entry from package index.")
 removeCmd:action(function(args, name)
     flagsCheck(args)
-    remove(args.packageLabel, args.norestore, args.erasebackups, args.recursive,
-           args.force)
+    remove(args.packageLabel, args.norestore, args.erasebackups, args.recursive, args.force)
 end)
 
 -- List command
-local listCmd = parser:command("list",
-                               "Shows already installed packages in this game instance.")
+local listCmd = parser:command("list", "Shows already installed packages in this game instance.")
 listCmd:flag("-j --json", "Show list in json format.")
 listCmd:flag("-t --table", "Show list in a lua table format.")
 listCmd:action(function(args, name)
@@ -175,8 +169,8 @@ local aboutCmd = parser:command("about", "Get Mercury information.")
 aboutCmd:action(function(args, name)
     cprint("Package manager for Halo Custom Edition.")
     cprint("Licensed in GNU General Public License v3.0\n")
-    cprint("My Games path: \"" .. MyGamesPath .. "\"")
-    cprint("Current Halo CE path: \"" .. GamePath .. "\"")
+    cprint("My Games path: \"" .. paths.myGamesPath .. "\"")
+    cprint("Current Halo CE path: \"" .. paths.gamePath .. "\"")
 end)
 
 -- Version command
@@ -188,9 +182,14 @@ end)
 -- Show commands information if no args
 if (not arg[1]) then
     print(parser:get_help())
-    print("\nGame Path: " .. GamePath)
-    print("My Games Data Path: " .. MyGamesPath)
+    print("\nGame Path: " .. paths.gamePath)
+    print("My Games Data Path: " .. paths.myGamesPath)
 end
 
 -- Override args array with parser ones
 local args = parser:parse()
+
+if (args.version) then
+    cprint(constants.mercuryVersion)
+    os.exit(1)
+end

@@ -9,6 +9,7 @@ local v = require "semver"
 
 local constants = require "Mercury.modules.constants"
 local merc = require "Mercury.modules.merc"
+local paths = environment.paths()
 
 local search = require "Mercury.actions.search"
 local remove = require "Mercury.actions.remove"
@@ -31,7 +32,7 @@ local function insert(mercPath, forced, skipOptionals)
     if (exist(mercPath)) then
         -- Unpack merc file
         dprint("Trying to unpack \"" .. mercFilename .. ".merc\" ...")
-        local unpackPath = MercuryUnpacked .. "/" .. mercFilename
+        local unpackPath = gpath(paths.mercuryUnpacked, "/", mercFilename)
         if (not exist(unpackPath)) then
             
             createFolder(unpackPath)

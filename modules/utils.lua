@@ -60,7 +60,7 @@ function each(t)
 end
 
 function splitPath(inputPath)
-    local inputPath = upath(inputPath)
+    local inputPath = gpath(inputPath)
     dprint("Splitting path: " .. inputPath)
     if (inputPath) then
         local directory = path.dir(inputPath)
@@ -69,9 +69,9 @@ function splitPath(inputPath)
         end
         local fileName = path.file(inputPath)
         local extension = path.ext(inputPath)
-        dprint("directory:  " .. directory)
-        dprint("fileName:  " .. fileName)
-        dprint("extension:  " .. extension)
+        dprint("directory:  " .. tostring(directory))
+        dprint("fileName:  " .. tostring(fileName))
+        dprint("extension:  " .. tostring(extension))
         if (fileName and fileName ~= "" and extension) then
             fileName = string.gsub(fileName, "." .. extension, "")
         else
@@ -83,8 +83,12 @@ function splitPath(inputPath)
 end
 
 function createFolder(folderPath)
-    dprint("Creating folder: " .. folderPath)
-    return fs.mkdir(folderPath, true)
+    if (not exist(folderPath)) then
+        dprint("Creating folder: " .. folderPath)
+        return fs.mkdir(folderPath, true)
+    else
+        dprint("Warning, folder " .. folderPath .. " already exists.")
+    end
 end
 
 function move(sourceFile, destinationFile)
@@ -134,11 +138,26 @@ function isFile(filePath)
 end
 
 --- Return a Unix like path from a Windows path
-function upath(wpath)
-    return wpath:gsub("\\", "/")
+function upath(windowspath)
+    return windowspath:gsub("\\", "/")
 end
 
 --- Return a Windows path from a Unix path
-function wpath(upath)
-    return upath:gsub("/", "\\")
+function wpath(unixpath)
+    return unixpath:gsub("/", "\\")
+end
+
+function gpath( ...)
+    local args = { ... }
+    local stringPath = ""
+    if (args) then
+        for _, currentPath in pairs(args) do
+            if (jit.os == "Windows") then
+                stringPath = stringPath .. wpath(currentPath)
+            else
+                stringPath = stringPath .. upath(currentPath)
+            end
+        end
+    end
+    return stringPath
 end

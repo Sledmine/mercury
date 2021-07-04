@@ -10,6 +10,9 @@ local glue = require "glue"
 local json = require "cjson"
 local registry = require "registry"
 
+-- Paths table instance
+local paths
+
 -- Windows required registry keys
 local registryEntries = {
     documents = "HKEY_CURRENT_USER\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Explorer\\Shell Folders",
@@ -37,7 +40,7 @@ local function getGamePath()
         cprint("Force game path by setting \"HALO_CE_PATH\" as an environment variable.\n")
         cprint("Example:")
         cprint([[On Linux: export HALO_CE_PATH="/home/117/.wine/c/Halo Custom Edition"]])
-        cprint([[On Windows: set HALO_CE_PATH="D:\Games\Halo Custom Edition"]])
+        cprint([[On Windows: set HALO_CE_PATH=D:\Games\Halo Custom Edition]])
         os.exit()
     end
     return gamePath
@@ -68,39 +71,35 @@ end
 function environment.paths()
     -- local sourceFolder = lfs.currentdir()
     -- local appData = os.getenv("APPDATA")
-    Arch = os.getenv("PROCESSOR_ARCHITECTURE")
-    if (Arch ~= "x86") then
-        Arch = "x64"
+    if (not paths) then
+        Arch = os.getenv("PROCESSOR_ARCHITECTURE")
+        if (Arch ~= "x86") then
+            Arch = "x64"
+        end
+        local gamePath = gpath(getGamePath())
+        local myGamesPath = gpath(getMyGamesPath())
+        local mercuryTemp = gpath((os.getenv("TEMP") or "/tmp") .. "/mercury")
+        local mercuryPackages = gpath(mercuryTemp, "/packages")
+        local mercuryDownloads = gpath(mercuryPackages, "/downloads")
+        local mercuryUnpacked = gpath(mercuryPackages, "/unpacked")
+        local mercuryOldIndex = gpath(gamePath, "/mercury/installed/packages.json")
+        local mercuryIndex = gpath(gamePath, "/mercury.json")
+        createFolder(mercuryPackages)
+        createFolder(mercuryDownloads)
+        createFolder(mercuryUnpacked)
+        paths = {
+            gamePath = gamePath,
+            myGamesPath = myGamesPath,
+            mercuryTemp = mercuryTemp,
+            mercuryPackages = mercuryPackages,
+            mercuryUnpacked = mercuryUnpacked,
+            mercuryDownloads = mercuryDownloads,
+            mercuryUnpacked = mercuryUnpacked,
+            mercuryOldIndex = mercuryOldIndex,
+            mercuryIndex = mercuryIndex
+        }
     end
-    GamePath = getGamePath()
-    MyGamesPath = getMyGamesPath()
-    MercuryTemp = (os.getenv("TEMP") or "/tmp") .. "/mercury"
-    MercuryPackages = MercuryTemp .. "/packages"
-    MercuryDownloads = MercuryPackages .. "/downloads"
-    MercuryUnpacked = MercuryPackages .. "/unpacked"
-    MercuryInstalled = GamePath .. "/mercury/installed"
-    MercuryOldIndex = GamePath .. "/mercury/installed/packages.json"
-    MercuryIndex = GamePath .. "/mercury.json"
-    if (not exist(MercuryPackages)) then
-        createFolder(MercuryPackages)
-    end
-    if (not exist(MercuryDownloads)) then
-        createFolder(MercuryDownloads)
-    end
-    if (not exist(MercuryUnpacked)) then
-        createFolder(MercuryUnpacked)
-    end
-    return {
-        gamePath = GamePath,
-        myGamesPath = MyGamesPath,
-        mercuryTemp = MercuryTemp,
-        mercuryPackages = MercuryPackages,
-        mercuryUnpacked = MercuryUnpacked,
-        mercuryDownloads = MercuryDownloads,
-        mercuryUnpacked = MercuryUnpacked,
-        mercuryInstalled = MercuryInstalled,
-        mercuryIndex = MercuryIndex
-    }
+    return paths
 end
 
 --- Get mercury local installed packages
@@ -108,35 +107,32 @@ end
 ---@return packageMercury[] packages
 function environment.packages(newPackages)
     if (not newPackages) then
-        if (exist(MercuryIndex)) then
-            local installedPackages = json.decode(glue.readfile(MercuryIndex, "t"))
+        if (exist(paths.mercuryIndex)) then
+            local installedPackages = json.decode(glue.readfile(paths.mercuryIndex, "t"))
             if (installedPackages and #glue.keys(installedPackages) > 0) then
                 return installedPackages
             end
-        else
-            createFolder(MercuryInstalled)
         end
     else
         local installedPackagesJson = json.encode(newPackages)
-        glue.writefile(MercuryIndex, installedPackagesJson, "t")
+        glue.writefile(paths.mercuryIndex, installedPackagesJson, "t")
     end
     return nil
 end
 
 --- Clean temp data, temp folders, trash files...
 function environment.clean()
-    dprint("MercuryTemp: " .. MercuryTemp)
-    delete(MercuryTemp, true)
+    dprint("Cleaning MercuryTemp: " .. paths.mercuryTemp)
+    delete(paths.mercuryTemp, true)
 end
 
 --- Migrate deprecated or old files and paths
 function environment.migrate()
-    if (exist(MercuryOldIndex)) then
+    if (exist(paths.mercuryOldIndex)) then
         cprint("Warning, migrating old packages index path to new index path!")
-        move(MercuryOldIndex, MercuryIndex)
-        delete(MercuryInstalled, true)
+        move(paths.mercuryOldIndex, paths.mercuryIndex)
+        delete(paths.mercuryInstalled, true)
     end
 end
-
 
 return environment

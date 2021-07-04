@@ -5,6 +5,7 @@
 ------------------------------------------------------------------------------
 local json = require "cjson"
 local glue = require "glue"
+local paths = environment.paths()
 
 local class = require "middleclass"
 
@@ -43,8 +44,8 @@ local packageMercury = class "packageMercury"
 local function replacePathVariables(files)
     if (files and #files > 0) then
         local pathVariables = {
-            ["$haloce"] = GamePath,
-            ["$mygames"] = MyGamesPath
+            ["$haloce"] = paths.gamePath,
+            ["$mygames"] = paths.myGamesPath
         }
         local paths
         for fileIndex, file in pairs(files) do
@@ -55,8 +56,8 @@ local function replacePathVariables(files)
             for variable, value in pairs(pathVariables) do
                 outputPath = outputPath:gsub(variable, value)
             end
-            file.path = upath(file.path)
-            file.outputPath = upath(outputPath)
+            file.path = gpath(file.path)
+            file.outputPath = gpath(outputPath)
             paths[fileIndex] = file
         end
         return paths

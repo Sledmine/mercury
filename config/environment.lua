@@ -61,7 +61,7 @@ local function getMyGamesPath()
             "Force game path by setting \"MY_GAMES_PATH\" or \"HALO_CE_DATA_PATH\" as an environment variable.\n")
         cprint("Example:")
         cprint([[On Linux: export MY_GAMES_PATH="/home/117/Documents/My Games/Halo CE"]])
-        cprint([[On Windows: set MY_GAMES_PATH="D:\Users\117\Documents\My Games\Halo CE"]])
+        cprint([[On Windows: set MY_GAMES_PATH=D:\Users\117\Documents\My Games\Halo CE]])
         os.exit()
     end
     return documentsPath

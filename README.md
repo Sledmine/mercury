@@ -103,8 +103,8 @@ export HALO_CE_DATA_PATH="/home/Documents/My Games"
 Do not forget to add those lines to your .bashrc or .zshrc file make them permanent variables.
 
 On Windows:
-```bash
-set HALO_CE_PATH="D:\Games\Halo Custom Edition"
-set HALO_CE_DATA_PATH="D:\Users\Sledmine\Documents\My Games\Halo CE"
+```cmd
+set HALO_CE_PATH=D:\Games\Halo Custom Edition
+set HALO_CE_DATA_PATH=D:\Users\Sledmine\Documents\My Games\Halo CE
 ```
 These variables will not remain permanent, look into how to set them permanently.

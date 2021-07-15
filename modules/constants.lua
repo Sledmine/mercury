@@ -1,9 +1,12 @@
 local constants = {}
 
-constants.mercuryVersion = "1.3.0-beta"
+constants.mercuryVersion = "2.0.0-beta"
 constants.xd3CmdLine = "xdelta3 -d -s \"%s\" \"%s\" \"%s\""
 constants.latestReleaseApi =
     "https://api.github.com/repos/Sledmine/Mercury/releases/latest"
 constants.gitHubReleases = "https://github.com/Sledmine/Mercury/releases/{tagName}/"
+constants.packageIndex = "http://mercuryce.com/pindex"
+constants.repositoryHost = "genesis.vadam.net"
+constants.vulcanoPath = "api/vulcano"
 
 return constants

@@ -7,8 +7,6 @@ local json = require "cjson"
 
 local class = require "middleclass"
 
-local packageMetadata = class "packageMetadata"
-
 ---@class packageMetadata
 ---@field name string
 ---@field label string
@@ -19,6 +17,9 @@ local packageMetadata = class "packageMetadata"
 ---@field conflicts string[]
 ---@field mirrors string[]
 ---@field nextVersion string
+
+---@type packageMetadata
+local packageMetadata = class "packageMetadata"
 
 --- Entity constructor
 ---@param jsonString string

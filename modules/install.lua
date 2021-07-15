@@ -57,13 +57,13 @@ function install.package(packageLabel,
     if (error == 200 and response) then
         local packageMeta = PackageMetadata:new(response)
         if (packageMeta and packageMeta.mirrors) then
+            dprint(packageMeta)
             cprint("done. Found version " .. packageMeta.version .. ".")
             local result, packagePath = download.package(packageMeta)
             if (result) then
                 result, error = insert(packagePath, forced, skipOptionals)
                 if (result) then
-                    cprint("Success, package \"" .. packageLabel ..
-                               "\" has been installed.")
+                    cprint("Success, package \"" .. packageLabel .. "\" has been installed.")
                     return true
                 end
             end
@@ -93,8 +93,7 @@ function install.update(packageLabel)
                 if (result) then
                     result, error = insert(packagePath)
                     if (result) then
-                        cprint("Success, package \"" .. packageLabel ..
-                                   "\" has been updated.")
+                        cprint("Success, package \"" .. packageLabel .. "\" has been updated.")
                         return true
                     end
                 end

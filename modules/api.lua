@@ -6,11 +6,12 @@
 local api = {}
 
 local fdownload = require "Mercury.modules.fdownload"
+local constants = require "Mercury.modules.constants"
 local requests = require "requests"
 
-api.repositoryHost = "genesis.vadam.net"
+api.repositoryHost = constants.repositoryHost
 api.protocol = "https"
-api.vulcanoPath = "api/vulcano"
+api.vulcanoPath = constants.vulcanoPath
 
 --- Generate an URL using api definitions
 local function vulcanoUrl()
@@ -46,7 +47,7 @@ function api.getUpdate(packageLabel, packageVersion)
 end
 
 function api.fetch()
-    local response = requests.get("http://mercuryce.com/pindex")
+    local response = requests.get(constants.packageIndex)
     return response.status_code, response.text
 end
 

@@ -5,7 +5,8 @@ constants.xd3CmdLine = "xdelta3 -d -s \"%s\" \"%s\" \"%s\""
 constants.latestReleaseApi =
     "https://api.github.com/repos/Sledmine/Mercury/releases/latest"
 constants.gitHubReleases = "https://github.com/Sledmine/Mercury/releases/{tagName}/"
-constants.packageIndex = "http://mercuryce.com/pindex"
+constants.mercuryWeb = "http://mercury.shadowmods.net"
+constants.packageIndex = constants.mercuryWeb .. "/pindex"
 constants.repositoryHost = "genesis.vadam.net"
 constants.vulcanoPath = "api/vulcano"
 

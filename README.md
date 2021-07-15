@@ -10,16 +10,23 @@
 
 # Mercury v1.3.0-beta
 
-## What is Mercury?
-
-Is a console program that gives you some features such as downloading an installing tools, addons, mods and maps for your Halo Custom Edition game, everything you need in one place being downloaded in the pure developer style, basically a software package manager oriented to a game with mods.
+Mercury is console program that provides you some cool features for Halo Custom Edition such as downloading and installing addons, maps and mods in general for your Halo Custom Edition game, everything you need stored in a repository, a unique place, all being downloaded in a pure developer style, in other words basically a software package manager oriented to a game that has mods.
 
 ![Mercury GIF](https://i.imgur.com/kzVgOu3.gif)
 
-## What is the purpose of Mercury?
+# What is the purpose of Mercury?
 
-- Get access into our package repository and download the latest or the oldest version of your favorite packages.
-- Manage your favorite mods or addons perform different actions for them such as, install, update, remove, etc.
+Mercury attempts to solve the problem of descentralized content available out there for the game, it tries to bring a way to simplify the deployment and publishing issues that a modder of the game can encounter at trying to release a mod for the community, we can say Mercury "simplifies" the installation process as some users are not friends of a command line but it is better
+than trying to explain how to install everything on a mod manually.
+
+In short terms what it offers you:
+- Get access into our package repository and download the latest or the specified version of your favorite packages/mods by using simple commands.
+- Manage your favorite mods or addons, performing different actions on them, remove, update, etc
+
+We tried to minimize the impact of how complex a package manager really is based on how the game is
+actually really hard to keep stable by installing different mods that are not compatible with each other, the final "build" of Mercury is your Halo files installation so we provide you with a way
+to know (when possible) if a package you are trying to install is not compatible with another package already installed in your game, but you have responsability to decide what packages you want
+to keep installed in order to install one package or another.
 
 # Installing Mercury
 
@@ -63,12 +70,15 @@ cd luapower-all-x86-x64
 luajit mercury/compile.lua
 ```
 
-# Development Environment
+**NOTE:** I'll try to create a docker container for this, it should simplify compilation process and
+provide a way to automatically build this on the cloud.
 
-If you want to modify and verify code in this repository you will have a couple of tools to
+# Setting up a development environment
+
+If you want to modify and test code in this repository you will have a couple of tools to
 test everything in your local environment, some unit testing is being added continuously.
 
-## Run with LuaJIT
+## Run Mercury from source
 Luapower follows a structure where everything must be inside the root folder to work, by just making
 a Symlink of your cloned respository into the Luapower folder you will be able to run, you can
 clone your repository directly in the Luapower folder but we would like to recommend you to create a
@@ -76,15 +86,18 @@ symlink.
 
 After that you can just use this command in the luapower folder to run it:
 ```cmd
-luajit mercury\mercury.lua
+./luajit mercury/mercury.lua
 ```
 
 ## Mocking Vulcano API and Server
 
-You can run a mock of a Vulcano API with a testing repository server using
+Vulcano is the API that Mercury consumes, as Vulcano is a really simple HTTP JSON Server we don't
+have documentation about it, but if you got this far to start working on Mercury it would be a really simple API to test and consume based on the Mercury code.
+
+You can run a mock of Vulcano API including static package repository using
 [easymock](https://github.com/CyberAgent/node-easymock) and the commands below:
 ```cmd
-cd tests\server
+cd tests/server
 easymock
 ```
 

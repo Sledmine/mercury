@@ -1,8 +1,9 @@
 # Changelog
 
-# 1.3.0
+# 2.0.0
 - Added support for Linux 64 bit builds
 - Added `fetch` command to retrieve the latest package index available on the respository
+- New manifest version `1.1.0` has been added, packages manifest now have a few different way to setup paths and an extra field for package category, check out the [Package Documentation](docs/PACKAGE.md) for more information.
 
 # 1.2.0
 - Added `-t --template` flag to the `luabundle` command, this will create a template of a

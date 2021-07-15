@@ -35,6 +35,7 @@ local packageMercury = class "packageMercury"
 ---@field targetVersion string
 ---@field internalVersion string
 ---@field manifestVersion string
+---@field category string
 ---@field files mercFiles[]
 ---@field updates mercUpdates[]
 ---@field dependencies mercDependencies[]
@@ -93,6 +94,9 @@ function packageMercury:initialize(jsonString)
     ---@type string
     self.manifestVersion = properties.manifestVersion
 
+    ---@type string
+    self.category = properties.category
+
     ---@type mercFiles[]
     self.files = replacePathVariables(properties.files)
 
@@ -114,6 +118,7 @@ function packageMercury:getProperties()
         version = self.version,
         internalVersion = self.internalVersion,
         manifestVersion = self.manifestVersion,
+        category = self.category,
         files = self.files,
         dependencies = self.dependencies
     }

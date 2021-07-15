@@ -30,7 +30,7 @@ This is the most important file for a Mercury package, this json file contains a
 
 ***Note:*** There are some plans to support `.yml` files in the future as manifest files. 
 
-# Manifest Structure
+# Manifest Structure - 1.1.0
 
 As explained above, a manifest file has different properties to tell Mercury how to install our mod, here is an example of a manifest.json below:
 
@@ -42,16 +42,17 @@ As explained above, a manifest file has different properties to tell Mercury how
     "version": "1.0.0-beta-1",
     "author": "Shadowmods Team",
     "internalVersion": "1.0.0-beta-1",
-    "manifestVersion": "1.0",
+    "manifestVersion": "1.1.0",
+    "category": "map",
     "files": [
         {
             "path": "maps\\forge_island.map",
-            "outputPath": "$haloce\\",
+            "outputPath": "$haloce\\maps\\forge_island.map",
             "type": "binary"
         },
         {
             "path": "forge_island.lua",
-            "outputPath": "$mygames\\chimera\\lua\\scripts\\map\\",
+            "outputPath": "$mygames\\chimera\\lua\\scripts\\map\\forge_island.lua",
             "type": "binary"
         }
     ],
@@ -95,6 +96,18 @@ This value is optional and is not designed to be used directly, you can use it t
 This value represents which version of the current manifest is being used, manifests are supposed to receive simple changes so this number should not change too often.
 
 
+`category`
+
+Category represents a simple type of package, it helps to distinguish packages, also helps indexing,
+it can be anything what you want, but for better indexing there are a list of possible values to use:
+
+- map
+- addon
+- script
+- config
+
+If you consider that there should be more values here feel free to ask or to create a pull request.
+
 `files`
 
 Here is another important property, this is the list of files inside the package to be installed in the game, every **file** has different important properties to use:
@@ -105,8 +118,8 @@ Here is another important property, this is the list of files inside the package
     "path": "examplemod.dll",
     // This is important for updates purposes, this tells Mercury how to update this file
     "type": "binary",
-    // This is the final path of the file after installation
-    "outputPath": "$haloce\\"
+    // This is the final output file path after installation
+    "outputPath": "$haloce\\examplemod.dll"
 }
 
 ```
@@ -127,8 +140,8 @@ There are some variables you can use in your outputPath properties:
 
 ```jsonc
 {
-    "outputPath": "$haloce\\controls\\"
-    // The $haloce string part will be replaced at installation time into: "C:\Halo Custom Edition\controls\"
+    "outputPath": "$haloce\\controls\\examplemod.dll"
+    // The $haloce string part will be replaced at installation time into: "C:\Halo Custom Edition"
     ...
 ```
 
@@ -136,14 +149,15 @@ There are some variables you can use in your outputPath properties:
 
 ```jsonc
 {
-    "outputPath": "$mygames\\chimera"
-    // The $mygames string part will be replaced at installation time into: "C:\Users\MasterChief117\Documents\My Games\Halo CE\chimera"
+    "outputPath": "$mygames\\chimera\\lua\\scripts\\global\\myscript.lua"
+    // The $mygames string part will be replaced at installation time into: "C:\Users\MasterChief117\Documents\My Games\Halo CE"
+    // Note that even if the string var says "mygames" the final refers to the "Halo CE" folder
     ...
 ```
 
 `dependencies`
 
-This is the list of dependencies required by this package, a dependency is another package hosted in the Mercury repository, every **dependency** has some properties to use:
+This is an array of dependencies required by this package, a dependency is another package hosted in the Mercury repository, **every dependency** has some properties to use:
 
 ```jsonc
 {
@@ -151,11 +165,11 @@ This is the list of dependencies required by this package, a dependency is anoth
     "label": "chimera",
     // Version of the dependency package
     "version": "3.14.16",
-    // This value can be nil or not present resulting into getting the latest package available
+    // This value can be null or not present resulting into getting the latest package available
 }
 ```
 
-Right now mercury does not support operators to decide which version should be preferred over currently installed versions or a range of safe to use versions, a dependency with a higher version number always will be preferred over currenty installed one and the older will be removed.
+Right now mercury does not support operators to decide which version should be preferred over currently installed versions or a range of safe to use versions, a dependency with a higher version number always will be preferred over a currently installed one and the older will be removed.
 
 # FAQ
 
@@ -169,7 +183,7 @@ You don't have to create an update for every package you create, if your package
 
 ## Can I host my own packages repository?
 
-For sure, Mercury is using an internal api called Vulcano to provide access to different packages, select newest package from repository and more, if you want to host your own packages you can contact us and add your repository to Vulcano as an available mirror for package downloading.
+For sure, Mercury is using an internal API called Vulcano to provide access to different packages, select newest package from repository and more, if you want to host your own packages you can contact us and add your repository to Vulcano as an available mirror for package downloading.
 
 ## Is there a tool to create an automated package build process?
 
@@ -179,7 +193,7 @@ Sadly nope, but we are working on a new action for Mercury, someting like:
 cd MySuperModFolder\
 mercury pack --nextMajor
 ```
-Something like this should do the trick in the future, however it is not that hard to build your own packages via bash scripting or someting similar.
+Something like this should do the trick in the future, however it is not that hard to build your own packages via bash scripting or something similar.
 
 # Join us on Discord
 Feel free to join the [Shadowmods Discord Server](https://discord.shadowmods.net) if you want to

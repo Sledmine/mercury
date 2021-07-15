@@ -13,7 +13,7 @@ inspect = require "inspect"
 require "Mercury.modules.utils"
 
 -- Local modules
-local environment = require "Mercury.config.environment"
+environment = require "Mercury.config.environment"
 -- Get all environment variables and configurations
 local paths = environment.paths()
 
@@ -32,6 +32,7 @@ function testUtils:setUp()
         "author": "Sled",
         "internalVersion": "1.0.0-r667",
         "manifestVersion": "1.0",
+        "category": "script",
         "files":  [
             {
                 "path": "test.txt",
@@ -56,6 +57,7 @@ function testUtils:setUp()
         author = "Sled",
         internalVersion = "1.0.0-r667",
         manifestVersion = "1.0",
+        category = "script",
         files = {
             {
                 path = "test.txt",

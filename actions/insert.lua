@@ -23,26 +23,27 @@ local errors = {
     updateError = "at trying to update a file",
     depedencyError = "at trying to install a package dependency",
     mercFileDoesNotExist = "mercury local package does not exist",
-    manifestError = "error at trying to read manifest.json from the package"
+    noManifest = "error at trying to read manifest.json from the package",
+    unknownManifestVersion = "error at trying to read manifest.json version"
 }
 
 -- Install any mercury package
 local function insert(mercPath, forced, skipOptionals)
-    local _, mercFilename = splitPath(mercPath)
     if (exist(mercPath)) then
+        local _, mercFilename = splitPath(mercPath)
         -- Unpack merc file
         dprint("Trying to unpack \"" .. mercFilename .. ".merc\" ...")
         local unpackPath = gpath(paths.mercuryUnpacked, "/", mercFilename)
         if (not exist(unpackPath)) then
-            
             createFolder(unpackPath)
         end
         local unpackResult = merc.unpack(mercPath, unpackPath)
         if (unpackResult) then
             -- Load package manifest data
-            local manifestJson = glue.readfile(unpackPath .. "/manifest.json")
+            local manifestPath = gpath(unpackPath, "/manifest.json")
+            local manifestJson = glue.readfile(manifestPath)
             if (not manifestJson) then
-                return false, errors.manifestError
+                return false, errors.noManifest
             end
             ---@type packageMercury
             local mercuryPackage = PackageMercury:new(manifestJson)
@@ -54,35 +55,29 @@ local function insert(mercPath, forced, skipOptionals)
                     local existingDependency = search(dependency.label)
                     -- Check if we have this package dependency already installed
                     if (existingDependency) then
-                        -- A specific package dependency was specified
-                        if (dependency.version) then
-                            -- Check semantic version
-                            if (v(existingDependency.version) < v(dependency.version)) then
-                                --  TODO Allow user to decide for this step
-                                cprint(
-                                    "Warning, removing older dependency to install newer required dependency \"" ..
-                                        dependency.label .. "-" .. dependency.version ..
-                                        "\"")
-                                --  TODO Add skip optionals to remove action
-                                local result, error = remove(dependency.label, true)
-                                if (not result) then
-                                    remove(dependency.label, false, false, false, true)
-                                end
-                                result, error =
-                                    install.package(dependency.label, dependency.version)
-                                if (not result) then
-                                    return false, errors.depedencyError
-                                end
-                            else
-                                cprint("Warning, dependency installation for \"" ..
-                                           dependency.label .. "-" .. dependency.version ..
-                                           "\" is being skipped because there is a newer or equal version already installed.")
+                        -- Specific dependency was specified, check semantic version
+                        if (dependency.version and v(existingDependency.version) <
+                            v(dependency.version)) then
+                            --  TODO Allow user to decide for this step
+                            cprint("Warning, newer dependency is required, removing old one \"" ..
+                                       dependency.label .. "-" .. dependency.version .. "\"")
+                            --  TODO Add skip optionals to remove action
+                            local result, error = remove(dependency.label, true)
+                            if (not result) then
+                                remove(dependency.label, false, false, false, true)
                             end
+                            result, error = install.package(dependency.label, dependency.version)
+                            if (not result) then
+                                return false, errors.depedencyError
+                            end
+                        else
+                            cprint("Warning, dependency installation for \"" .. dependency.label ..
+                                       "-" .. dependency.version ..
+                                       "\" is being skipped, newer or equal dependency is already installed.")
                         end
                     else
-                        local result, error =
-                            install.package(dependency.label, dependency.version, false,
-                                            false)
+                        local result, error = install.package(dependency.label, dependency.version,
+                                                              false, false)
                         if (not result) then
                             return false, errors.depedencyError
                         end
@@ -100,9 +95,17 @@ local function insert(mercPath, forced, skipOptionals)
                     end
 
                     -- File path from mercury unpack path
-                    local inputFile = unpackPath .. "/" .. file.path
+                    local inputFile = gpath(unpackPath, "/", file.path)
                     -- File path for insertion
-                    local outputFile = file.outputPath .. file.path
+                    local outputFile
+                    if (mercuryPackage.manifestVersion == "1.0") then
+                        outputFile = gpath(file.outputPath .. file.path)
+                    elseif (mercuryPackage.manifestVersion == "1.1.0") then
+                        outputFile = gpath(file.outputPath)
+                    else
+                        cprint("Error, unknown manifest version.")
+                        return false, errors.unknownManifestVersion
+                    end
                     local outputFilePath = splitPath(outputFile)
 
                     -- Create folder for current file
@@ -111,7 +114,7 @@ local function insert(mercPath, forced, skipOptionals)
                     end
 
                     dprint("Inserting file \"" .. file.path .. "\" ...")
-                    dprint("Output: \"" .. outputFile .. "\" ...")
+                    dprint("Output, \"" .. outputFile .. "\" ...")
 
                     if (exist(outputFile)) then
                         if (forced or mercuryPackage.updates) then
@@ -126,20 +129,17 @@ local function insert(mercPath, forced, skipOptionals)
                                     cprint("done.")
                                 end
                             else
-                                cprint("Error, at trying to erase file: '" .. file.path ..
-                                           "'")
+                                cprint("Error, at trying to erase file: '" .. file.path .. "'")
                                 return false, errors.eraseFileError
                             end
                         else
-                            cprint("Warning, creating backup for conflict file: \"" ..
-                                       file.path .. "\"... ", true)
-                            local result, desc, error =
-                                move(outputFile, outputFile .. ".bak")
+                            cprint("Warning, creating backup for conflict file: \"" .. file.path ..
+                                       "\"... ", true)
+                            local result, desc, error = move(outputFile, outputFile .. ".bak")
                             if (result) then
                                 cprint("done.")
                             else
-                                cprint("Error, at trying to create a backup for: '" ..
-                                           file.path)
+                                cprint("Error, at trying to create a backup for: '" .. file.path)
                                 return false, errors.backupCreationError
                             end
                         end
@@ -147,8 +147,7 @@ local function insert(mercPath, forced, skipOptionals)
 
                     -- Copy file into game folder
                     if (copyFile(inputFile, outputFile)) then
-                        dprint("File succesfully installed.")
-                        dprint(outputFile)
+                        dprint("Done, file succesfully installed.")
                     else
                         cprint("Error, at trying to install file: '" .. file.path .. "'")
                         return false, errors.installationError
@@ -160,14 +159,21 @@ local function insert(mercPath, forced, skipOptionals)
             -- Apply updates to files if available
             if (mercuryPackage.updates) then
                 for fileIndex, file in pairs(mercuryPackage.updates) do
-                    cprint("Updating " .. file.path .. " ... ", true)
+                    cprint("Updating \"" .. file.path .. "\" ... ", true)
                     -- File update from mercury unpack path
-                    local diffFilePath = unpackPath .. "\\" .. file.diffPath
+                    local diffFilePath = gpath(unpackPath, "/", file.diffPath)
                     -- File path for insertion
-                    local sourceFilePath = file.outputPath .. file.path
+                    local sourceFilePath
+                    if (mercuryPackage.manifestVersion == "1.0") then
+                        sourceFilePath = gpath(file.outputPath, file.path)
+                    elseif (mercuryPackage.manifestVersion == "1.1.0") then
+                        sourceFilePath = gpath(file.outputPath)
+                    else
+                        cprint("Error, unknown manifest version")
+                    end
+
                     -- File path for temp updated file
                     local updatedFilePath = sourceFilePath .. ".updated"
-
                     dprint("diffFilePath: " .. diffFilePath)
                     dprint("sourceFilePath: " .. sourceFilePath)
                     dprint("updatedFilePath: " .. updatedFilePath)
@@ -179,16 +185,18 @@ local function insert(mercPath, forced, skipOptionals)
                                                          updatedFilePath)
                         dprint("xd3Cmd: " .. xd3Cmd)
 
-                        --  TODO Append validation for update command
+                        --  TODO Add validation for update command
                         local xd3Result = os.execute(xd3Cmd)
                         if (exist(updatedFilePath)) then
-                            --  TODO Add validation for these operations
-                            -- Rename updated file to source file
+                            -- Prepare a temp file name to replace it with the updated one
                             local oldFilePath = sourceFilePath .. ".old"
-                            move(sourceFilePath, oldFilePath)
-                            move(updatedFilePath, sourceFilePath)
-                            delete(oldFilePath)
-                            cprint("done.")
+                            -- Move updated file to source file path
+                            if (move(sourceFilePath, oldFilePath) and move(updatedFilePath, sourceFilePath) and delete(oldFilePath)) then
+                                cprint("done.")
+                            else
+                                cprint("Error, at performing old files removal")
+                                return false, errors.eraseFileError
+                            end
                         else
                             cprint("Error, at updating \"" .. file.path .. "\"")
                             return false, errors.updateError
@@ -201,7 +209,7 @@ local function insert(mercPath, forced, skipOptionals)
             local installedPackages = environment.packages() or {}
             -- Substract required package properties and store them
             if (mercuryPackage.updates) then
-                -- TODO Check out this, there are probably better ways to do this
+                -- TODO Check out this, there are probably better ways to do it
                 local updateProps = mercuryPackage:getProperties()
                 updateProps.updates = mercuryPackage.updates
 
@@ -213,8 +221,7 @@ local function insert(mercPath, forced, skipOptionals)
 
                 -- Remove updates property from the final package properties
                 updateProps.updates = nil
-                installedPackages[mercuryPackage.label] =
-                    glue.update(oldProps, updateProps)
+                installedPackages[mercuryPackage.label] = glue.update(oldProps, updateProps)
             else
                 installedPackages[mercuryPackage.label] = mercuryPackage:getProperties()
             end

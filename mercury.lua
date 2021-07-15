@@ -31,8 +31,8 @@ local luabundler = require "Mercury.modules.luabundle"
 local constants = require "Mercury.modules.constants"
 
 -- Create argument parser with Mercury info
-local parser = argparse("mercury", "Package Manager for Halo Custom Edition.",
-                        "Mercury Webpage: http://mercuryce.com\nJoin us on Discord: https://discord.shadowmods.net/\nSupport Mercury on GitHub: https://github.com/Sledmine/Mercury")
+local cliDescription = "Mercury Webpage: %s\nJoin us on Discord: https://discord.shadowmods.net/\nSupport Mercury on GitHub: https://github.com/Sledmine/Mercury"
+local parser = argparse("mercury", "Package Manager for Halo Custom Edition.", cliDescription:format(constants.mercuryWeb))
 -- Disable command required message                        
 parser:require_command(false)
 

@@ -13,12 +13,12 @@ local glue = require "glue"
 
 --- Unpack a merc package
 ---@param mercPath string Path to the merc package that will be unpacked
----@param unpackPath string Path of the output files unpacked from the merc package
+---@param unpackDir string Path of the output files unpacked from the merc package
 ---@return boolean result
-function merc.unpack(mercPath, unpackPath)
+function merc.unpack(mercPath, unpackDir)
     local dir, fileName, ext = splitPath(mercPath)
     dprint("Unpacking: " .. mercPath .. "...")
-    dprint("To Path: " .. unpackPath)
+    dprint("To Dir: " .. unpackDir)
     local packageZip = minizip.open(mercPath, "r")
 
     -- Set current file as first file
@@ -33,7 +33,7 @@ function merc.unpack(mercPath, unpackPath)
     for entryIndex = 1, totalEntries do
         -- Store current file name
         local fileName = packageZip:get_file_info().filename
-        local filePath = unpackPath .. "/" .. fileName
+        local filePath = gpath(unpackDir, "/", fileName)
 
         -- Ignore manifest.json entry file and process all the other entries
         if (fileName ~= "manifest.json") then
@@ -47,7 +47,7 @@ function merc.unpack(mercPath, unpackPath)
             createFolder(filePath)
         else
             -- Current file is indeed a file, just write it
-            dprint("Current decompressed file path: " .. filePath)
+            dprint("Decompressing path " .. filePath)
             glue.writefile(filePath, packageZip:extract(fileName), "b")
         end
 

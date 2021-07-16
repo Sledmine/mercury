@@ -115,7 +115,8 @@ function environment.packages(newPackages)
         end
     else
         local installedPackagesJson = json.encode(newPackages)
-        glue.writefile(paths.mercuryIndex, installedPackagesJson, "t")
+        local result, error = glue.writefile(paths.mercuryIndex, installedPackagesJson, "t")
+        return result
     end
     return nil
 end

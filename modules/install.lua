@@ -57,8 +57,9 @@ function install.package(packageLabel,
     if (error == 200 and response) then
         local packageMeta = PackageMetadata:new(response)
         if (packageMeta and packageMeta.mirrors) then
-            dprint(packageMeta)
             cprint("done. Found version " .. packageMeta.version .. ".")
+            dprint("Package metadata:")
+            dprint(packageMeta)
             local result, packagePath = download.package(packageMeta)
             if (result) then
                 result, error = insert(packagePath, forced, skipOptionals)

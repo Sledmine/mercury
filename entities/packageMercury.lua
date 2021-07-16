@@ -40,9 +40,9 @@ local packageMercury = class "packageMercury"
 ---@field updates mercUpdates[]
 ---@field dependencies mercDependencies[]
 
---- Replace all the environment related paths
+--- Replace and normalize file paths
 ---@param files mercFiles[]
-local function replacePathVariables(files)
+local function normalizePaths(files, manifestVersion)
     if (files and #files > 0) then
         local pathVariables = {
             ["$haloce"] = paths.gamePath,
@@ -53,12 +53,19 @@ local function replacePathVariables(files)
             if (not paths) then
                 paths = {}
             end
-            local outputPath = file.outputPath
+            local normalizedOutputPath = file.outputPath
             for variable, value in pairs(pathVariables) do
-                outputPath = outputPath:gsub(variable, value)
+                normalizedOutputPath = normalizedOutputPath:gsub(variable, value)
             end
             file.path = gpath(file.path)
-            file.outputPath = gpath(outputPath)
+            if (manifestVersion == "1.0") then
+                file.outputPath = gpath(normalizedOutputPath .. file.path)
+            elseif (manifestVersion == "1.1.0") then
+                file.outputPath = gpath(normalizedOutputPath)
+            else
+                cprint("Error, uknown manifest version (" .. tostring(manifestVersion) .. ")")
+                error("Error at trying to read manifest.json version", 2)
+            end
             paths[fileIndex] = file
         end
         return paths
@@ -67,9 +74,16 @@ local function replacePathVariables(files)
 end
 
 --- Entity constructor
----@param jsonString string
-function packageMercury:initialize(jsonString)
-    local properties = json.decode(jsonString)
+---@param jsonStringOrTable string | packageMercury
+function packageMercury:initialize(jsonStringOrTable)
+    local properties
+    if (type(jsonStringOrTable) == "string") then
+        properties = json.decode(jsonStringOrTable)
+    elseif (type(jsonStringOrTable) == "table") then
+        properties = jsonStringOrTable
+    else
+        error("Specified package constructor parameter is not valid", 2)
+    end
     ---@type string
     self.label = properties.label
     
@@ -98,13 +112,18 @@ function packageMercury:initialize(jsonString)
     self.category = properties.category
 
     ---@type mercFiles[]
-    self.files = replacePathVariables(properties.files)
+    self.files = normalizePaths(properties.files, self.manifestVersion)
 
     ---@type mercUpdates[]
-    self.updates = replacePathVariables(properties.updates)
+    self.updates = normalizePaths(properties.updates, self.manifestVersion)
 
     ---@type mercDependencies[]
     self.dependencies = properties.dependencies
+
+    -- Update manifest
+    if (self.manifestVersion == "1.0") then
+        self.manifestVersion = "1.1.0"
+    end
 end
 
 --- Return the public/raw properties of the package

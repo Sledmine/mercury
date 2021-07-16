@@ -132,7 +132,7 @@ function environment.migrate()
     if (exist(paths.mercuryOldIndex)) then
         cprint("Warning, migrating old packages index path to new index path!")
         move(paths.mercuryOldIndex, paths.mercuryIndex)
-        delete(paths.mercuryInstalled, true)
+        delete(gpath(paths.gamePath,  "/mercury"), true)
     end
 end
 

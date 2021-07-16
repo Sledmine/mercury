@@ -59,17 +59,22 @@ function each(t)
     end
 end
 
+---@alias folder string
+---@alias fileName string
+---@alias extension string
+--- Return elements from a file or folder path
+---@return folder, filename, extension
 function splitPath(inputPath)
     local inputPath = gpath(inputPath)
     dprint("Splitting path: " .. inputPath)
     if (inputPath) then
-        local directory = path.dir(inputPath)
-        if (directory == ".") then
-            directory = nil
+        local folder = path.dir(inputPath)
+        if (folder == ".") then
+            folder = nil
         end
         local fileName = path.file(inputPath)
         local extension = path.ext(inputPath)
-        dprint("directory:  " .. tostring(directory))
+        dprint("directory:  " .. tostring(folder))
         dprint("fileName:  " .. tostring(fileName))
         dprint("extension:  " .. tostring(extension))
         if (fileName and fileName ~= "" and extension) then
@@ -77,7 +82,7 @@ function splitPath(inputPath)
         else
             fileName = nil
         end
-        return directory, fileName, extension
+        return folder, fileName, extension
     end
     error("No given file or folder path to split!")
 end

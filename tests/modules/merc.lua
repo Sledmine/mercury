@@ -14,10 +14,11 @@ testMerc = {}
 
 function testMerc:setUp()
     -- Before every unit test
-    self.inputMerc = "./Mercury/tests/modules/merc/package/test-1.0.0.merc"
+    self.inputMerc = "./Mercury/tests/modules/merc/package/unpack.merc"
     self.outputMercPath = "./Mercury/tests/modules/merc/unpack"
     
-    self.sourceMerc = "./Mercury/tests/modules/merc/src"
+    self.packDir = "./Mercury/tests/modules/merc/packDir"
+    self.outputDir = "./Mercury/tests/modules/merc/package/pack.merc"
 end
 
 -- Specifically test unpack method
@@ -31,6 +32,17 @@ function testMerc:testUnpack()
         delete(self.outputMercPath, true)
     else
         lu.fail("Input merc package does not exist")
+    end
+end
+
+function testMerc:testPack() 
+    delete(self.outputDir)
+    if(exist(self.packDir)) then
+        lu.assertIsTrue(merc.pack(self.packDir, self.outputDir))
+        lu.assertIsTrue(exist(self.outputDir))
+        delete(self.outputDir)
+    else
+        lu.fail("packDir does not exist")
     end
 end
 

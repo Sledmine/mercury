@@ -21,6 +21,7 @@ local staticLibs = {
     "cjson",
     "z",
     "minizip",
+    "minizip2",
     "md5"
 }
 

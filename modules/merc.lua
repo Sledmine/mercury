@@ -9,6 +9,7 @@ local merc = {}
 
 -- TODO Migrate this to minizip2
 local minizip = require "minizip"
+local minizip2 = require "minizip2"
 local glue = require "glue"
 
 --- Unpack a merc package
@@ -68,8 +69,18 @@ function merc.unpack(mercPath, unpackDir)
     return false
 end
 
-function merc.pack()
 
+function merc.pack(packDir, mercPath)
+    if (packDir and mercPath) then
+        local packageZip = minizip2.open(mercPath, "w")
+        if (packageZip) then
+            packageZip:add_all(packDir)
+            packageZip:close()
+
+            return true
+        end
+    end
+    return false
 end
 
 return merc

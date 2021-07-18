@@ -45,7 +45,7 @@ output, all the info required for that is here.
 # Bundle File
 
 As explained above, the bundle.json file has all the requirements to bundle our project, the content
-of a bundle.json file should be something like this:
+of a bundle.json file could be something like this:
 
 ```json
 {
@@ -108,15 +108,12 @@ After all the explanation from above we now should be able to start creating mod
 using Mercury, there are a few tools available on the `luabundle` command from Mercury, here are
 a few examples of how to use them:
 
-## Create a `bundle.json` template file
+## Create a bundle.json template file
 ```
 cd MySuperProjectFolder
 mercury luabundle -t
 ```
-This command will create `bundle.json` file with common properties by default in order to help us
-starting the creation of a modular lua project, the `-t` flag stands for the short version of the
-`--template` flag, meaning this command will create an example of a `bundle.json` file
-
+This command will create `bundle.json` file with common properties by default, this will help you to start the creation of a modular lua project, the `-t` flag stands for the short version of the `--template` flag, meaning this command will create an example of a `bundle.json` file
 
 ## Bundle a project directly
 ```
@@ -135,7 +132,7 @@ The `-c` flag stands for the short version of the `--compile` flag, meaning that
 be compiled **AFTER** gathering and bundling all the modules required in the `bundle.json` file.
 
 
-## Bundle a project using a different `bundle.json` file
+## Bundle a project using a different bundle.json file
 ```
 cd MySuperProjectFolder
 mercury luabundle server
@@ -152,7 +149,7 @@ the only requirement is to add the word "**Bundle**" at the end of our target fi
 
 Nope, not at all, but I'm not really sure about that in the future, I mean Mercury is already
 working as a package manager for Halo Custom Edition mods so getting support for specific
-Halo Custom Edition lua modules is not that crazy but is definitely not on my plans right now.
+Halo Custom Edition lua modules is not that crazy but is definitely out of the scope right now.
 
 # Join us on Discord
 Feel free to join the [Shadowmods Discord Server](https://discord.shadowmods.net) if you want to

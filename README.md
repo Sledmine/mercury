@@ -1,6 +1,6 @@
 <html>
     <p align="center">
-        <img width="300px" src="assets/images/mercury.png"/>
+        <img width="300px" src="img/mercury.png"/>
     </p>
     <h1 align="center">Mercury</h1>
     <p align="center">
@@ -12,7 +12,7 @@
 
 Mercury is console program that provides you some cool features for Halo Custom Edition such as downloading and installing addons, maps and mods in general for your Halo Custom Edition game, everything you need stored in a repository, a unique place, all being downloaded in a pure developer style, in other words basically a software package manager oriented to a game that has mods.
 
-![Mercury GIF](https://i.imgur.com/kzVgOu3.gif)
+![Mercury GIF](img/demo.gif)
 
 # What is the purpose of Mercury?
 
@@ -37,8 +37,8 @@ To download and use Mercury in your computer you have to download Windows binari
 We are working on some documentation for Mercury, stay tuned, some markdowns will be hosted here as
 well:
 
-- [Packages](docs/PACKAGE.md)
-- [Lua Bundler](docs/LUABUNDLER.md)
+- [Lua Bundler](docs/LUA-BUNDLER.md)
+- [Mercury Packages](docs/PACKAGES.md)
 
 # Contribute to Mercury
 

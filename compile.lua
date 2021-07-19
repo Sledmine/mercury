@@ -147,6 +147,7 @@ local function compileInstaller(compilationArch)
         local installerTemplate = glue.readfile("mercury\\installerTemplate.iss", "t")
         if (installerTemplate) then
             installerTemplate = installerTemplate:gsub("$VNUMBER", tostring(version))
+            installerTemplate = installerTemplate:gsub("$OSTARGET", "windows")
             local arch64 = compilationArch
             local arch = compilationArch
             if (compilationArch == "x86") then

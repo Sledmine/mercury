@@ -40,11 +40,15 @@ parser:require_command(false)
 parser:command_target("command")
 
 -- General flags
-parser:flag("-v --version", "Print mercury version and exit.")
-parser:flag("-d --debug", "Enable debug mode, some extra printing will show.")
-parser:flag("-t --test", "Enable test mode, testing behaviour will occur.")
+parser:flag("-v", "Get Mercury version.")
+parser:flag("--debug", "Enable debug mode, some extra printing will show.")
+parser:flag("--test", "Enable test mode, testing behaviour will occur.")
 
 local function flagsCheck(args)
+    if (args.v) then
+        cprint(constants.mercuryVersion)
+        os.exit(1)
+    end
     if (args.debug) then
         IsDebugModeEnabled = true
         cprint("Warning, Debug mode enabled.")
@@ -173,12 +177,6 @@ aboutCmd:action(function(args, name)
     cprint("Current Halo CE path: \"" .. paths.gamePath .. "\"")
 end)
 
--- Version command
-local versionCmd = parser:command("version", "Get Mercury version.")
-versionCmd:action(function(args, name)
-    cprint(constants.mercuryVersion)
-end)
-
 -- Show commands information if no args
 if (not arg[1]) then
     print(parser:get_help())
@@ -189,7 +187,7 @@ end
 -- Override args array with parser ones
 local args = parser:parse()
 
-if (args.version) then
+if (args.v) then
     cprint(constants.mercuryVersion)
     os.exit(1)
 end

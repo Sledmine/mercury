@@ -38,7 +38,9 @@ mercury about
 
 For Linux users there should be a bin file ready to use, place it on a place of your choice and add it to your PATH in order to start using it.
 
+**NOTE:** Linux builds only include x64 binaries as Linux has been dropping support for x86 binaries in many distros, also Mercury on Linux is more oriented for more advanced users and server admins.
+
 You can drop it on your user bin folder and that should be all, adding a new folder to your PATH should not be required.
 ```bash
-mv /home/117/Downloads/mercury /usr/bin/mercury
+mv /home/117/Downloads/mercury-x.x.x+linux.x64 /usr/bin/mercury
 ```

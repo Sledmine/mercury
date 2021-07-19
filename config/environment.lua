@@ -123,7 +123,7 @@ end
 
 --- Clean temp data, temp folders, trash files...
 function environment.clean()
-    dprint("Cleaning MercuryTemp: " .. paths.mercuryTemp)
+    dprint("Cleaning " .. paths.mercuryTemp .. "...")
     delete(paths.mercuryTemp, true)
 end
 

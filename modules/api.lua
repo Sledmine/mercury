@@ -28,22 +28,28 @@ end
 ---@param packageLabel string
 ---@param packageVersion string
 function api.getPackage(packageLabel, packageVersion)
+    cprint("Searching for \"" .. packageLabel .. "\" in our repository... ", true)
     local packageUrl = vulcanoUrl() .. "/" .. packageLabel
     local apiUrl = packageUrl
     if (packageVersion) then
         apiUrl = packageUrl .. "/" .. packageVersion
     end
     dprint(apiUrl)
-    return get(apiUrl)
+    local status, response = get(apiUrl)
+    cprint("done.")
+    return status, response
 end
 
 ---@param packageLabel string
 ---@param packageVersion string
 function api.getUpdate(packageLabel, packageVersion)
+    cprint("Searching update for \"" .. packageLabel .. "\" in our repository... ", true)
     local packageUrl = vulcanoUrl() .. "/" .. packageLabel .. "/update" 
     local apiUrl = packageUrl .. "/" .. packageVersion
     dprint(apiUrl)
-    return get(apiUrl)
+    local status, response = get(apiUrl)
+    cprint("done.")
+    return status, response
 end
 
 function api.fetch()

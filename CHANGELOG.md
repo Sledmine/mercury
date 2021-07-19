@@ -5,6 +5,7 @@
 - Added `fetch` command to retrieve the latest package index available on the respository
 - New manifest version `1.1.0` has been added, packages manifest now have a few different way to setup paths and an extra field for package category, check out the [Package Documentation](docs/PACKAGE.md) for more information.
 - Removed `version` command, use `-v` to flag to get the Mercury version instead.
+- Fixed issues with `install` and `update` commands at returning wrong data as the result of the command.
 
 # 1.2.0
 - Added `-t --template` flag to the `luabundle` command, this will create a template of a

@@ -17,7 +17,7 @@ Make sure that your downloading the latest version available, installation is pr
 
 If you are on Windows the installation should be pretty simple, just download the installer and follow the instructions from it, classical endless next button.
 
-![release-download](img/release-download.png)
+![release-download](img/release-download-windows.png)
 
 After finishing installation you will find a new shortcut on your desktop like the one below:
 
@@ -40,7 +40,9 @@ For Linux users there should be a bin file ready to use, place it on a place of 
 
 **NOTE:** Linux builds only include x64 binaries as Linux has been dropping support for x86 binaries in many distros, also Mercury on Linux is more oriented for more advanced users and server admins.
 
+![release-download](img/release-downloads-linux.png)
+
 You can drop it on your user bin folder and that should be all, adding a new folder to your PATH should not be required.
 ```bash
-mv /home/117/Downloads/mercury-x.x.x+linux.x64 /usr/bin/mercury
+mv /home/117/Downloads/mercury-x.x.x+linux.x64.bin /usr/bin/mercury
 ```

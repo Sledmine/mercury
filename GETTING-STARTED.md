@@ -1,4 +1,4 @@
-# Introduction
+# Getting Started
 
 Mercury is a package manager for your Halo Custom Edition installation. It allows you to
 download, install and remove different packages for the game, those packages can be a map mod, a new DLL addon, a script, some config files, etc.

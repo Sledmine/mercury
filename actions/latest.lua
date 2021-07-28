@@ -7,13 +7,14 @@ local function latest()
     cprint("Searching, for latest Mercury version... ", true)
     local response = requests.get(constants.latestReleaseApi)
     if (response and response.status_code == 200) then
+        cprint("done.")
         local release = json.decode(response.text)
         if (release and not release.prerelease and not release.draft) then
             local tagName = release.tag_name
             local version = tagName:gsub("v", "")
             -- Current version is an older version than the latest release
             if (v(constants.mercuryVersion) < v(version)) then
-                cprint(string.format("done. Found version %s.", version))
+                cprint(string.format("Found version %s.", version))
                 local latestRelease = constants.gitHubReleases:gsub("{tagName}", tagName)
                 if (jit.os =="Windows") then
                     os.execute(("explorer \"%s\""):format(latestRelease))
@@ -31,7 +32,7 @@ local function latest()
             end
         end
     end
-    cprint("done. Mercury is already on the latest version.")
+    cprint("Mercury is already on the latest version.")
     return false
 end
 

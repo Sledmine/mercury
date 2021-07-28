@@ -9,5 +9,6 @@ constants.mercuryWeb = "http://mercury.shadowmods.net"
 constants.packageIndex = constants.mercuryWeb .. "/pindex"
 constants.repositoryHost = "genesis.vadam.net"
 constants.vulcanoPath = "api/vulcano"
+constants.hac2MirrorDownload = "https://storage.shadowmods.net/public/haloce/hac2_repo/%s.zip"
 
 return constants

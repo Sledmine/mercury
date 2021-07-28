@@ -1,6 +1,7 @@
 # Changelog
 
 # 2.0.0
+- Added experimental `map` and `pack` commands
 - Added support for Linux 64 bit builds
 - Added `fetch` command to retrieve the latest package index available on the respository
 - New manifest version `1.1.0` has been added, packages manifest now have a few different way to setup paths and an extra field for package category, check out the [Package Documentation](docs/PACKAGE.md) for more information.

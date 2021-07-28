@@ -26,6 +26,8 @@ local list = require "Mercury.actions.list"
 local insert = require "Mercury.actions.insert"
 local latest = require "Mercury.actions.latest"
 local fetch = require "Mercury.actions.fetch"
+local pack = require "Mercury.modules.merc".pack
+local map = require "Mercury.actions.map"
 
 local luabundler = require "Mercury.modules.luabundle"
 local constants = require "Mercury.modules.constants"
@@ -41,7 +43,7 @@ parser:command_target("command")
 
 -- General flags
 parser:flag("-v", "Get Mercury version.")
-parser:flag("--debug", "Enable debug mode, some extra printing will show.")
+parser:flag("--debug", "Enable debug mode, some debug messages will appear.")
 parser:flag("--test", "Enable test mode, testing behaviour will occur.")
 
 local function flagsCheck(args)
@@ -63,9 +65,18 @@ local function flagsCheck(args)
     end
 end
 
+-- Fetch command
+local fetchCmd = parser:command("fetch")
+fetchCmd:description("Return the latest package index available on Vulcano.")
+fetchCmd:flag("-j --json", "Show list in json format.")
+fetchCmd:action(function(args, name)
+    flagsCheck(args)
+    fetch(args.json)
+end)
+
 -- Install command
-local installCmd = parser:command("install", "Install any package into the game.")
-installCmd:description("Install will download and insert any package from Mercury repository.")
+local installCmd = parser:command("install")
+installCmd:description("Download and insert any package from the Mercury repository.")
 installCmd:argument("packageLabel", "Label of the package you want to download.")
 installCmd:argument("packageVersion", "Version of the package to install."):args("?")
 installCmd:flag("-f --force",
@@ -82,17 +93,19 @@ installCmd:action(function(args, name)
     environment.clean()
 end)
 
-local fetchCmd = parser:command("fetch", "Fetch the most recent package index from the repository.")
-fetchCmd:description("Fetch will return the latest package index available on vulcano.")
-fetchCmd:flag("-j --json", "Show list in json format.")
-fetchCmd:action(function(args, name)
+-- List command
+local listCmd = parser:command("list")
+listCmd:description("Shows installed packages.")
+listCmd:flag("-j --json", "Show list in json format.")
+listCmd:flag("-t --table", "Show list in a lua table format.")
+listCmd:action(function(args, name)
     flagsCheck(args)
-    fetch(args.json)
+    list(args.json, args.table)
 end)
 
 -- Update command
-local updateCmd = parser:command("update", "Update any installed package in this game instance.")
-updateCmd:description("Update any package to a next version by downloading difference.")
+local updateCmd = parser:command("update")
+updateCmd:description("Update any package with an update from the Mercury repository.")
 updateCmd:argument("packageLabel", "Label of the package you want to update.")
 updateCmd:option("--repository", "Specify a custom repository to use.")
 -- update:argument("packageVersion", "Version of the package to update, latest by default."):args("?")
@@ -106,13 +119,17 @@ updateCmd:action(function(args, name)
     environment.clean()
 end)
 
--- Upgrade command
-local latestCmd = parser:command("latest", "Get latest Mercury version from GitHub.")
-latestCmd:description("Open GitHub release page if there is a newer Mercury version available.")
-latestCmd:action(function(args, name)
+-- Remove command
+local removeCmd = parser:command("remove")
+removeCmd:description("Delete any currently installed package.")
+removeCmd:argument("packageLabel", "Label of the package you want to remove.")
+removeCmd:flag("-n --norestore", "Prevent previous backups from being restored.")
+removeCmd:flag("-e --erasebackups", "Erase previously created backups.")
+removeCmd:flag("-r --recursive", "Remove all the dependencies of this package.")
+removeCmd:flag("-f --force", "Force remove by erasing entry from package index.")
+removeCmd:action(function(args, name)
     flagsCheck(args)
-    latest()
-    environment.clean()
+    remove(args.packageLabel, args.norestore, args.erasebackups, args.recursive, args.force)
 end)
 
 -- Insert command
@@ -131,6 +148,34 @@ insertCmd:action(function(args, name)
     environment.clean()
 end)
 
+local mapCmd = parser:command("map")
+mapCmd:description("Download a specific map from our HAC2 mirror repository.")
+mapCmd:argument("mapName", "File name of the map to be downloaded")
+mapCmd:option("-o --output", "Path to download the map as a zip file, prevents map unpacking and installation.")
+mapCmd:action(function(args, name)
+    flagsCheck(args)
+    map(args.mapName, args.output)
+    environment.clean()
+end)
+
+-- Latest (upgrade mercury) command
+local latestCmd = parser:command("latest", "Get latest Mercury version from GitHub.")
+latestCmd:description("Open GitHub release page if there is a newer Mercury version available.")
+latestCmd:action(function(args, name)
+    flagsCheck(args)
+    latest()
+end)
+
+-- Pack command
+local packCmd = parser:command("pack", "Pack a given directory into a mercury package.")
+packCmd:description("Create a Mercury package from a specific directory.")
+packCmd:argument("packDir", "Path to the directory to pack.")
+packCmd:argument("mercPath", "Output path for the resultant package.")
+packCmd:action(function(args, name)
+    flagsCheck(args)
+    pack(args.packDir, args.mercPath)
+end)
+
 -- Bundle command
 local luabundleCmd = parser:command("luabundle", "Bundle lua files into one distributable script.")
 luabundleCmd:description("Bundle modular lua projects into a single script.")
@@ -144,28 +189,6 @@ luabundleCmd:action(function(args, name)
         return
     end
     luabundler.bundle(args.bundleFile, args.compile)
-end)
-
--- Remove command
-local removeCmd = parser:command("remove", "Delete any currently installed package.")
-removeCmd:description("Remove will delete any package that is already installed.")
-removeCmd:argument("packageLabel", "Label of the package you want to remove.")
-removeCmd:flag("-n --norestore", "Prevent previous backups from being restored.")
-removeCmd:flag("-e --erasebackups", "Erase previously created backups.")
-removeCmd:flag("-r --recursive", "Remove all the dependencies of this package.")
-removeCmd:flag("-f --force", "Force remove by erasing entry from package index.")
-removeCmd:action(function(args, name)
-    flagsCheck(args)
-    remove(args.packageLabel, args.norestore, args.erasebackups, args.recursive, args.force)
-end)
-
--- List command
-local listCmd = parser:command("list", "Shows already installed packages in this game instance.")
-listCmd:flag("-j --json", "Show list in json format.")
-listCmd:flag("-t --table", "Show list in a lua table format.")
-listCmd:action(function(args, name)
-    flagsCheck(args)
-    list(args.json, args.table)
 end)
 
 -- About command

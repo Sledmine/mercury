@@ -69,16 +69,20 @@ function merc.unpack(mercPath, unpackDir)
     return false
 end
 
-
+--- Pack a folder into a merc package
+---@param packDir string
+---@param mercPath string
 function merc.pack(packDir, mercPath)
     if (packDir and mercPath) then
+        cprint("Packing given directory... ", true)
         local packageZip = minizip2.open(mercPath, "w")
         if (packageZip) then
             packageZip:add_all(packDir)
             packageZip:close()
-
+            cprint("done.")
             return true
         end
+        cprint("Error, at creating Mercury package.")
     end
     return false
 end

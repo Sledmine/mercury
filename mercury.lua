@@ -5,6 +5,7 @@
 ------------------------------------------------------------------------------
 -- Luapower modules
 local argparse = require "argparse"
+local glue = require "glue"
 inspect = require "inspect"
 
 -- Global data and utils for different operations
@@ -26,15 +27,17 @@ local list = require "Mercury.actions.list"
 local insert = require "Mercury.actions.insert"
 local latest = require "Mercury.actions.latest"
 local fetch = require "Mercury.actions.fetch"
-local pack = require "Mercury.modules.merc".pack
+local pack = require"Mercury.modules.merc".pack
 local map = require "Mercury.actions.map"
 
 local luabundler = require "Mercury.modules.luabundle"
 local constants = require "Mercury.modules.constants"
 
 -- Create argument parser with Mercury info
-local cliDescription = "Mercury Webpage: %s\nJoin us on Discord: https://discord.shadowmods.net/\nSupport Mercury on GitHub: https://github.com/Sledmine/Mercury"
-local parser = argparse("mercury", "Package Manager for Halo Custom Edition.", cliDescription:format(constants.mercuryWeb))
+local cliDescription =
+    "Mercury Webpage: %s\nJoin us on Discord: https://discord.shadowmods.net/\nSupport Mercury on GitHub: https://github.com/Sledmine/Mercury"
+local parser = argparse("mercury", "Package Manager for Halo Custom Edition.",
+                        cliDescription:format(constants.mercuryWeb))
 -- Disable command required message                        
 parser:require_command(false)
 
@@ -77,8 +80,8 @@ end)
 -- Install command
 local installCmd = parser:command("install")
 installCmd:description("Download and insert any package from the Mercury repository.")
-installCmd:argument("packageLabel", "Label of the package you want to download.")
-installCmd:argument("packageVersion", "Version of the package to install."):args("?")
+installCmd:argument("package", "Package or packages to install."):args("+")
+-- installCmd:argument("packageVersion", "Version of the package to install."):args("?")
 installCmd:flag("-f --force",
                 "Force installation by removing packages and deleting conflicting files also avoid backup creation.")
 installCmd:flag("-o --skipOptionals", "Ignore optional files at installation.")
@@ -89,7 +92,12 @@ installCmd:action(function(args, name)
     if (args.repository) then
         api.repositoryHost = args.repository
     end
-    install.package(args.packageLabel, args.packageVersion, args.force, args.skipOptionals)
+    for packageIndex, package in pairs(args.package) do
+        local packageSplit = glue.string.split(package, "-")
+        local packageLabel = packageSplit[1]
+        local packageVersion = packageSplit[2]
+        install.package(packageLabel, packageVersion, args.force, args.skipOptionals)
+    end
     environment.clean()
 end)
 
@@ -150,11 +158,14 @@ end)
 
 local mapCmd = parser:command("map")
 mapCmd:description("Download a specific map from our HAC2 mirror repository.")
-mapCmd:argument("mapName", "File name of the map to be downloaded")
-mapCmd:option("-o --output", "Path to download the map as a zip file, prevents map unpacking and installation.")
+mapCmd:argument("map", "File name of the map to be downloaded"):args("+")
+mapCmd:option("-o --output",
+              "Path to download the map as a zip file, prevents map unpacking and installation.")
 mapCmd:action(function(args, name)
     flagsCheck(args)
-    map(args.mapName, args.output)
+    for _, mapName in pairs(args.map) do
+        map(mapName, args.output)
+    end
     environment.clean()
 end)
 

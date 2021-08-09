@@ -102,7 +102,7 @@ end
 ---@return packageMercury[] packages
 function environment.packages(newPackages)
     if (not newPackages) then
-        if (exist(paths.mercuryIndex)) then
+        if (exists(paths.mercuryIndex)) then
             local installedPackages = json.decode(glue.readfile(paths.mercuryIndex, "t"))
             if (installedPackages and #glue.keys(installedPackages) > 0) then
                 return installedPackages
@@ -124,7 +124,7 @@ end
 
 --- Migrate deprecated or old files and paths
 function environment.migrate()
-    if (exist(paths.mercuryOldIndex)) then
+    if (exists(paths.mercuryOldIndex)) then
         cprint("Warning, migrating old packages index path to new index path!")
         move(paths.mercuryOldIndex, paths.mercuryIndex)
         delete(gpath(paths.gamePath, "/mercury"), true)

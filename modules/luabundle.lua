@@ -27,7 +27,7 @@ function luabundler.bundle(bundleName, compile)
         bundleName = bundleName .. "Bundle.json"
     end
     local bundleFileName = bundleName or "bundle.json"
-    if (bundleFileName and exist(bundleFileName)) then
+    if (bundleFileName and exists(bundleFileName)) then
         ---@type bundle
         local project = json.decode(glue.readfile(bundleFileName, "t"))
         if (project) then

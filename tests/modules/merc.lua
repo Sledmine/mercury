@@ -25,9 +25,9 @@ end
 function testMerc:testUnpack()
     delete(self.unpackDir, true)
     createFolder(self.unpackDir)
-    if (exist(self.inputPack)) then
+    if (exists(self.inputPack)) then
         lu.assertIsTrue(merc.unpack(self.inputPack, self.unpackDir))
-        lu.assertIsTrue(exist(self.unpackDir .. "/manifest.json"))
+        lu.assertIsTrue(exists(self.unpackDir .. "/manifest.json"))
         delete(self.unpackDir, true)
     else
         lu.fail("Input merc package does not exist")
@@ -36,9 +36,9 @@ end
 
 function testMerc:testPack() 
     delete(self.outputPack)
-    if(exist(self.packDir)) then
+    if(exists(self.packDir)) then
         lu.assertIsTrue(merc.pack(self.packDir, self.outputPack))
-        lu.assertIsTrue(exist(self.outputPack))
+        lu.assertIsTrue(exists(self.outputPack))
         delete(self.outputPack)
     else
         lu.fail("packDir does not exist")

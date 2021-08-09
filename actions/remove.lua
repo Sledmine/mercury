@@ -69,11 +69,11 @@ local function remove(packageLabel, noRestore, eraseBackups, recursive, forced)
             local result, description, errorCode = delete(finalFilePath)
             if (result) then
                 dprint("Done, file erased.")
-                if (exist(finalFilePath .. ".bak") and not noRestore) then
+                if (exists(finalFilePath .. ".bak") and not noRestore) then
                     if (not noRestore) then
                         cprint("Warning, restoring \"" .. file.path .. "\" backup file... ", true)
                         move(finalFilePath .. ".bak", finalFilePath)
-                        if (exist(finalFilePath)) then
+                        if (exists(finalFilePath)) then
                             cprint("done.")
                         else
                             cprint("Error, at restore backup for \"" .. finalFilePath .. "\"")
@@ -83,7 +83,7 @@ local function remove(packageLabel, noRestore, eraseBackups, recursive, forced)
                         cprint("Warning, Backups erase enabled deleting file now... ", true)
                         local backupFilePath = finalFilePath .. ".bak"
                         delete(backupFilePath)
-                        if (exist(backupFilePath)) then
+                        if (exists(backupFilePath)) then
                             cprint("Error, at deleting backup for \"" .. backupFilePath .. "\"")
                         else
                             cprint("done.")

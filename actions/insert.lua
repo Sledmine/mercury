@@ -28,12 +28,12 @@ local errors = {
 
 -- Install any mercury package
 local function insert(mercPath, forced, skipOptionals)
-    if (exist(mercPath)) then
+    if (exists(mercPath)) then
         local _, mercFilename = splitPath(mercPath)
         -- Unpack merc file
         dprint("Trying to unpack \"" .. mercFilename .. ".merc\" ...")
         local unpackPath = gpath(paths.mercuryUnpacked, "/", mercFilename)
-        if (not exist(unpackPath)) then
+        if (not exists(unpackPath)) then
             createFolder(unpackPath)
         end
         local unpackSuccess = merc.unpack(mercPath, unpackPath)
@@ -108,12 +108,12 @@ local function insert(mercPath, forced, skipOptionals)
                     -- Final output file folder
                     local outputFileFolder = splitPath(outputFile)
                     -- Create folder for current file
-                    if (not exist(outputFileFolder)) then
+                    if (not exists(outputFileFolder)) then
                         createFolder(outputFileFolder)
                     end
                     dprint("Inserting file \"" .. file.path .. "\" ...")
                     dprint("Output, \"" .. outputFile .. "\" ...")
-                    if (exist(outputFile)) then
+                    if (exists(outputFile)) then
                         if (forced or package.updates) then
                             if (not package.updates) then
                                 cprint(
@@ -177,7 +177,7 @@ local function insert(mercPath, forced, skipOptionals)
 
                         --  TODO Add validation for update command
                         local xd3Result = os.execute(xd3Cmd)
-                        if (exist(updatedFilePath)) then
+                        if (exists(updatedFilePath)) then
                             -- Prepare a temp file name to replace it with the updated one
                             local oldFilePath = sourceFilePath .. ".old"
                             -- Move updated file to source file path

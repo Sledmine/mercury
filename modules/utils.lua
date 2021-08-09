@@ -88,7 +88,7 @@ function splitPath(inputPath)
 end
 
 function createFolder(folderPath)
-    if (not exist(folderPath)) then
+    if (not exists(folderPath)) then
         dprint("Creating folder: " .. folderPath)
         return fs.mkdir(folderPath, true)
     else
@@ -134,7 +134,7 @@ function copyFile(sourceFile, destinationFile)
     return false
 end
 
-function exist(fileOrFolderPath)
+function exists(fileOrFolderPath)
     return fs.is(fileOrFolderPath)
 end
 

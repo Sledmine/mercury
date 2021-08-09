@@ -7,6 +7,7 @@ local function unpackMap(mapPath)
     local readZip = zip.open(mapPath, "r")
     if (readZip) then
         readZip:extract_all(gpath(paths.gamePath, "/maps"))
+        readZip:close()
         return true
     end
     return false
@@ -17,11 +18,11 @@ end
 ---@param mapName string File name of the map to download
 ---@param outputPath string Path to download the map as zip file
 local function map(mapName, outputPath)
-    local downloadUrl = constants.hac2MirrorDownload:format(mapName)
+    local downloadUrl = constants.mapRepositoryDownload:format(mapName)
     dprint(downloadUrl)
     local alternativePath = gpath(paths.mercuryDownloads, "/", mapName, ".zip")
     dprint(alternativePath)
-    cprint("Downloading map from HAC2 mirror repository... ")
+    cprint("Downloading map from repository... ")
     local code = download.url(downloadUrl, outputPath or alternativePath)
     if (code and code == 200) then
         cprint("Done, map downloaded successfully.")

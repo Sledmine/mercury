@@ -71,27 +71,22 @@ end
 function environment.paths()
     -- local sourceFolder = lfs.currentdir()
     -- local appData = os.getenv("APPDATA")
+
+    -- Singleton like method, return gathered paths instead of getting them every invocation
     if (not paths) then
-        Arch = os.getenv("PROCESSOR_ARCHITECTURE")
-        if (Arch ~= "x86") then
-            Arch = "x64"
-        end
         local gamePath = gpath(getGamePath())
         local myGamesPath = gpath(getMyGamesPath())
         local mercuryTemp = gpath((os.getenv("TEMP") or "/tmp") .. "/mercury")
-        local mercuryPackages = gpath(mercuryTemp, "/packages")
-        local mercuryDownloads = gpath(mercuryPackages, "/downloads")
-        local mercuryUnpacked = gpath(mercuryPackages, "/unpacked")
+        local mercuryDownloads = gpath(mercuryTemp, "/downloads")
+        local mercuryUnpacked = gpath(mercuryTemp, "/unpacked")
         local mercuryOldIndex = gpath(gamePath, "/mercury/installed/packages.json")
         local mercuryIndex = gpath(gamePath, "/mercury.json")
-        createFolder(mercuryPackages)
         createFolder(mercuryDownloads)
         createFolder(mercuryUnpacked)
         paths = {
             gamePath = gamePath,
             myGamesPath = myGamesPath,
             mercuryTemp = mercuryTemp,
-            mercuryPackages = mercuryPackages,
             mercuryUnpacked = mercuryUnpacked,
             mercuryDownloads = mercuryDownloads,
             mercuryUnpacked = mercuryUnpacked,
@@ -132,7 +127,7 @@ function environment.migrate()
     if (exist(paths.mercuryOldIndex)) then
         cprint("Warning, migrating old packages index path to new index path!")
         move(paths.mercuryOldIndex, paths.mercuryIndex)
-        delete(gpath(paths.gamePath,  "/mercury"), true)
+        delete(gpath(paths.gamePath, "/mercury"), true)
     end
 end
 

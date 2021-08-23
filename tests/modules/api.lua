@@ -3,21 +3,19 @@
 -- Sledmine
 -- Tests for api consumer
 ------------------------------------------------------------------------------
-package.path = package.path .. ";.\\Mercury\\?.lua"
-
 local lu = require "luaunit"
 inspect = require "inspect"
 
 -- Global modules
-require "lib.utils"
+require "Mercury.modules.utils"
 
-local api = require "modules.api"
+local api = require "Mercury.modules.api"
 
 testApi = {}
 
 function testApi:setUp()
     api.repositoryHost = "localhost:3000"
-    api.httpProtocol = "http"
+    api.protocol = "http"
 
     self.expectedPackage =
         [[{"name":"test","label":"test","author":"Sledmine","version":"1.0.0","fullVersion":"1.0.0","mirrors":["http://localhost:3000/repository/test/1.0.0/test.merc"],"nextVersion":"2.0.0"}]]

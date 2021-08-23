@@ -7,12 +7,14 @@ local download = {}
 
 local json = require "cjson"
 local glue = require "glue"
-local fdownload = require "lib.fdownload"
+
+local fdownload = require "Mercury.modules.fdownload"
+local paths = environment.paths()
 
 ---@param packageMeta packageMetadata
 function download.package(packageMeta)
     for index, packageUrl in pairs(packageMeta.mirrors) do
-        local outputPath = MercuryDownloads .. "\\" .. packageMeta.label .. ".merc"
+        local outputPath = gpath(paths.mercuryDownloads, "/", packageMeta.label, ".merc")
         local result, code, headers, status = fdownload.get(packageUrl, outputPath)
         return code, outputPath
     end

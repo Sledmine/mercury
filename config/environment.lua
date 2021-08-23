@@ -8,77 +8,93 @@ local environment = {}
 local lfs = require "lfs"
 local glue = require "glue"
 local json = require "cjson"
-
---  TODO Move this to a local module
 local registry = require "registry"
 
--- Registry keys declaration
+-- Paths table instance
+local paths
+
+-- Windows required registry keys
 local registryEntries = {
     documents = "HKEY_CURRENT_USER\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Explorer\\Shell Folders",
     haloce32 = "HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\Microsoft Games\\Halo CE",
     haloce64 = "HKEY_LOCAL_MACHINE\\SOFTWARE\\WOW6432Node\\Microsoft\\Microsoft Games\\Halo CE"
 }
 
-local function getMyGamesPath()
-    local documentsPath = registry.getkey(registryEntries.documents)
-    if (documentsPath) then
-        return documentsPath.values["Personal"]["value"] .. "\\My Games\\Halo CE"
-    else
-        print("Error at trying to get \"My Documents\" path...")
+local function getGamePath()
+    -- Override game path using environment variables
+    local gamePath = os.getenv("HALO_CE_PATH")
+    if (jit.os == "Windows" and not gamePath) then
+        local query
+        local arch = os.getenv("PROCESSOR_ARCHITECTURE")
+        if (arch == "x86") then
+            query = registry.getkey(registryEntries.haloce32)
+        else
+            query = registry.getkey(registryEntries.haloce64)
+        end
+        if (query) then
+            gamePath = query.values["EXE Path"]["value"]
+        end
+    end
+    if (not gamePath) then
+        cprint("Error, Halo Custom Edition path was not found on the system.")
+        cprint("Force game path by setting \"HALO_CE_PATH\" as an environment variable.\n")
+        cprint("Example:")
+        cprint([[On Linux: export HALO_CE_PATH="/home/117/.wine/c/Halo Custom Edition"]])
+        cprint([[On Windows: set HALO_CE_PATH=D:\Games\Halo Custom Edition]])
         os.exit()
     end
-    return nil
+    return gamePath
 end
 
-local function getGamePath()
-    local registryPath
-    local arch = os.getenv("PROCESSOR_ARCHITECTURE")
-    if (arch == "x86") then
-        registryPath = registry.getkey(registryEntries.haloce32)
-    else
-        registryPath = registry.getkey(registryEntries.haloce64)
+local function getMyGamesPath()
+    -- Override documents path using environment variables
+    local documentsPath = os.getenv("MY_GAMES_PATH") or os.getenv("HALO_CE_DATA_PATH")
+    if (jit.os == "Windows" and not documentsPath) then
+        local query = registry.getkey(registryEntries.documents)
+        if (query) then
+            documentsPath = query.values["Personal"]["value"] .. "\\My Games\\Halo CE"
+        end
     end
-    if (registryPath) then
-        return registryPath.values["EXE Path"]["value"]
-    else
-        print("Error at getting game path, Mercury does not support portable installations.")
+    if (not documentsPath) then
+        cprint("Error, at trying to get \"My Games\" path from the system.")
+        cprint(
+            "Force game path by setting \"MY_GAMES_PATH\" or \"HALO_CE_DATA_PATH\" as an environment variable.\n")
+        cprint("Example:")
+        cprint([[On Linux: export MY_GAMES_PATH="/home/117/Documents/My Games/Halo CE"]])
+        cprint([[On Windows: set MY_GAMES_PATH=D:\Users\117\Documents\My Games\Halo CE]])
         os.exit()
     end
-    return nil
+    return documentsPath
 end
 
 --- Setup environment to work, environment variables, configuration folder, etc
-function environment.get()
-    local temp = os.getenv("TEMP")
-    local sourceFolder = lfs.currentdir()
-    local appData = os.getenv("APPDATA")
-    Arch = os.getenv("PROCESSOR_ARCHITECTURE")
-    if (Arch ~= "x86") then
-        Arch = "x64"
-    end
-    GamePath = getGamePath()
-    MyGamesPath = getMyGamesPath()
-    MercuryTemp = temp .. "\\mercury"
-    MercuryPackages = MercuryTemp .. "\\packages"
-    if (not exist(MercuryPackages)) then
-        createFolder(MercuryPackages)
-    end
-    MercuryDownloads = MercuryPackages .. "\\downloaded"
-    if (not exist(MercuryDownloads)) then
-        createFolder(MercuryDownloads)
-    end
-    MercuryUnpacked = MercuryPackages .. "\\unpacked"
-    if (not exist(MercuryUnpacked)) then
-        createFolder(MercuryUnpacked)
-    end
-    MercuryInstalled = GamePath .. "\\mercury\\installed"
-    MercuryIndex = GamePath .. "\\mercury\\installed\\packages.json"
-end
+function environment.paths()
+    -- local sourceFolder = lfs.currentdir()
+    -- local appData = os.getenv("APPDATA")
 
---- Clean temp data, temp folders, trash files...
-function environment.cleanTemp()
-    dprint("MercuryTemp: " .. MercuryTemp)
-    delete(MercuryTemp, true)
+    -- Singleton like method, return gathered paths instead of getting them every invocation
+    if (not paths) then
+        local gamePath = gpath(getGamePath())
+        local myGamesPath = gpath(getMyGamesPath())
+        local mercuryTemp = gpath((os.getenv("TEMP") or "/tmp") .. "/mercury")
+        local mercuryDownloads = gpath(mercuryTemp, "/downloads")
+        local mercuryUnpacked = gpath(mercuryTemp, "/unpacked")
+        local mercuryOldIndex = gpath(gamePath, "/mercury/installed/packages.json")
+        local mercuryIndex = gpath(gamePath, "/mercury.json")
+        createFolder(mercuryDownloads)
+        createFolder(mercuryUnpacked)
+        paths = {
+            gamePath = gamePath,
+            myGamesPath = myGamesPath,
+            mercuryTemp = mercuryTemp,
+            mercuryUnpacked = mercuryUnpacked,
+            mercuryDownloads = mercuryDownloads,
+            mercuryUnpacked = mercuryUnpacked,
+            mercuryOldIndex = mercuryOldIndex,
+            mercuryIndex = mercuryIndex
+        }
+    end
+    return paths
 end
 
 --- Get mercury local installed packages
@@ -86,19 +102,33 @@ end
 ---@return packageMercury[] packages
 function environment.packages(newPackages)
     if (not newPackages) then
-        if (exist(MercuryIndex)) then
-            local installedPackages = json.decode(glue.readfile(MercuryIndex, "t"))
+        if (exists(paths.mercuryIndex)) then
+            local installedPackages = json.decode(glue.readfile(paths.mercuryIndex, "t"))
             if (installedPackages and #glue.keys(installedPackages) > 0) then
                 return installedPackages
             end
-        else
-            createFolder(MercuryInstalled)
         end
     else
         local installedPackagesJson = json.encode(newPackages)
-        glue.writefile(MercuryIndex, installedPackagesJson, "t")
+        local result, error = glue.writefile(paths.mercuryIndex, installedPackagesJson, "t")
+        return result
     end
     return nil
+end
+
+--- Clean temp data, temp folders, trash files...
+function environment.clean()
+    dprint("Cleaning " .. paths.mercuryTemp .. "...")
+    delete(paths.mercuryTemp, true)
+end
+
+--- Migrate deprecated or old files and paths
+function environment.migrate()
+    if (exists(paths.mercuryOldIndex)) then
+        cprint("Warning, migrating old packages index path to new index path!")
+        move(paths.mercuryOldIndex, paths.mercuryIndex)
+        delete(gpath(paths.gamePath, "/mercury"), true)
+    end
 end
 
 return environment

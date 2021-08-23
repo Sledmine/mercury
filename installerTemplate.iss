@@ -1,7 +1,7 @@
 #define NAME "Mercury"
 #define VERSION "$VNUMBER"
 #define AUTHOR "Sledmine"
-#define WEBSITE "http://mercuryce.com/"
+#define WEBSITE "http://mercury.shadowmods.net/"
 
 #include "environment.iss"
 
@@ -21,7 +21,7 @@ LicenseFile=LICENSE
 ;PrivilegesRequired=lowest
 ArchitecturesInstallIn64BitMode=$ARCH64
 OutputDir=bin
-OutputBaseFilename=mercury-{#VERSION}-$ARCH
+OutputBaseFilename=mercury-{#VERSION}+$OSTARGET.$ARCH
 Compression=lzma
 SolidCompression=yes
 WizardStyle=classic

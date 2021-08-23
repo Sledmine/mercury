@@ -9,7 +9,7 @@ local pjson = require "pretty.json"
 local bundle = require "bundle"
 local fs = require "fs"
 
-local codeBundler = require "lib.codeBundler"
+local codeBundler = require "Mercury.modules.codeBundler"
 
 local luabundler = {}
 
@@ -27,7 +27,7 @@ function luabundler.bundle(bundleName, compile)
         bundleName = bundleName .. "Bundle.json"
     end
     local bundleFileName = bundleName or "bundle.json"
-    if (bundleFileName and exist(bundleFileName)) then
+    if (bundleFileName and exists(bundleFileName)) then
         ---@type bundle
         local project = json.decode(glue.readfile(bundleFileName, "t"))
         if (project) then

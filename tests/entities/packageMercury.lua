@@ -10,16 +10,15 @@ local glue = require "glue"
 inspect = require "inspect"
 
 -- Global modules
-require "lib.utils"
+require "Mercury.modules.utils"
 
 -- Local modules
-local environment = require "config.environment"
-
+environment = require "Mercury.config.environment"
 -- Get all environment variables and configurations
-environment.get()
+local paths = environment.paths()
 
--- Entities
-local PackageMercury = require "entities.packageMercury"
+-- Entity
+local PackageMercury = require "Mercury.entities.packageMercury"
 
 testUtils = {}
 
@@ -33,6 +32,7 @@ function testUtils:setUp()
         "author": "Sled",
         "internalVersion": "1.0.0-r667",
         "manifestVersion": "1.0",
+        "category": "script",
         "files":  [
             {
                 "path": "test.txt",
@@ -57,15 +57,16 @@ function testUtils:setUp()
         author = "Sled",
         internalVersion = "1.0.0-r667",
         manifestVersion = "1.0",
+        category = "script",
         files = {
             {
                 path = "test.txt",
-                outputPath = GamePath .. "\\test\\",
+                outputPath = gpath(paths.gamePath, "/test/"),
                 type = "text"
             },
             {
                 path = "test2.txt",
-                outputPath = GamePath .. "\\test\\",
+                outputPath = gpath(paths.gamePath, "/test/"),
                 type = "text"
             }
         },
@@ -103,12 +104,12 @@ function testUtils:setUp()
         files = {
             {
                 path = "test.txt",
-                outputPath =   MyGamesPath .. "\\test\\",
+                outputPath =  gpath(paths.myGamesPath, "/test/"),
                 type = "text"
             },
             {
                 path = "test2.txt",
-                outputPath = MyGamesPath .. "\\test\\",
+                outputPath = gpath(paths.myGamesPath, "/test/"),
                 type = "text"
             }
         },

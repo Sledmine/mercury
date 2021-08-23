@@ -9,17 +9,17 @@ local merc = {}
 
 -- TODO Migrate this to minizip2
 local minizip = require "minizip"
+local minizip2 = require "minizip2"
 local glue = require "glue"
 
 --- Unpack a merc package
----@param mercPath string
----@param unpackPath string
+---@param mercPath string Path to the merc package that will be unpacked
+---@param unpackDir string Path of the output files unpacked from the merc package
 ---@return boolean result
-function merc.unpack(mercPath, unpackPath)
+function merc.unpack(mercPath, unpackDir)
     local dir, fileName, ext = splitPath(mercPath)
-    dprint("Unpacking " .. fileName .. "...")
-    dprint("mercFile: " .. mercPath)
-    dprint("outputPath: " .. unpackPath)
+    dprint("Unpacking: " .. mercPath .. "...")
+    dprint("To Dir: " .. unpackDir)
     local packageZip = minizip.open(mercPath, "r")
 
     -- Set current file as first file
@@ -34,12 +34,12 @@ function merc.unpack(mercPath, unpackPath)
     for entryIndex = 1, totalEntries do
         -- Store current file name
         local fileName = packageZip:get_file_info().filename
-        local filePath = unpackPath .. "\\" .. fileName
+        local filePath = gpath(unpackDir, "/", fileName)
 
         -- Ignore manifest.json entry file and process all the other entries
         if (fileName ~= "manifest.json") then
-            dprint("Current entry: " .. entryIndex - 1 .. "/" .. totalEntries - 1)
-            dprint("Decompressing '" .. fileName .. "'...")
+            dprint("Entry: " .. entryIndex - 1 .. " / " .. totalEntries - 1)
+            dprint("Decompressing \"" .. fileName .. "\"...")
         end
 
         -- Current entry is not a file, create a folder
@@ -48,7 +48,7 @@ function merc.unpack(mercPath, unpackPath)
             createFolder(filePath)
         else
             -- Current file is indeed a file, just write it
-            dprint("Current decompressed file path: " .. filePath)
+            dprint("Decompressing path " .. filePath)
             glue.writefile(filePath, packageZip:extract(fileName), "b")
         end
 
@@ -66,6 +66,24 @@ function merc.unpack(mercPath, unpackPath)
         return true
     end
     cprint("Error, there was a problem at unpacking \"" .. mercPath .. "\".")
+    return false
+end
+
+--- Pack a folder into a merc package
+---@param packDir string
+---@param mercPath string
+function merc.pack(packDir, mercPath)
+    if (packDir and mercPath) then
+        cprint("Packing given directory... ", true)
+        local packageZip = minizip2.open(mercPath, "w")
+        if (packageZip) then
+            packageZip:add_all(packDir)
+            packageZip:close()
+            cprint("done.")
+            return true
+        end
+        cprint("Error, at creating Mercury package.")
+    end
     return false
 end
 

@@ -7,7 +7,7 @@
        Halo Custom Edition Package Manager
     </p>
     <p align="center">
-       v2.0.0-beta
+       v2.0.0
     </p>
 </html>
 

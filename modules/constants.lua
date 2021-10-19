@@ -1,6 +1,6 @@
 local constants = {}
 
-constants.mercuryVersion = "2.0.0"
+constants.mercuryVersion = "2.0.1"
 constants.xd3CmdLine = "xdelta3 -d -s \"%s\" \"%s\" \"%s\""
 constants.latestReleaseApi = "https://api.github.com/repos/Sledmine/Mercury/releases/latest"
 constants.gitHubReleases = "https://github.com/Sledmine/Mercury/releases/{tagName}/"

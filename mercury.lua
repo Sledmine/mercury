@@ -93,8 +93,8 @@ installCmd:action(function(args, name)
         api.repositoryHost = args.repository
     end
     for packageIndex, package in pairs(args.package) do
-        local packageSplit = glue.string.split(package, "-")
-        local packageLabel = packageSplit[1]
+        local packageLabel = glue.string.split(package, "-")[1]
+        local packageSplit = glue.string.split(package,  packageLabel .. "-")
         local packageVersion = packageSplit[2]
         install.package(packageLabel, packageVersion, args.force, args.skipOptionals)
     end

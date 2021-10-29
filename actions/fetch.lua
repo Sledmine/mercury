@@ -10,8 +10,9 @@ local function fetch(jsonFormat)
                 return true
             end
             local availablePackages = json.decode(response)
-            print("Available packages for installation on the Mercury repository:")
-            glue.map(availablePackages, function(package)
+            dprint(availablePackages)
+            print("Packages available for installation on the Mercury repository:")
+            glue.map(availablePackages, function(_, package)
                 print(("- %s-%s"):format(package.label, package.version))
             end)
         end

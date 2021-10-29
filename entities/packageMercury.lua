@@ -143,5 +143,9 @@ function packageMercury:getProperties()
     }
 end
 
+function packageMercury:getExpectedVersion()
+    return "1.1.0"
+end
+
 return packageMercury
 

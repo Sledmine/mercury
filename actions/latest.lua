@@ -15,7 +15,7 @@ local function latest()
             -- Current version is an older version than the latest release
             if (v(constants.mercuryVersion) < v(version)) then
                 cprint(string.format("Found version %s.", version))
-                local latestRelease = constants.gitHubReleases:gsub("{tagName}", tagName)
+                local latestRelease = constants.gitHubReleases:format(tagName)
                 if (jit.os =="Windows") then
                     os.execute(("explorer \"%s\""):format(latestRelease))
                 else

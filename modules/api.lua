@@ -9,13 +9,18 @@ local fdownload = require "Mercury.modules.fdownload"
 local constants = require "Mercury.modules.constants"
 local requests = require "requests"
 
-api.repositoryHost = constants.repositoryHost
 api.protocol = "https"
-api.vulcanoPath = constants.vulcanoPath
+api.repositoryHost = constants.repositoryHost
+api.version = "v1"
 
 --- Generate an URL using api definitions
 local function vulcanoUrl()
-    return api.protocol .. "://" .. api.repositoryHost .. "/" .. api.vulcanoPath
+    return api.protocol .. "://" .. api.repositoryHost .. "/" .. api.version
+end
+
+--- Generate a genesis URL using api definitions
+local function genesisIndexUrl()
+    return vulcanoUrl() .. "/fetch"
 end
 
 --- Simple GET HTTP method
@@ -29,7 +34,7 @@ end
 ---@param packageVersion string
 function api.getPackage(packageLabel, packageVersion)
     cprint("Searching for \"" .. packageLabel .. "\" in our repository... ", true)
-    local packageUrl = vulcanoUrl() .. "/" .. packageLabel
+    local packageUrl = vulcanoUrl() .. "/package/" .. packageLabel
     local apiUrl = packageUrl
     if (packageVersion) then
         apiUrl = packageUrl .. "/" .. packageVersion
@@ -44,7 +49,7 @@ end
 ---@param packageVersion string
 function api.getUpdate(packageLabel, packageVersion)
     cprint("Searching update for \"" .. packageLabel .. "\" in our repository... ", true)
-    local packageUrl = vulcanoUrl() .. "/" .. packageLabel .. "/update" 
+    local packageUrl = vulcanoUrl() .. "/update" .. packageLabel
     local apiUrl = packageUrl .. "/" .. packageVersion
     dprint(apiUrl)
     local status, response = get(apiUrl)
@@ -53,7 +58,7 @@ function api.getUpdate(packageLabel, packageVersion)
 end
 
 function api.fetch()
-    local response = requests.get(constants.packageIndex)
+    local response = requests.get(genesisIndexUrl())
     return response.status_code, response.text
 end
 

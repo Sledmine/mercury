@@ -11,6 +11,8 @@ local merc = {}
 local minizip = require "minizip"
 local minizip2 = require "minizip2"
 local glue = require "glue"
+local json = require "cjson"
+local v = require "semver"
 
 --- Unpack a merc package
 ---@param mercPath string Path to the merc package that will be unpacked
@@ -26,6 +28,7 @@ function merc.unpack(mercPath, unpackDir)
     packageZip:first_file()
 
     -- Quantity of files in the zip
+    -- FIXME I'm suspectig something around here is causing a memory leak
     local totalEntries = packageZip:get_global_info().entries
 
     local entriesCount = 0
@@ -72,10 +75,33 @@ end
 --- Pack a folder into a merc package
 ---@param packDir string
 ---@param mercPath string
-function merc.pack(packDir, mercPath)
-    if (packDir and mercPath) then
+function merc.pack(packDir, mercPath, template, fix, feature, breaking)
+    if (template) then
+        local manifest = {
+            label = "",
+            name = "",
+            description = "",
+            version = "",
+            author = "",
+            category = ""
+        }
+        for property, value in pairs(manifest) do
+            print("-> Set " .. property .. ":")
+            local value = io.read("l")
+            if (value and value ~= "") then
+                manifest[property] = value
+            end 
+        end
+        manifest.files = {}
+        manifest.manifestVersion = "1.1.0"
+        cprint("Success, package folder with manifest template has been created.")
+        glue.writefile(packDir .. "/manifest.json", json.encode(manifest), "t")
+        return true
+    end
+    local manifest = json.decode(glue.readfile(packDir .. "/manifest.json", "t"))
+    if (packDir and mercPath and manifest) then
         cprint("Packing given directory... ", true)
-        local packageZip = minizip2.open(mercPath, "w")
+        local packageZip = minizip2.open(mercPath .. "/" .. manifest.label .. "-" .. manifest.version .. ".zip", "w")
         if (packageZip) then
             packageZip:add_all(packDir)
             packageZip:close()

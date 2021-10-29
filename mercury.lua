@@ -61,9 +61,8 @@ local function flagsCheck(args)
     if (args.test) then
         IsTestModeEnabled = true
         -- Override respository connection data
-        api.repositoryHost = "localhost:3000"
         api.protocol = "http"
-        api.librarianPath = "api/vulcano"
+        api.repositoryHost = "localhost:8180"
         cprint("Warning, Test mode enabled.")
     end
 end
@@ -83,7 +82,7 @@ installCmd:description("Download and insert any package from the Mercury reposit
 installCmd:argument("package", "Package or packages to install."):args("+")
 -- installCmd:argument("packageVersion", "Version of the package to install."):args("?")
 installCmd:flag("-f --force",
-                "Force installation by removing packages and deleting conflicting files also avoid backup creation.")
+                "Force installation by removing packages, deleting conflicting files and preventing backup creation.")
 installCmd:flag("-o --skipOptionals", "Ignore optional files at installation.")
 installCmd:option("--repository", "Specify a custom repository to use.")
 installCmd:action(function(args, name)
@@ -134,10 +133,10 @@ removeCmd:argument("packageLabel", "Label of the package you want to remove.")
 removeCmd:flag("-n --norestore", "Prevent previous backups from being restored.")
 removeCmd:flag("-e --erasebackups", "Erase previously created backups.")
 removeCmd:flag("-r --recursive", "Remove all the dependencies of this package.")
-removeCmd:flag("-f --force", "Force remove by erasing entry from package index.")
+removeCmd:flag("-i --index", "Force remove by erasing entry from package index.")
 removeCmd:action(function(args, name)
     flagsCheck(args)
-    remove(args.packageLabel, args.norestore, args.erasebackups, args.recursive, args.force)
+    remove(args.packageLabel, args.norestore, args.erasebackups, args.recursive, args.index)
 end)
 
 -- Insert command
@@ -182,9 +181,10 @@ local packCmd = parser:command("pack", "Pack a given directory into a mercury pa
 packCmd:description("Create a Mercury package from a specific directory.")
 packCmd:argument("packDir", "Path to the directory to pack.")
 packCmd:argument("mercPath", "Output path for the resultant package.")
+packCmd:flag("-t --template", "Create a package folder template.")
 packCmd:action(function(args, name)
     flagsCheck(args)
-    pack(args.packDir, args.mercPath)
+    pack(args.packDir, args.mercPath, args.template)
 end)
 
 -- Bundle command

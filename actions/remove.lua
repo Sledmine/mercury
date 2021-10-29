@@ -34,8 +34,8 @@ end
 ---@param noRestore boolean Do not restore previous backup files
 ---@param eraseBackups boolean Erase previous backup files
 ---@param recursive boolean Erase all the dependencies of this package
----@param forced boolean Forced remove by erasing the package entry from the packages index
-local function remove(packageLabel, noRestore, eraseBackups, recursive, forced)
+---@param index boolean Forced remove by erasing the package entry from the packages index
+local function remove(packageLabel, noRestore, eraseBackups, recursive, index)
     if (search(packageLabel)) then
         local installedPackages = environment.packages()
         cprint("Removing package \"" .. packageLabel .. "\"...")
@@ -47,11 +47,11 @@ local function remove(packageLabel, noRestore, eraseBackups, recursive, forced)
             local packageDependencies = package.dependencies
             if (packageDependencies and #packageDependencies > 0) then
                 for dependency in each(packageDependencies) do
-                    remove(dependency.label, noRestore, eraseBackups, recursive, forced)
+                    remove(dependency.label, noRestore, eraseBackups, recursive, index)
                 end
             end
         end
-        if (forced) then
+        if (index) then
             if (erasePackageFromIndex(packageLabel)) then
                 cprint("Done, package '" .. packageLabel .. "' has been forced removed by entry.")
                 return true

@@ -28,6 +28,8 @@ local insert = require "Mercury.actions.insert"
 local latest = require "Mercury.actions.latest"
 local fetch = require "Mercury.actions.fetch"
 local pack = require"Mercury.modules.merc".pack
+local packdiff = require"Mercury.modules.merc".diff
+local packtemplate = require"Mercury.modules.merc".template
 local map = require "Mercury.actions.map"
 
 local luabundler = require "Mercury.modules.luabundle"
@@ -87,15 +89,17 @@ installCmd:flag("-o --skipOptionals", "Ignore optional files at installation.")
 installCmd:option("--repository", "Specify a custom repository to use.")
 installCmd:action(function(args, name)
     flagsCheck(args)
-    -- TODO Add parsing for custom repository protocol
-    if (args.repository) then
-        api.repositoryHost = args.repository
-    end
-    for packageIndex, package in pairs(args.package) do
-        local packageLabel = glue.string.split(package, "-")[1]
-        local packageSplit = glue.string.split(package,  packageLabel .. "-")
-        local packageVersion = packageSplit[2]
-        install.package(packageLabel, packageVersion, args.force, args.skipOptionals)
+    if (latest()) then
+        -- TODO Add parsing for custom repository protocol
+        if (args.repository) then
+            api.repositoryHost = args.repository
+        end
+        for packageIndex, package in pairs(args.package) do
+            local packageLabel = glue.string.split(package, "-")[1]
+            local packageSplit = glue.string.split(package, packageLabel .. "-")
+            local packageVersion = packageSplit[2]
+            install.package(packageLabel, packageVersion, args.force, args.skipOptionals)
+        end
     end
     environment.clean()
 end)
@@ -137,6 +141,7 @@ removeCmd:flag("-i --index", "Force remove by erasing entry from package index."
 removeCmd:action(function(args, name)
     flagsCheck(args)
     remove(args.packageLabel, args.norestore, args.erasebackups, args.recursive, args.index)
+    --environment.clean()
 end)
 
 -- Insert command
@@ -184,7 +189,23 @@ packCmd:argument("mercPath", "Output path for the resultant package.")
 packCmd:flag("-t --template", "Create a package folder template.")
 packCmd:action(function(args, name)
     flagsCheck(args)
-    pack(args.packDir, args.mercPath, args.template)
+    if (args.template) then
+        packtemplate()
+    else
+        pack(args.packDir, args.mercPath)
+    end
+    environment.clean()
+end)
+
+-- Diff command
+local packdiffCmd = parser:command("packdiff")
+packdiffCmd:description("Create an update package from two Mercury packages difference.")
+packdiffCmd:argument("oldPackagePath", "Path to old package used as target.")
+packdiffCmd:argument("newPackagePath", "Path to new package as the source.")
+packdiffCmd:action(function(args, name)
+    flagsCheck(args)
+    packdiff(args.oldPackagePath, args.newPackagePath)
+    environment.clean()
 end)
 
 -- Bundle command
@@ -214,8 +235,8 @@ end)
 -- Show commands information if no args
 if (not arg[1]) then
     print(parser:get_help())
-    print("\nGame Path: " .. paths.gamePath)
-    print("My Games Data Path: " .. paths.myGamesPath)
+    print("\nCurrent Game Path: " .. paths.gamePath)
+    print("Current My Games Data Path: " .. paths.myGamesPath)
 end
 
 -- Override args array with parser ones

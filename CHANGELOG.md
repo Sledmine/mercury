@@ -1,5 +1,11 @@
 # Changelog
 
+# 3.0.0
+- Updated repository API (deprecates old API, old Mercury versions are obsolete now)
+- Added repository API versioning, it will improve support for future Mercury versions without
+breaking API instantly for Mercury users on older versions
+- Fixed an issue at giving specific packages version to `install` command
+
 # 2.0.0
 - Added experimental `map` and `pack` commands
 - Added support for Linux 64 bit builds

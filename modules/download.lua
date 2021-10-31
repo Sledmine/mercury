@@ -3,10 +3,9 @@
 -- Sledmine
 -- Download any package file
 ------------------------------------------------------------------------------
-local download = {}
-
-local json = require "cjson"
 local glue = require "glue"
+
+local download = {}
 
 local fdownload = require "Mercury.modules.fdownload"
 local paths = environment.paths()

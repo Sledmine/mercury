@@ -46,7 +46,14 @@ local function normalizePaths(files, manifestVersion)
     if (files and #files > 0) then
         local pathVariables = {
             ["$haloce"] = paths.gamePath,
-            ["$mygames"] = paths.myGamesPath
+            ["game-root"] = paths.gamePath,
+            ["$mygames"] = paths.myGamesPath,
+            ["my-games-data-path"] = paths.myGamesPath,
+            ["lua-global"] = paths.luaScriptsGlobal,
+            ["lua-map"] = paths.luaScriptsMap,
+            ["lua-sapp"] = paths.luaScriptsSAPP,
+            ["game-maps"] = paths.gameMaps,
+            ["game-mods"] = paths.gameDLLMods,
         }
         local paths
         for fileIndex, file in pairs(files) do
@@ -55,7 +62,8 @@ local function normalizePaths(files, manifestVersion)
             end
             local normalizedOutputPath = file.outputPath
             for variable, value in pairs(pathVariables) do
-                normalizedOutputPath = normalizedOutputPath:gsub(variable, value)
+                local plainVariable = variable:gsub('[%^%$%(%)%%%.%[%]%*%+%-%?]','%%%1')
+                normalizedOutputPath = normalizedOutputPath:gsub(plainVariable, value)
             end
             file.path = gpath(file.path)
             if (manifestVersion == "1.0") then

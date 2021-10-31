@@ -7,7 +7,6 @@ local glue = require "glue"
 local json = require "cjson"
 local pjson = require "pretty.json"
 local bundle = require "bundle"
-local fs = require "fs"
 
 local codeBundler = require "Mercury.modules.codeBundler"
 
@@ -15,8 +14,9 @@ local luabundler = {}
 
 ---@class bundle
 ---@field name string
----@field requires table
----@field include table
+---@field target string
+---@field include string[]
+---@field modules string[]
 ---@field main string
 ---@field output string
 
@@ -42,15 +42,13 @@ function luabundler.bundle(bundleName, compile)
                 cprint("done.")
                 if (compile) then
                     cprint("Compiling project... ", true)
-                    local compile = project.target:gsub("lua", "luac") .. " -o " ..
-                                        project.output
+                    local compile = project.target:gsub("lua", "luac") .. " -o " .. project.output
                     compile = compile .. " " .. project.output
                     local compileResult = os.execute(compile)
                     if (compileResult) then
                         cprint("done.")
                     else
-                        cprint(
-                            "Error, compilation process encountered one or more errors!")
+                        cprint("Error, compilation process encountered one or more errors!")
                     end
                 end
             else
@@ -60,27 +58,27 @@ function luabundler.bundle(bundleName, compile)
         end
         return true
     end
-    cprint("Warning, there is not a " .. bundleFileName ..
-               " in this folder, be sure to create one.")
+    cprint("Warning, there is not a " .. bundleFileName .. " in this folder, be sure to create one.")
     return false
 end
 
 --- Attempt to create a bundle file template
 function luabundler.template()
-    if (not fs.is("bundle.json")) then
+    if (not exists("bundle.json")) then
         local template = {
-            name = "",
+            name = "Template",
             target = "lua53",
-            include = {"modules\\"},
+            include = {"lua/"},
             modules = {""},
-            main = "",
-            output = "dist\\.lua"
+            main = "main",
+            output = "dist/.lua"
         }
         glue.writefile("bundle.json", pjson.stringify(template, nil, 4), "t")
         cprint("Success, bundle.json template has been created successfully.")
-    else
-        cprint("Warning, there is already a manifest in this folder!")
+        return true
     end
+    cprint("Warning, there is already a bundle file in this folder!")
+    return false
 end
 
 return luabundler

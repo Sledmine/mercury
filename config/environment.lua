@@ -46,7 +46,7 @@ local function getGamePath()
     return gamePath
 end
 
-local function getMyGamesPath()
+local function getMyGamesHaloCEPath()
     -- Override documents path using environment variables
     local documentsPath = os.getenv("MY_GAMES_PATH") or os.getenv("HALO_CE_DATA_PATH")
     if (jit.os == "Windows" and not documentsPath) then
@@ -75,23 +75,33 @@ function environment.paths()
     -- Singleton like method, return gathered paths instead of getting them every invocation
     if (not paths) then
         local gamePath = gpath(getGamePath())
-        local myGamesPath = gpath(getMyGamesPath())
+        local myGamesHaloCEPath = gpath(getMyGamesHaloCEPath())
         local mercuryTemp = gpath((os.getenv("TEMP") or "/tmp") .. "/mercury")
         local mercuryDownloads = gpath(mercuryTemp, "/downloads")
         local mercuryUnpacked = gpath(mercuryTemp, "/unpacked")
         local mercuryOldIndex = gpath(gamePath, "/mercury/installed/packages.json")
         local mercuryIndex = gpath(gamePath, "/mercury.json")
+        local luaScriptsGlobal = gpath(myGamesHaloCEPath, "/chimera/lua/global/scripts")
+        local luaScriptsMap = gpath(myGamesHaloCEPath, "/chimera/lua/map/scripts")
+        local luaScriptsSAPP = gpath(myGamesHaloCEPath, "/sapp/lua")
+        local gameMaps = gpath(gamePath, "/maps")
+        local gameDLLMods = gpath(gamePath, "/mods")
+
         createFolder(mercuryDownloads)
         createFolder(mercuryUnpacked)
         paths = {
             gamePath = gamePath,
-            myGamesPath = myGamesPath,
+            myGamesPath = myGamesHaloCEPath,
             mercuryTemp = mercuryTemp,
-            mercuryUnpacked = mercuryUnpacked,
             mercuryDownloads = mercuryDownloads,
             mercuryUnpacked = mercuryUnpacked,
             mercuryOldIndex = mercuryOldIndex,
-            mercuryIndex = mercuryIndex
+            mercuryIndex = mercuryIndex,
+            luaScriptsGlobal = luaScriptsGlobal,
+            luaScriptsMap = luaScriptsMap,
+            luaScriptsSAPP = luaScriptsSAPP,
+            gameMaps = gameMaps,
+            gameDLLMods = gameDLLMods
         }
     end
     return paths

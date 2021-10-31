@@ -1,3 +1,5 @@
+local json = require "cjson"
+
 local install = {}
 
 -- Actions
@@ -8,11 +10,8 @@ local insert = require "Mercury.actions.insert"
 -- Modules
 local download = require "Mercury.modules.download"
 
--- Entities
-local PackageMetadata = require "Mercury.entities.packageMetadata"
-
 local errors = {
-    ["404"] = "file or package not found for download",
+    ["404"] = "file, package or update not found for download",
     ["403"] = "access denied, you do not have required permissions",
     ["connection refused"] = "no connection to repository",
     ["download error"] = "an error occurred while downloading",
@@ -21,9 +20,8 @@ local errors = {
 }
 
 local function getError(status)
-    --  TODO: Add better error array handling
     if (type(status) == "table") then
-        status = status[1]
+        status = table.concat(status, ", ")
     end
     local errorDescription = errors[tostring(status)] or status or "unknown error"
     dprint(status)
@@ -38,9 +36,9 @@ end
 --- Attempt to install a package with the requrired operations
 ---@param packageLabel string Label of the package to install
 ---@param packageVersion string Version of the package to install
----@param forced bool Forced mode installation
----@param skipOptionals bool Ignore optional files at installation
----@param skipDependencies bool Ignore dependencies at installation
+---@param forced boolean Forced mode installation
+---@param skipOptionals boolean Ignore optional files at installation
+---@param skipDependencies boolean Ignore dependencies at installation
 ---@return boolean result
 function install.package(packageLabel,
                          packageVersion,
@@ -59,7 +57,8 @@ function install.package(packageLabel,
     local status, result, response
     status, response = api.getPackage(packageLabel, packageVersion)
     if (status == 200 and response) then
-        local meta = PackageMetadata:new(response)
+        ---@type packageMetadata
+        local meta = json.decode(response)
         if (meta and meta.mirrors) then
             cprint("Found version " .. meta.version .. ".")
             dprint("Package metadata:")
@@ -78,7 +77,7 @@ function install.package(packageLabel,
     return false, getError(status)
 end
 
-function install.update(packageLabel)
+function install.update(packageLabel, silent)
     local currentPackage = search(packageLabel)
     if (not currentPackage) then
         cprint("Error, package \"" .. packageLabel .. "\" is not installed.")
@@ -86,29 +85,31 @@ function install.update(packageLabel)
     end
     -- Create local variables before implementation, it can be used to avoid too much else if
     local status, result, response
-    status, response = api.getPackage(packageLabel, currentPackage.version)
+    status, response = api.getUpdate(packageLabel, currentPackage.version)
     if (status == 200 and response) then
-        local meta = PackageMetadata:new(response)
-        if (meta and meta.nextVersion) then
-            cprint("done. Found version " .. meta.nextVersion .. ".")
+        ---@type packageMetadata
+        local meta = json.decode(response)
+        if (meta) then
+            cprint("Found version " .. meta.version .. ".")
             dprint("Package metadata:")
             dprint(meta)
-            status, response = api.getUpdate(packageLabel, meta.nextVersion)
-            if (status == 200 and response) then
-                local updateMeta = PackageMetadata:new(response)
-                local packagePath
-                status, packagePath = download.package(updateMeta)
-                if (status == 200) then
-                    result, status = insert(packagePath)
-                    if (result) then
-                        cprint("Success, package \"" .. packageLabel .. "\" has been updated.")
-                        return true
+            local updatePath
+            status, updatePath = download.package(meta)
+            if (status == 200) then
+                result, status = insert(updatePath)
+                if (result) then
+                    if (not install.update(packageLabel, true)) then
+                        cprint("Success, package \"" .. packageLabel .. "\" updated to version " .. meta.version .. ".")
                     end
+                    return true
                 end
             end
         else
             status = "no update warning"
         end
+    end
+    if (silent) then
+        return false, status
     end
     return false, getError(status)
 end

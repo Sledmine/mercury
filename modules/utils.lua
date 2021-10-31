@@ -14,20 +14,17 @@ function cprint(message, nextLine)
     else
         local messageWithColor = string.gsub(message, "Done", "[92mDone[0m")
         messageWithColor = string.gsub(messageWithColor, "done.", "[92mdone[0m.")
-        messageWithColor = string.gsub(messageWithColor, "Downloading",
-                                       "[94mDownloading[0m")
+        messageWithColor = string.gsub(messageWithColor, "Downloading", "[94mDownloading[0m")
         messageWithColor = string.gsub(messageWithColor, "Success", "[92mSuccess[0m")
-        messageWithColor =
-            string.gsub(messageWithColor, "Searching", "[94mSearching[0m")
+        messageWithColor = string.gsub(messageWithColor, "Found", "[92mFound[0m")
+        messageWithColor = string.gsub(messageWithColor, "Searching", "[94mSearching[0m")
         messageWithColor = string.gsub(messageWithColor, "Error", "[91mError[0m")
         messageWithColor = string.gsub(messageWithColor, "Warning", "[93mWarning[0m")
-        messageWithColor =
-            string.gsub(messageWithColor, "Unpacking", "[93mUnpacking[0m")
-        messageWithColor =
-            string.gsub(messageWithColor, "Inserting", "[93mInserting[0m")
+        messageWithColor = string.gsub(messageWithColor, "Unpacking", "[93mUnpacking[0m")
+        messageWithColor = string.gsub(messageWithColor, "Packing", "[93mPacking[0m")
+        messageWithColor = string.gsub(messageWithColor, "Inserting", "[93mInserting[0m")
         messageWithColor = string.gsub(messageWithColor, "Bundling", "[93mBundling[0m")
-        messageWithColor =
-            string.gsub(messageWithColor, "Compiling", "[93mCompiling[0m")
+        messageWithColor = string.gsub(messageWithColor, "Compiling", "[93mCompiling[0m")
         messageWithColor = string.gsub(messageWithColor, "Removing", "[91mRemoving[0m")
         io.write(messageWithColor)
         if (not nextLine) then
@@ -152,8 +149,8 @@ function wpath(unixpath)
     return unixpath:gsub("/", "\\")
 end
 
-function gpath( ...)
-    local args = { ... }
+function gpath(...)
+    local args = {...}
     local stringPath = ""
     if (args) then
         for _, currentPath in pairs(args) do
@@ -165,4 +162,33 @@ function gpath( ...)
         end
     end
     return stringPath
+end
+
+function filesIn(dir, recursive)
+    local files = {}
+    for name, d in fs.dir(dir) do
+        if not name then
+            print("error: ", d)
+            break
+        end
+        local entryType = d:attr "type"
+        local entryPath = d:path()
+        -- print(entryType, entryPath, name)
+        if (entryType == "dir" and recursive) then
+            glue.extend(files, filesIn(entryPath))
+        elseif (entryType == "file") then
+            glue.append(files, entryPath)
+        end
+    end
+    return files
+end
+
+function SHA256(filePath)
+    local stream = io.popen("sha256sum " .. filePath, "r")
+    local result = stream:read("*all")
+    stream:close()
+    -- print(result)
+    local splitOutput = glue.string.split(result, " ")
+    -- print(inspect(splitOutput))
+    return splitOutput[1]
 end

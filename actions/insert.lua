@@ -112,6 +112,7 @@ local function insert(mercPath, forced, skipOptionals)
                         createFolder(outputFileFolder)
                     end
                     dprint("Inserting file \"" .. file.path .. "\" ...")
+                    dprint("Input, \"" .. inputFilePath .. "\" ...")
                     dprint("Output, \"" .. outputFile .. "\" ...")
                     if (exists(outputFile)) then
                         if (forced or package.updates) then
@@ -163,9 +164,9 @@ local function insert(mercPath, forced, skipOptionals)
                     local sourceFilePath = file.outputPath
 
                     -- File path for temp updated file
-                    local updatedFilePath = sourceFilePath .. ".updated"
-                    dprint("diffFilePath: " .. diffFilePath)
                     dprint("sourceFilePath: " .. sourceFilePath)
+                    dprint("diffFilePath: " .. diffFilePath)
+                    local updatedFilePath = sourceFilePath .. ".updated"
                     dprint("updatedFilePath: " .. updatedFilePath)
 
                     if (file.type == "binary" or file.type == "text") then

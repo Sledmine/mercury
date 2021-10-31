@@ -3,6 +3,7 @@ local requests = require "requests"
 local constants = require "Mercury.modules.constants"
 local v = require "semver"
 
+-- Verify that Mercury is on the latest version available
 local function latest()
     cprint("Searching, for latest Mercury version... ", true)
     local response = requests.get(constants.latestReleaseApi)
@@ -19,9 +20,9 @@ local function latest()
                 if (jit.os =="Windows") then
                     os.execute(("explorer \"%s\""):format(latestRelease))
                 else
-                    os.execute(("open \"%s\""):format(latestRelease))
+                    os.execute(("sensible-browser \"%s\""):format(latestRelease))
                 end
-                return true
+                return false
                 --[[for _, asset in pairs(release.assets) do
                     if (asset.name and asset.name:find(Arch)) then
                         cprint("done.")
@@ -33,7 +34,7 @@ local function latest()
         end
     end
     cprint("Mercury is already on the latest version.")
-    return false
+    return true
 end
 
 return latest

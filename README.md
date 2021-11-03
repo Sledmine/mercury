@@ -10,22 +10,21 @@
 
 # Introduction
 
-Mercury is console program that provides you some cool features for Halo Custom Edition such as downloading and installing addons, maps and mods in general for your Halo Custom Edition game, everything you need stored in a repository, a unique place, all being downloaded in a pure developer style, in other words basically a software package manager oriented to a game that has mods.
+Mercury is a CLI program that offers cool features for Halo Custom Edition such as downloading and installing addons, maps and mods in general for your Halo Custom Edition game, everything you need stored in a repository, a unique place.
 
 ![Mercury GIF](img/demo.gif)
 
 # What is the purpose of Mercury?
 
-Mercury attempts to solve the problem of descentralized content available out there for the game, it tries to bring a way to simplify the deployment and publishing issues that a modder of the game can encounter at trying to release a mod for the community, we can say Mercury "simplifies" the installation process as some users are not friends of a command line but it is better
-than trying to explain how to install everything on a mod manually.
+Mercury attempts to solve the problem of descentralized content available out there for the game, it tries to bring a way to simplify the deployment and releasing issues that a modder of the game can encounter at trying to release a mod for the community, we can say Mercury "simplifies" the installation and distribution process, as some users are not friends of a command line but this way is better than trying to explain hundreds of users how to install everything on a mod manually.
 
 In short terms what it offers you:
 - Get access into our package repository and download the latest or the specified version of your favorite packages/mods by using simple commands.
 - Manage your favorite mods or addons, performing different actions on them, remove, update, etc
 
-We tried to minimize the impact of how complex a package manager really is based on how the game is
-actually really hard to keep stable by installing different mods that are not compatible with each other, the final "build" of Mercury is your Halo files installation so we provide you with a way
-to know (when possible) if a package you are trying to install is not compatible with another package already installed in your game, but you have responsability to decide what packages you want
+We tried to minimize the impact of how complex a package manager really is, as the game is actually really hard to keep stable by installing different mods that are not compatible with each other.
+
+Mercury follows this politic where the final "build" of your game is based on the packages required by the mods you are installing, in theory the mod author should be caring about the dependencies of the mod being published so you will end with a stable experience with multiple mods installed, but at the end you have responsability to decide what packages you want
 to keep installed in order to install one package or another.
 
 # Installing Mercury

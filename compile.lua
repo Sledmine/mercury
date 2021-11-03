@@ -94,47 +94,34 @@ local function compileMercury(compilationArch)
     local bundleBashTemplate =
         "export LUAJIT_PATH=bin/linux%s/luajit && ./mgit bundle -a \"%s\" -m \"%s\" -M \"%s\" -i \"%s\" -fv %s -vi \"%s\" -o \"%s\" -av %s"
 
-    local removeCache = [[rm -rf bundle-tmp/]]
-    os.execute(removeCache)
     if (jit.os == "Linux") then
+        os.execute([[rm -rf bundle-tmp/]])
         -- Fix lib names on Linux
-        for _,libname in pairs(staticLibs) do
+        for _, libname in pairs(staticLibs) do
             staticLibs[_] = libname:gsub("lib", "")
         end
-        local bundleBash = string.format(bundleBashTemplate,
-                                         luapowerArchs[compilationArch],
-                                         table.concat(staticLibs, " "),
-                                         table.concat(modules, " "), mainLua, iconPath,
-                                         version, table.concat(versionInfo, ";"),
+        local bundleBash = string.format(bundleBashTemplate, luapowerArchs[compilationArch],
+                                         table.concat(staticLibs, " "), table.concat(modules, " "),
+                                         mainLua, iconPath, version, table.concat(versionInfo, ";"),
                                          outputPath:gsub(".exe", ""), tostring(version))
         print(bundleBash)
         return os.execute(bundleBash)
     else
-        -- Multi arch compilation using same folder with different symlinks for x86 and x64 builds
-        -- If symlink exists, erase it
-        if (fs.is([[C:\mingw\]])) then
-            local removeSmlink = [[rmdir C:\mingw\]]
-            os.execute(removeSmlink)
-        end
-
-        local removeMercuryBin = [[rm mercury\bin\mercury.exe]]
-        os.execute(removeMercuryBin)
-
-        -- Create new symlink for current arch
-        local makeMingwSmlink = [[mklink /d C:\mingw\ C:\%s\]]
+        os.execute([[rmdir bundle-tmp]])
+        -- Multi arch compilation using diferrent path definitions for x86 and x64 builds
         local x86Flag = ""
         if (compilationArch == "x86") then
             x86Flag = "-m32"
-            os.execute(makeMingwSmlink:format("mingw32"))
+            bundleCmdTemplate = [[set PATH=C:\mingw32;%PATH% && ]]
         else
-            os.execute(makeMingwSmlink:format("mingw64"))
+            bundleCmdTemplate = [[set PATH=C:\mingw64;%PATH% && ]]
         end
 
-        local bundleCmd = string.format(bundleCmdTemplate, luapowerArchs[compilationArch],
-                                        x86Flag, table.concat(staticLibs, " "),
-                                        table.concat(modules, " "), mainLua, iconPath,
-                                        windowsVersion .. ".0", table.concat(versionInfo, ";"),
-                                        outputPath, tostring(version))
+        local bundleCmd = string.format(bundleCmdTemplate, luapowerArchs[compilationArch], x86Flag,
+                                        table.concat(staticLibs, " "), table.concat(modules, " "),
+                                        mainLua, iconPath, windowsVersion .. ".0",
+                                        table.concat(versionInfo, ";"), outputPath,
+                                        tostring(version))
         print(bundleCmd)
         return os.execute(bundleCmd)
     end
@@ -144,7 +131,7 @@ end
 local function compileInstaller(compilationArch)
     if (jit.os == "Windows") then
         ---@type string
-        local installerTemplate = glue.readfile("mercury\\installerTemplate.iss", "t")
+        local installerTemplate = glue.readfile("mercury/installerTemplate.iss", "t")
         if (installerTemplate) then
             installerTemplate = installerTemplate:gsub("$VNUMBER", tostring(version))
             installerTemplate = installerTemplate:gsub("$OSTARGET", "windows")

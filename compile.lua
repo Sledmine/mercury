@@ -107,14 +107,15 @@ local function compileMercury(compilationArch)
         print(bundleBash)
         return os.execute(bundleBash)
     else
+        print("Remove bundle-tmp...")
         os.execute([[rmdir bundle-tmp]])
         -- Multi arch compilation using diferrent path definitions for x86 and x64 builds
         local x86Flag = ""
         if (compilationArch == "x86") then
             x86Flag = "-m32"
-            bundleCmdTemplate = [[set PATH=C:\mingw32;%PATH% && ]]
+            bundleCmdTemplate = [[set PATH=C:\mingw32\bin;%%PATH%% && ]] .. bundleCmdTemplate
         else
-            bundleCmdTemplate = [[set PATH=C:\mingw64;%PATH% && ]]
+            bundleCmdTemplate = [[set PATH=C:\mingw64\bin;%%PATH%% && ]] .. bundleCmdTemplate
         end
 
         local bundleCmd = string.format(bundleCmdTemplate, luapowerArchs[compilationArch], x86Flag,

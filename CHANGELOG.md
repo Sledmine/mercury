@@ -4,7 +4,11 @@
 - Updated repository API (deprecates old API, old Mercury versions are obsolete now)
 - Added repository API versioning, it will improve support for future Mercury versions without
 breaking API instantly for Mercury users on older versions
-- Fixed an issue at giving specific packages version to `install` command
+- Fixed an issue at giving multiple specific packages version to `install` command
+- Added automatic `pack` command build based on folders path
+- Added `packdiff` command, allows to create diff/update package between packages
+- Removed `-f --forced` flag from `remove` command, renamed to `-i --index`
+- Updated maps host for `map` command to search on HAC2 repository
 
 # 2.0.0
 - Added experimental `map` and `pack` commands

@@ -117,6 +117,7 @@ function merc.pack(packDir, mercPath, breaking, feature, fix)
                                        ".zip", "w")
             if (packageZip) then
                 -- Allow sym links, append manifest file
+                packageZip.store_links = false
                 packageZip.follow_links = true
                 packageZip:add_file(finalManifestPath)
 

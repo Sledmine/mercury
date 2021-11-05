@@ -52,6 +52,8 @@ local function normalizePaths(files, manifestVersion)
             ["lua-global"] = paths.luaScriptsGlobal,
             ["lua-map"] = paths.luaScriptsMap,
             ["lua-sapp"] = paths.luaScriptsSAPP,
+            ["lua-data-global"] = paths.luaDataGlobal,
+            ["lua-data-map"] = paths.luaDataMap,
             ["game-maps"] = paths.gameMaps,
             ["game-mods"] = paths.gameDLLMods,
         }

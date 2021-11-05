@@ -137,6 +137,7 @@ function merc.pack(packDir, mercPath, breaking, feature, fix)
         end
         cprint("Error, at trying to open manifest.json.")
     end
+    cprint("Error, creating package from specified folder, verify manifest.json and paths.")
     return false
 end
 

@@ -81,9 +81,11 @@ function environment.paths()
         local mercuryUnpacked = gpath(mercuryTemp, "/unpacked")
         local mercuryOldIndex = gpath(gamePath, "/mercury/installed/packages.json")
         local mercuryIndex = gpath(gamePath, "/mercury.json")
-        local luaScriptsGlobal = gpath(myGamesHaloCEPath, "/chimera/lua/global/scripts")
-        local luaScriptsMap = gpath(myGamesHaloCEPath, "/chimera/lua/map/scripts")
+        local luaScriptsGlobal = gpath(myGamesHaloCEPath, "/chimera/lua/scripts/global")
+        local luaScriptsMap = gpath(myGamesHaloCEPath, "/chimera/lua/scripts/map")
         local luaScriptsSAPP = gpath(myGamesHaloCEPath, "/sapp/lua")
+        local luaDataGlobal = gpath(myGamesHaloCEPath, "/chimera/lua/data/global")
+        local luaDataMap = gpath(myGamesHaloCEPath, "/chimera/lua/data/map")
         local gameMaps = gpath(gamePath, "/maps")
         local gameDLLMods = gpath(gamePath, "/mods")
 
@@ -100,6 +102,8 @@ function environment.paths()
             luaScriptsGlobal = luaScriptsGlobal,
             luaScriptsMap = luaScriptsMap,
             luaScriptsSAPP = luaScriptsSAPP,
+            luaDataGlobal = luaDataGlobal,
+            luaDataMap = luaDataMap,
             gameMaps = gameMaps,
             gameDLLMods = gameDLLMods
         }

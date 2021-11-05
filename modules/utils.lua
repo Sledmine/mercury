@@ -175,7 +175,7 @@ function filesIn(dir, recursive)
         local entryPath = d:path()
         -- print(entryType, entryPath, name)
         if (entryType == "dir" and recursive) then
-            glue.extend(files, filesIn(entryPath))
+            glue.extend(files, filesIn(entryPath, recursive))
         elseif (entryType == "file") then
             glue.append(files, entryPath)
         end

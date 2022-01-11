@@ -192,3 +192,12 @@ function SHA256(filePath)
     -- print(inspect(splitOutput))
     return splitOutput[1]
 end
+
+--- Execute command line based on OS platform
+function run(command)
+    -- Binaries should be isolated on Windows, use binaries from executable folder
+    if (jit.os == "Windows") then
+        return os.execute(fs.exepath() .. command)
+    end
+    return os.execute(command)
+end

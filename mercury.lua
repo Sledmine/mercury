@@ -50,6 +50,7 @@ parser:command_target("command")
 parser:flag("-v", "Get Mercury version.")
 parser:flag("--debug", "Enable debug mode, some debug messages will appear.")
 parser:flag("--test", "Enable test mode, testing behaviour will occur.")
+parser:flag("--unsafe", "Set API requests to unsafe mode.")
 
 local function flagsCheck(args)
     if (args.v) then
@@ -66,6 +67,10 @@ local function flagsCheck(args)
         api.protocol = "http"
         api.repositoryHost = "localhost:8180"
         cprint("Warning, Test mode enabled.")
+    end
+    if (args.unsafe) then
+        -- Use http protocol for API requests
+        api.protocol = "http"
     end
 end
 

@@ -197,11 +197,11 @@ end
 function run(command)
     -- Binaries should be isolated on Windows, use binaries from executable folder
     if (jit.os == "Windows") then
-        local exepath = fs.exepath()
-        if (exepath:find("luajit")) then
+        local exedir = fs.exedir()
+        if (exedir:find("luajit")) then
             return os.execute(command)
         else
-            return os.execute(exepath .. "\\" .. command)
+            return os.execute(exedir .. "\\" .. command)
         end
     end
     return os.execute(command)

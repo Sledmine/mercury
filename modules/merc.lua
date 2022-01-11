@@ -80,6 +80,19 @@ function merc.unpack(mercPath, unpackDir)
     return false
 end
 
+function merc.unzip(filepath, unpackPath)
+    if (exists(filepath)) then
+        local unzipCmd = "unzip -q -o \"" .. filepath .. "\" -d \"" .. unpackPath .. "\""
+        if (IsDebugModeEnabled) then
+            unzipCmd = "unzip -o \"" .. filepath .. "\" -d \"" .. unpackPath .. "\""
+        end
+        local result = run(unzipCmd)
+        return result
+    end
+    cprint("Error, there was a problem at unpacking \"" .. filepath .. "\".")
+    return false
+end
+
 --- Pack a folder into a merc package
 ---@param packDir string
 ---@param mercPath string

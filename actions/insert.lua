@@ -36,7 +36,7 @@ local function insert(mercPath, forced, skipOptionals)
         if (not exists(unpackPath)) then
             createFolder(unpackPath)
         end
-        local unpackSuccess = merc.unpack(mercPath, unpackPath)
+        local unpackSuccess = merc.unzip(mercPath, unpackPath)
         if (unpackSuccess) then
             -- Load package manifest data
             local manifestPath = gpath(unpackPath, "/manifest.json")

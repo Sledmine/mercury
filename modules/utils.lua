@@ -196,13 +196,13 @@ end
 --- Execute command line based on OS platform
 function run(command)
     -- Binaries should be isolated on Windows, use binaries from executable folder
-    if (jit.os == "Windows") then
-        local exedir = fs.exedir()
-        if (exedir:find("mingw")) then
-            return os.execute(command)
-        else
-            return os.execute(exedir .. "\\" .. command)
-        end
-    end
+    --if (jit.os == "Windows") then
+    --    local exedir = fs.exedir()
+    --    if (exedir:find("mingw")) then
+    --        return os.execute(command)
+    --    else
+    --        return os.execute(exedir .. "\\" .. command)
+    --    end
+    --end
     return os.execute(command)
 end

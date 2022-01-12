@@ -82,9 +82,9 @@ end
 
 function merc.unzip(filepath, unpackPath)
     if (exists(filepath)) then
-        local unzipCmd = "unzip -q -o \"" .. filepath .. "\" -d \"" .. unpackPath .. "\""
+        local unzipCmd = constants.unzipCmdLine:format(filepath, unpackPath)
         if (IsDebugModeEnabled) then
-            unzipCmd = "unzip -o \"" .. filepath .. "\" -d \"" .. unpackPath .. "\""
+            unzipCmd = constants.unzipCmdDebugLine:format(filepath, unpackPath)
         end
         local result = run(unzipCmd)
         return result

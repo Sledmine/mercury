@@ -60,7 +60,7 @@ end
 ---@alias fileName string
 ---@alias extension string
 --- Return elements from a file or folder path
----@return folder, filename, extension
+---@return folder, fileName, extension
 function splitPath(inputPath)
     local inputPath = gpath(inputPath)
     dprint("Splitting path: " .. inputPath)

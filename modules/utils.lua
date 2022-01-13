@@ -92,7 +92,9 @@ function createFolder(folderPath)
         return fs.mkdir(folderPath, true)
     else
         dprint("Warning, folder " .. folderPath .. " already exists.")
+        return nil
     end
+    return false
 end
 
 function move(sourceFile, destinationFile)

@@ -32,6 +32,21 @@ function merc.unzip(filepath, unpackDir)
     return false
 end
 
+function merc.unpack(filepath, unpackDir)
+    local packageZip = zip.open(filepath, "r")
+    if (packageZip) then
+        if (createFolder(unpackDir) or createFolder(unpackDir) == nil) then
+            packageZip:extract_all(unpackDir)
+            packageZip:close()
+            return true
+        end
+        cprint("Error, there was a problem at creating unpack folder \"" .. unpackDir .. "\".")
+        return false
+    end
+    cprint("Error, there was a problem at unpacking \"" .. filepath .. "\".")
+    return false
+end
+
 --- Pack a folder into a Mercury package
 ---@param packDir string
 ---@param mercPath string

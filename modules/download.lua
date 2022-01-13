@@ -13,7 +13,9 @@ local paths = environment.paths()
 ---@param packageMeta packageMetadata
 function download.package(packageMeta)
     for index, packageUrl in pairs(packageMeta.mirrors) do
-        local outputPath = gpath(paths.mercuryDownloads, "/", packageMeta.label, ".merc")
+        local urlSplit = glue.string.split(packageUrl, "/")
+        local packageFileName = urlSplit[#urlSplit]
+        local outputPath = gpath(paths.mercuryDownloads, "/", packageFileName)
         local result, code, headers, status = fdownload.get(packageUrl, outputPath)
         return code, outputPath
     end

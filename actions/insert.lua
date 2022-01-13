@@ -36,8 +36,7 @@ local function insert(mercPath, forced, skipOptionals)
         if (not exists(unpackPath)) then
             createFolder(unpackPath)
         end
-        local unpackSuccess = merc.unzip(mercPath, unpackPath)
-        if (unpackSuccess) then
+        if (merc.unpack(mercPath, unpackPath)) then
             -- Load package manifest data
             local manifestPath = gpath(unpackPath, "/manifest.json")
             local manifestJson = glue.readfile(manifestPath)
@@ -137,7 +136,7 @@ local function insert(mercPath, forced, skipOptionals)
                             if (result) then
                                 cprint("done.")
                             else
-                                cprint("Error, at trying to create a backup for: '" .. file.path)
+                                cprint("Error, at trying to create a backup for: \"" .. file.path .. "\"")
                                 return false, errors.backupCreationError
                             end
                         end
@@ -147,7 +146,7 @@ local function insert(mercPath, forced, skipOptionals)
                     if (copyFile(inputFilePath, outputFile)) then
                         dprint("Done, file succesfully installed.")
                     else
-                        cprint("Error, at trying to install file: '" .. file.path .. "'")
+                        cprint("Error, at trying to install file: \"" .. file.path .. "\"")
                         return false, errors.installationError
                     end
                     ::continue::
@@ -177,7 +176,7 @@ local function insert(mercPath, forced, skipOptionals)
                         dprint("xd3Cmd: " .. xd3Cmd)
 
                         --  TODO Add validation for update command
-                        local xd3Result = os.execute(xd3Cmd)
+                        local xd3Result = run(xd3Cmd)
                         if (exists(updatedFilePath)) then
                             -- Prepare a temp file name to replace it with the updated one
                             local oldFilePath = sourceFilePath .. ".old"

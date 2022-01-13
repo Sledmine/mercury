@@ -10,5 +10,7 @@ constants.repositoryHost = "vulcano.shadowmods.net"
 constants.mapRepositoryDownload = "http://maps.halonet.net/maps/%s.zip"
 constants.unzipCmdLine = "unzip -q -o \"%s\" -d \"%s\""
 constants.unzipCmdDebugLine = "unzip -o \"%s\" -d \"%s\""
+constants.copyCmdWindowsLine = "copy /Y \"%s\" \"%s\""
+constants.copyCmdLinuxLine = "cp -f \"%s\" \"%s\""
 
 return constants

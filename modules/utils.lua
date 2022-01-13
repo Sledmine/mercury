@@ -7,6 +7,8 @@ local fs = require "fs"
 local path = require "path"
 local glue = require "glue"
 
+local constants = require "Mercury.modules.constants"
+
 --- Overloaded color printing function
 function cprint(message, nextLine)
     if (type(message) == "table" or not message) then
@@ -104,30 +106,27 @@ function delete(fileOrFolderPath, recursive)
     return fs.remove(fileOrFolderPath)
 end
 
-function copyFile(sourceFile, destinationFile)
-    if (sourceFile and destinationFile) then
-        if (fs.is(sourceFile) == false) then
+--- Copy a file to a specific destination using OS specific tools
+-- Use OS specific tools to use the copy buffer provided by the OS
+function copyFile(sourcePath, destinationPath)
+    if (sourcePath and destinationPath) then
+        if (not exists(sourcePath)) then
             cprint("Error, specified source file does not exist!")
-            cprint(sourceFile)
+            cprint(sourcePath)
             return false
         end
-        local sourceF = io.open(sourceFile, "rb")
-        local destinationF = io.open(destinationFile, "wb")
-        if (sourceF and destinationF) then
-            destinationF:write(sourceF:read("*a"))
-            io.close(sourceF)
-            io.close(destinationF)
-            return true
+        local isSourceReadable = glue.canopen(sourcePath)
+        if (isSourceReadable) then
+            if (isHostWindows()) then
+                return os.execute(constants.copyCmdWindowsLine:format(sourcePath, destinationPath))
+            else
+                return os.execute(constants.copyCmdLinuxLine:format(sourcePath, destinationPath))
+            end
+        else
+            dprint("Error, " .. sourcePath .. " source can not be open.")
         end
-        if (not sourceF) then
-            dprint("Error, " .. sourceFile .. " source file can't be opened.")
-        end
-        if (not destinationF) then
-            dprint("Error, file: \"" .. destinationFile .. "\" can't be opened.")
-        end
-        return false
     end
-    cprint("Error, at trying to copy files, one of the specified paths is null.")
+    cprint("Error, at trying to copy files.")
     return false
 end
 
@@ -205,4 +204,8 @@ function run(command)
     --    end
     --end
     return os.execute(command)
+end
+
+function isHostWindows()
+    return jit.os == "Windows"
 end

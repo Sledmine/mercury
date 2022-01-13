@@ -132,8 +132,12 @@ end
 
 --- Clean temp data, temp folders, trash files...
 function environment.clean()
-    dprint("Cleaning " .. paths.mercuryTemp .. "...")
-    delete(paths.mercuryTemp, true)
+    if (not IsDebugModeEnabled) then
+        dprint("Cleaning " .. paths.mercuryTemp .. "...")
+        delete(paths.mercuryTemp, true)
+    else
+        cprint("Warning, environment will not be cleaned due to debug mode!")
+    end
 end
 
 --- Migrate deprecated or old files and paths

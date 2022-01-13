@@ -106,27 +106,51 @@ function delete(fileOrFolderPath, recursive)
     return fs.remove(fileOrFolderPath)
 end
 
---- Copy a file to a specific destination using OS specific tools
--- Use OS specific tools to use the copy buffer provided by the OS
+--- Copy file to specific destination
 function copyFile(sourcePath, destinationPath)
     if (sourcePath and destinationPath) then
         if (not exists(sourcePath)) then
-            cprint("Error, specified source file does not exist!")
-            cprint(sourcePath)
+            dprint("Error, specified source file does not exist!")
+            dprint(sourcePath)
             return false
         end
         local isSourceReadable = glue.canopen(sourcePath)
         if (isSourceReadable) then
-            if (isHostWindows()) then
-                return os.execute(constants.copyCmdWindowsLine:format(sourcePath, destinationPath))
+            local source = io.open(sourcePath, "rb")
+            local destination = io.open(destinationPath, "wb")
+            if (destination) then
+                local bytesToRead = 64 * 1024
+                while true do
+                    local bytes = source:read(bytesToRead)
+                    if not bytes then
+                        break
+                    end
+                    destination:write(bytes)
+                end
+                return true
             else
-                return os.execute(constants.copyCmdLinuxLine:format(sourcePath, destinationPath))
+                dprint("Error, " .. destinationPath .. " destination can not be open.")
             end
         else
             dprint("Error, " .. sourcePath .. " source can not be open.")
         end
     end
-    cprint("Error, at trying to copy files.")
+    return false
+end
+
+--- Move file to specific destinatio
+function moveFile(sourcePath, destinationPath)
+    if (sourcePath and destinationPath) then
+        if (not exists(sourcePath)) then
+            dprint("Error, specified source file does not exist!")
+            dprint(sourcePath)
+            return false
+        end
+        if (exists(destinationPath)) then
+            delete(destinationPath)
+        end
+        return fs.move(sourcePath, destinationPath)
+    end
     return false
 end
 
@@ -195,14 +219,14 @@ end
 --- Execute command line based on OS platform
 function run(command)
     -- Binaries should be isolated on Windows, use binaries from executable folder
-    --if (jit.os == "Windows") then
-    --    local exedir = fs.exedir()
-    --    if (exedir:find("mingw")) then
-    --        return os.execute(command)
-    --    else
-    --        return os.execute(exedir .. "\\" .. command)
-    --    end
-    --end
+    if (isHostWindows()) then
+        local exedir = fs.exedir()
+        if (exedir:find("mingw")) then
+            return os.execute(command)
+        else
+            return os.execute("set PATH=" .. exedir .. ";%PATH% && " .. command)
+        end
+    end
     return os.execute(command)
 end
 

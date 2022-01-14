@@ -4,7 +4,7 @@
 - Fixed memory leak at copying large files
 - Fixed memory leak at unpacking large packages
 - Added `--unsafe` flag, allows unsafe API requests
-- Expanded HTTPS request
+- Expanded HTTP request timeout
 - Removed minizip dependency, migrated to minizip2 (a tester reported minizip2 causes crashes on Windows 7, needs testing)
 
 # 3.0.0

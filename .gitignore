@@ -58,3 +58,4 @@ packages/
 service/
 *.mercu
 cert/
+img/update*

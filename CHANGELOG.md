@@ -1,5 +1,12 @@
 # Changelog
 
+# 3.0.1
+- Fixed memory leak at copying large files
+- Fixed memory leak at unpacking large packages
+- Added `--unsafe` flag, allows unsafe API requests
+- Expanded HTTPS request
+- Removed minizip dependency, migrated to minizip2 (a tester reported minizip2 causes crashes on Windows 7, needs testing)
+
 # 3.0.0
 - Updated repository API (deprecates old API, old Mercury versions are obsolete now)
 - Added repository API versioning, it will improve support for future Mercury versions without

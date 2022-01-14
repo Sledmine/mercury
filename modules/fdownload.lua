@@ -1,11 +1,14 @@
 -----------------------------------------------------------------------------
--- FDownload: Library to download files using ftp, http, https
--- Editor: Sledmine
--- Original Author: Diego Nehab
+-- FDownload: Module to download files using ftp, http, https
+-- Sledmine
+-- Author: Diego Nehab
+-- Source: (https://github.com/diegonehab/luasocket/blob/master/etc/get.lua)
 -----------------------------------------------------------------------------
 local socket = require "socket"
 local http = require "socket.http"
 local https = require "socket.https"
+http.timeout = 120
+https.timeout = 120
 local ftp = require "socket.ftp"
 local url = require "socket.url"
 local ltn12 = require "ltn12"

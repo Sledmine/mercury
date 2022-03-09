@@ -207,10 +207,15 @@ local packdiffCmd = parser:command("packdiff")
 packdiffCmd:description("Create an update package from two Mercury packages difference.")
 packdiffCmd:argument("oldPackagePath", "Path to old package used as target.")
 packdiffCmd:argument("newPackagePath", "Path to new package as the source.")
+packdiffCmd:argument("diffPackagePath", "Path to diff package as the result."):args("?")
 packdiffCmd:action(function(args, name)
     flagsCheck(args)
-    packdiff(args.oldPackagePath, args.newPackagePath)
+    local result = packdiff(args.oldPackagePath, args.newPackagePath, args.diffPackagePath)
     environment.clean()
+    if (result) then
+        os.exit(0)
+    end
+    os.exit(1)
 end)
 
 -- Bundle command
@@ -249,5 +254,5 @@ local args = parser:parse()
 
 if (args.v) then
     cprint(constants.mercuryVersion)
-    os.exit(1)
+    os.exit(0)
 end

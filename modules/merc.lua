@@ -137,7 +137,7 @@ function merc.template()
 end
 
 function merc.diff(oldpackagePath, newPackagePath, diffPackagePath)
-    local diffPackagePath = diffPackagePath or path.dir(newPackagePath) .. "/" ..
+    local diffPackagePath = (diffPackagePath or (path.dir(newPackagePath)) .. "/") ..
                                 path.nameext(newPackagePath) .. ".mercu"
     local oldExtractionPath = paths.mercuryTemp .. "/old"
     local newExtractionPath = paths.mercuryTemp .. "/new"

@@ -7,6 +7,8 @@ local merc = {}
 
 local zip = require "minizip2"
 local glue = require "glue"
+local starts = glue.string.starts
+local ends = glue.string.ends
 local json = require "cjson"
 local pjson = require "pretty.json"
 local v = require "semver"
@@ -58,7 +60,7 @@ function merc.pack(packDir, mercPath, breaking, feature, fix)
             cprint("Automatically indexing manifest files from package folder... ", true)
             local packageFiles = filesIn(packDir, true)
             for _, filePath in ipairs(packageFiles) do
-                if (not filePath:find("manifest.json")) then
+                if (not ends(filePath, "manifest.json") and not starts(path.file(filePath), ".")) then
                     local fileType = "binary"
                     local fileExtension = path.ext(filePath)
                     if (fileExtension == "json" or fileExtension == "ini" or fileExtension == "yml" or
@@ -90,10 +92,10 @@ function merc.pack(packDir, mercPath, breaking, feature, fix)
 
                 -- Add files from manifest
                 for _, file in ipairs(manifest.files) do
-                    cprint("-> " .. file.outputPath .. "... ", true)
+                    -- Use print instead of cprint due to weird bug with stdout using zip open
+                    print("-> " .. file.outputPath)
                     local filePath = packDir .. "/" .. file.outputPath
                     packageZip:add_file(filePath, file.outputPath)
-                    cprint("done.")
                 end
                 packageZip:close()
 
@@ -128,6 +130,13 @@ function merc.template()
         end
         manifest.files = {}
         manifest.manifestVersion = "1.1.0"
+        createFolder("game-root")
+        createFolder("game-maps")
+        createFolder("game-mods")
+        createFolder("lua-map")
+        createFolder("lua-global")
+        createFolder("lua-data-global")
+        createFolder("lua-data-map")
         glue.writefile("manifest.json", pjson.stringify(manifest, nil, 4), "t")
         cprint("Success, package folder with manifest template has been created.")
         return true

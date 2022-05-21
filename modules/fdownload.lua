@@ -7,8 +7,9 @@
 local socket = require "socket"
 local http = require "socket.http"
 local https = require "socket.https"
-http.timeout = 120
-https.timeout = 120
+local timeout = 500
+http.timeout = timeout
+https.timeout = timeout
 local ftp = require "socket.ftp"
 local url = require "socket.url"
 local ltn12 = require "ltn12"

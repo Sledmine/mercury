@@ -1,5 +1,12 @@
 # Changelog
 
+# 3.0.2
+- Expanded HTTP request timeout to 500 milliseconds
+- Fixed stdout bug with `pack` command, current file being compressed now prints before starting compression
+- Added common package folders creation in `pack` command
+- Fixed optional parameters using `--template` on `pack` command
+- Added optional `outputPath` to `packdiff` command
+
 # 3.0.1
 - Fixed memory leak at copying large files
 - Fixed memory leak at unpacking large packages

@@ -4,6 +4,7 @@
 -- Tests for utils lib
 ------------------------------------------------------------------------------
 local lu = require "luaunit"
+local glue = require "glue"
 inspect = require "inspect"
 
 -- Global modules
@@ -22,7 +23,6 @@ function testUtils:testSplitPath()
     -- Force Windows test cases
     jit.os = "Windows"
     local directory, fileName, extension = splitPath(self.testFilePath)
-
     lu.assertEquals(directory, "C:\\Test")
     lu.assertEquals(fileName, "Filename")
     lu.assertEquals(extension, "txt")
@@ -58,18 +58,20 @@ end
 
 function testUtils:testGeneratePath()
     jit.os = "Windows"
-    local documentsPath = gpath("/home/sledmine/Documents/")
-    lu.assertEquals(documentsPath, "\\home\\sledmine\\Documents\\")
-
-    local appendPath = gpath("/home/sledmine", "/Downloads", "/Music/")
-    lu.assertEquals(appendPath, "\\home\\sledmine\\Downloads\\Music\\")
+    lu.assertEquals(gpath("/home/sledmine/Documents/"), "\\home\\sledmine\\Documents\\")
+    lu.assertEquals(gpath("/home/sledmine", "/Downloads", "/Music/"), "\\home\\sledmine\\Downloads\\Music\\")
 
     jit.os = "Linux"
-    local documentsPath = gpath("\\home\\sledmine\\Documents")
-    lu.assertEquals(documentsPath, "/home/sledmine/Documents")
+    lu.assertEquals(gpath("\\home\\sledmine\\Documents"), "/home/sledmine/Documents")
+    lu.assertEquals(gpath("\\home\\sledmine", "\\Downloads", "\\Music\\"), "/home/sledmine/Downloads/Music/")
+end
 
-    local appendPath = gpath("\\home\\sledmine", "\\Downloads", "\\Music\\")
-    lu.assertEquals(appendPath, "/home/sledmine/Downloads/Music/")
+function testUtils:testCopyFile()
+    local filePath = "test.dat"
+    local copyFilePath = filePath .. ".copy"
+    copyFile(filePath, copyFilePath)
+
+    lu.assertEquals(SHA256(filePath), SHA256(copyFilePath), "Checksum verification must be equal")
 end
 
 local function runTests()

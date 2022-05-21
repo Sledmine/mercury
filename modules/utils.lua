@@ -68,10 +68,14 @@ function splitPath(inputPath)
     dprint("Splitting path: " .. inputPath)
     if (inputPath) then
         local folder = path.dir(inputPath)
-        if (folder == ".") then
-            folder = nil
+        local fileName
+        if (jit.os == "Windows") then
+            local splitPath = glue.string.split(inputPath, "\\")
+            fileName = splitPath[#splitPath]
+            table.remove(splitPath, #splitPath)
+            folder = table.concat(splitPath, "\\")
         end
-        local fileName = path.file(inputPath)
+        fileName = fileName or path.file(inputPath)
         local extension = path.ext(inputPath)
         dprint("directory:  " .. tostring(folder))
         dprint("fileName:  " .. tostring(fileName))
@@ -80,6 +84,9 @@ function splitPath(inputPath)
             fileName = string.gsub(fileName, "." .. extension, "")
         else
             fileName = nil
+        end
+        if folder == "" or folder == "." then
+            folder = nil
         end
         return folder, fileName, extension
     end
@@ -118,7 +125,7 @@ function copyFile(sourcePath, destinationPath)
         end
         local isSourceReadable = glue.canopen(sourcePath)
         if (isSourceReadable) then
-            local source = io.open(sourcePath, "rb")
+            local source = assert(io.open(sourcePath, "rb"))
             local destination = io.open(destinationPath, "wb")
             if (destination) then
                 local bytesToRead = 64 * 1024
@@ -129,6 +136,9 @@ function copyFile(sourcePath, destinationPath)
                     end
                     destination:write(bytes)
                 end
+                --assert(SHA256(sourcePath) == SHA256(destinationPath))
+                source:close()
+                destination:close()
                 return true
             else
                 dprint("Error, " .. destinationPath .. " destination can not be open.")
@@ -209,7 +219,7 @@ function filesIn(dir, recursive)
 end
 
 function SHA256(filePath)
-    local stream = io.popen("sha256sum " .. filePath, "r")
+    local stream = assert(io.popen("sha256sum " .. filePath, "r"))
     local result = stream:read("*all")
     stream:close()
     -- print(result)

@@ -1,6 +1,7 @@
 # Changelog
 
 # 3.0.2
+- Fixed file handle leak at copying files
 - Expanded HTTP request timeout to 500 milliseconds
 - Fixed stdout bug with `pack` command, current file being compressed now prints before starting compression
 - Added common package folders creation in `pack` command

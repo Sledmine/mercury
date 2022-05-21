@@ -73,10 +73,8 @@ local versionInfo = {
 }
 
 local iconPath = "Mercury/assets/icons/mercury.ico"
-
 -- This requires a certain link on the luapower root
 local mainLua = "mercury"
-
 local outputPath = "Mercury/bin/mercury.exe"
 
 ------------ Compilation process ------------
@@ -106,9 +104,8 @@ local function compileMercury(compilationArch)
         print(bundleBash)
         return os.execute(bundleBash)
     else
-        print("Remove bundle-tmp...")
         os.execute([[rmdir bundle-tmp]])
-        -- Multi arch compilation using diferrent path definitions for x86 and x64 builds
+        -- Multi arch compilation using different path definitions for x86 and x64 builds
         local x86Flag = ""
         if (compilationArch == "x86") then
             x86Flag = "-m32"

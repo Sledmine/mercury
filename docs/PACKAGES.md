@@ -1,25 +1,25 @@
-# Mercury Packages
+# Packages
 
 Mercury packages are simple zip files with `.merc` extension, they can contain any kind of files required to install a Halo Custom Edition mod, the purpose of a Mercury package is to provide an easy and automated way to install mods without suffering in the attempt, every package has [semantic versioning](https://www.jvandemo.com/a-simple-guide-to-semantic-versioning/) to keep track of every mod, also giving a way to provide updates between packages via binary or text difference, more info about this later on this documentation.
 
-# Package Structure
+# Package content
 
 As mentioned above, a Mercury package is just a zip file with extension `.merc` that contains all the files needed to install a mod, here is an example of a Mercury package content:
 
 ```
-- maps\forge_island.map
-- forge_island.lua
+- game-maps/forge_island.map
+- lua-map/forge_island.lua
 - manifest.json
 ```
 
 Let's take a look to every file:
 
- - `maps\forge_island.mp`
+ - `game-maps/forge_island.map`
 
 This file is a really common file in Halo Custom Edition, we have a `.map` file that we can place
 on our `Halo Custom Edition\maps\` folder to play it as always.
 
-- `forge_island.lua`
+- `lua-map/forge_island.lua`
 
 This is a more modern file in mods for Halo Custom Edition, the `forge_island.map` requires
  a lua script to work, this file should be placed in a path like `Documents\My Games\Halo CE\chimera\lua\scripts\map\` this sometimes can be kind of hard to install for some users, it can result in problems like the user placing it in the wrong folder and similar scenarios, nobody wants angry people complaining about our mod not working by their mistakes.
@@ -30,7 +30,7 @@ This is the most important file for a Mercury package, this json file contains a
 
 ***Note:*** There are some plans to support `.yml` files in the future as manifest files. 
 
-# Manifest Structure - 1.1.0
+# Manifest structure
 
 As explained above, a manifest file has different properties to tell Mercury how to install our mod, here is an example of a manifest.json below:
 
@@ -42,17 +42,19 @@ As explained above, a manifest file has different properties to tell Mercury how
     "version": "1.0.0-beta-1",
     "author": "Shadowmods Team",
     "internalVersion": "1.0.0-beta-1",
-    "manifestVersion": "1.1.0",
+    "manifestVersion": "1.2.0",
     "category": "map",
     "files": [
         {
             "path": "maps\\forge_island.map",
             "outputPath": "$haloce\\maps\\forge_island.map",
+            "checksum": "83cc508cc4f92f68984ed9bbf7943cf82952344e2d3d9fe0f148d6776acb5598",
             "type": "binary"
         },
         {
             "path": "forge_island.lua",
             "outputPath": "$mygames\\chimera\\lua\\scripts\\map\\forge_island.lua",
+            "checksum": "b3753bea0fc6523c7497184a0dc2c78eda7190b1a6c34a3796b0721ea2176d76",
             "type": "binary"
         }
     ],

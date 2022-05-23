@@ -170,10 +170,16 @@ mapCmd:description("Download a specific map from our HAC2 mirror repository.")
 mapCmd:argument("map", "File name of the map to be downloaded"):args("+")
 mapCmd:option("-o --output",
               "Path to download the map as a zip file, prevents map unpacking and installation.")
+mapCmd:flag("--hac2",
+              "Use the well known (but kinda slow) HAC2 maps repository instead of the default one.")
 mapCmd:action(function(args, name)
     flagsCheck(args)
     for _, mapName in pairs(args.map) do
-        map(mapName, args.output)
+        if args.hac2 then
+            map(mapName, args.output, constants.hac2MapRepositoryDownload)
+        else
+            map(mapName, args.output)
+        end
     end
     environment.clean()
 end)

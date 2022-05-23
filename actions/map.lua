@@ -16,19 +16,20 @@ end
 -- TODO Add delete and list flags to provide complete map management
 --- Download maps from a external repository
 ---@param mapName string File name of the map to download
----@param outputPath string Path to download the map as zip file
-local function map(mapName, outputPath)
-    local downloadUrl = constants.mapRepositoryDownload:format(mapName)
+---@param alternativePath string Path to download the map as zip filePath any
+---@param alternativeRepository string URL of the repository to download the map
+local function map(mapName, alternativePath, alternativeRepository)
+    local downloadUrl = (alternativeRepository or constants.mapRepositoryDownload):format(mapName)
     dprint(downloadUrl)
-    local alternativePath = gpath(paths.mercuryDownloads, "/", mapName, ".zip")
-    dprint(alternativePath)
+    local defaultOutputPath = gpath(paths.mercuryDownloads, "/", mapName, ".zip")
+    dprint(defaultOutputPath)
     cprint("Downloading map from repository... ")
-    local code = download.url(downloadUrl, outputPath or alternativePath)
+    local code = download.url(downloadUrl, alternativePath or defaultOutputPath)
     if (code and code == 200) then
         cprint("Done, map downloaded successfully.")
-        if (not outputPath) then
+        if (not alternativePath) then
             cprint("Unpacking map... ", true)
-            if (unpackMap(alternativePath)) then
+            if (unpackMap(defaultOutputPath)) then
                 cprint("done.")
                 return true
             end

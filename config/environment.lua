@@ -15,9 +15,9 @@ local paths
 
 -- Windows required registry keys
 local registryEntries = {
-    documents = "HKEY_CURRENT_USER\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Explorer\\Shell Folders",
-    haloce32 = "HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\Microsoft Games\\Halo CE",
-    haloce64 = "HKEY_LOCAL_MACHINE\\SOFTWARE\\WOW6432Node\\Microsoft\\Microsoft Games\\Halo CE"
+    documents = [[HKEY_CURRENT_USER\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\Shell Folders]],
+    haloce32 = [[HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Microsoft Games\Halo CE]],
+    haloce64 = [[HKEY_LOCAL_MACHINE\SOFTWARE\WOW6432Node\Microsoft\Microsoft Games\Halo CE]]
 }
 
 local function getGamePath()
@@ -31,7 +31,7 @@ local function getGamePath()
         else
             query = registry.getkey(registryEntries.haloce64)
         end
-        if (query) then
+        if (query and query.values["EXE Path"]) then
             gamePath = query.values["EXE Path"]["value"]
         end
     end
@@ -51,7 +51,7 @@ local function getMyGamesHaloCEPath()
     local documentsPath = os.getenv("MY_GAMES_PATH") or os.getenv("HALO_CE_DATA_PATH")
     if (jit.os == "Windows" and not documentsPath) then
         local query = registry.getkey(registryEntries.documents)
-        if (query) then
+        if (query and query.values["Personal"]) then
             documentsPath = query.values["Personal"]["value"] .. "\\My Games\\Halo CE"
         end
     end

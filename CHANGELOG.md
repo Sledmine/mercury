@@ -1,6 +1,9 @@
 # Changelog
 
-# 3.0.2
+# 3.1.0
+- Added semi automatic Mercury upgrade using GitHub API for releases
+- Added optional flag `--hac2` to `map` command, default maps repository now uses a Mercury repository
+- Updated error message handling at getting games path from registry
 - Fixed file handle leak at copying files
 - Expanded HTTP request timeout to 500 milliseconds
 - Fixed stdout bug with `pack` command, current file being compressed now prints before starting compression

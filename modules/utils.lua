@@ -9,8 +9,10 @@ local glue = require "glue"
 
 local constants = require "Mercury.modules.constants"
 
---- Overloaded color printing function
-function cprint(message, nextLine)
+---Overloaded color printing function
+---@param message any
+---@param removeNextLine? boolean
+function cprint(message, removeNextLine)
     if (type(message) == "table" or not message) then
         print(inspect(message))
     else
@@ -29,7 +31,7 @@ function cprint(message, nextLine)
         messageWithColor = string.gsub(messageWithColor, "Compiling", "[93mCompiling[0m")
         messageWithColor = string.gsub(messageWithColor, "Removing", "[91mRemoving[0m")
         io.write(messageWithColor)
-        if (not nextLine) then
+        if (not removeNextLine) then
             io.write("\n")
         end
     end

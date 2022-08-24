@@ -47,6 +47,7 @@ local modules = {
     "requests.lua",
     "pretty/*.lua",
     "pretty/json/*.lua",
+    "tinyyaml.lua",
     -- "luaunit.lua", -- Testing purposes only, keep it here for tracking, not needed for release
     -- Mercury modules
     "Mercury/actions/*.lua",

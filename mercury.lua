@@ -31,6 +31,7 @@ local pack = require"Mercury.modules.merc".pack
 local packdiff = require"Mercury.modules.merc".diff
 local packtemplate = require"Mercury.modules.merc".template
 local map = require "Mercury.actions.map"
+local build = require "Mercury.actions.build"
 
 local luabundler = require "Mercury.modules.luabundle"
 local constants = require "Mercury.modules.constants"
@@ -202,10 +203,15 @@ packCmd:action(function(args, name)
     flagsCheck(args)
     if (args.template) then
         packtemplate()
+        return
     else
-        pack(args.packDir, args.mercPath)
+        local result = pack(args.packDir, args.mercPath)
+        environment.clean()
+        if result then
+            os.exit(0)
+        end
+        os.exit(1)
     end
-    environment.clean()
 end)
 
 -- Diff command
@@ -236,7 +242,23 @@ luabundleCmd:action(function(args, name)
         luabundler.template()
         return
     end
-    luabundler.bundle(args.bundleFile, args.compile)
+    if luabundler.bundle(args.bundleFile, args.compile) then
+        os.exit(0)
+    end
+    os.exit(1)
+end)
+
+local buildCmd = parser:command("build", "Build a Mercury project using a buildspec file.")
+buildCmd:description("Compile and build a Mercury project trough Invader and other tools.")
+buildCmd:argument("yamlFilePath", "Path to the buildspec file."):args("?")
+buildCmd:flag("--verbose", "Output more verbose messages to console.")
+buildCmd:flag("--release", "Flag this build as a release.")
+buildCmd:action(function(args, name)
+    flagsCheck(args)
+    if build(args.yamlFilePath, args.verbose, args.release) then
+        os.exit(0)
+    end
+    os.exit(1)
 end)
 
 -- About command

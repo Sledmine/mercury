@@ -188,6 +188,7 @@ function merc.diff(oldpackagePath, newPackagePath, diffPackagePath)
                                                  diffExtractionPath .. "/" .. newFile.path .. ".xd3")
 
                         cprint("Searching, for differences in " .. oldFile.path)
+                        --dprint(SHA256(oldFilePath) .. " -> " .. SHA256(newFilePath))
                         if (SHA256(oldFilePath) ~= SHA256(newFilePath)) then
                             cprint("\tWarning, " .. oldFile.path ..
                                        " has differences between packages, creating xd3 diff!")

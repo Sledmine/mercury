@@ -1,5 +1,9 @@
 # Changelog
 
+# 3.2.0
+- Added current downloading map name to `map` command
+- Added `build` command for standard projects building using a buildspec.yaml file
+
 # 3.1.0
 - Added semi automatic Mercury upgrade using GitHub API for releases
 - Added optional flag `--hac2` to `map` command, default maps repository now uses a Mercury repository

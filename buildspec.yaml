@@ -1,0 +1,16 @@
+version: 1
+tag_space: 64M
+extend_limits: true
+resource_usage: none
+#with_index: index.txt
+auto_forge: false
+stock-resource-bounds: true
+scenarios:
+  - levels/a50/a50_coop_evolved_dev
+  - levels/b30/b30_coop_evolved_dev
+  - levels/c10/c10_coop_evolved_dev
+  - levels/c20/c20_coop_evolved_dev
+commands:
+  release:
+    - mercury build --release
+    - mercury luabundle -c

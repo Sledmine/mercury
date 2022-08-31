@@ -247,3 +247,18 @@ end
 function isHostWindows()
     return jit.os == "Windows"
 end
+
+function verify(assertion, message)
+    if not assertion then
+        cprint("Error, " .. message .. ".")
+        environment.clean()
+        os.exit(1)
+    end
+    return true
+end
+
+--Replace string of another string in a string escaping pattern chars
+function replace(str, find, replace)
+    local find = find:gsub("([%^%$%(%)%%%.%[%]%*%+%-%?])", "%%%1")
+    return str:gsub(find, replace)
+end

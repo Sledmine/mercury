@@ -250,12 +250,14 @@ end)
 
 local buildCmd = parser:command("build", "Build a Mercury project using a buildspec file.")
 buildCmd:description("Compile and build a Mercury project trough Invader and other tools.")
-buildCmd:argument("yamlFilePath", "Path to the buildspec file."):args("?")
+--buildCmd:argument("yamlFilePath", "Path to the buildspec file."):args("?")
+buildCmd:argument("command", "Command to execute."):args("?")
 buildCmd:flag("--verbose", "Output more verbose messages to console.")
 buildCmd:flag("--release", "Flag this build as a release.")
+buildCmd:option("--output", "Output path for the build result."):args("?")
 buildCmd:action(function(args, name)
     flagsCheck(args)
-    if build(args.yamlFilePath, args.verbose, args.release) then
+    if build("buildspec.yaml", args.command, args.verbose, args.release, (args.output or {})[1]) then
         os.exit(0)
     end
     os.exit(1)

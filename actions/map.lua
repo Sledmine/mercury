@@ -23,7 +23,7 @@ local function map(mapName, alternativePath, alternativeRepository)
     dprint(downloadUrl)
     local defaultOutputPath = gpath(paths.mercuryDownloads, "/", mapName, ".zip")
     dprint(defaultOutputPath)
-    cprint("Downloading map from repository... ")
+    cprint("Downloading " .. mapName .. "...")
     local code = download.url(downloadUrl, alternativePath or defaultOutputPath)
     if (code and code == 200) then
         cprint("Done, map downloaded successfully.")

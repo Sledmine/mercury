@@ -3,6 +3,7 @@ tag_space: 64M
 extend_limits: true
 resource_usage: none
 #with_index: index.txt
+#script_source: "data"
 auto_forge: false
 stock-resource-bounds: true
 scenarios:

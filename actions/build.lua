@@ -15,6 +15,7 @@ local paths = environment.paths()
 ---@field auto_forge boolean
 ---@field resource_usage string
 ---@field with_index string
+---@field script_source "data" | "tags"
 ---@field commands table<string, string[]>
 
 --Provide a runner command for each invader command 
@@ -71,6 +72,11 @@ local function build(yamlFilePath, command, verbose, isRelease, outputPath)
         else
             flag("maps", "\"" .. paths.gameMaps .. "\"")
         end
+    end
+    if not buildspec.script_source then
+        flag("script-source", "tags")
+    else
+        flag("script-source", buildspec.script_source)
     end
     if buildspec.auto_forge then
         flag("auto-forge")

@@ -1,6 +1,12 @@
 # Packages
 
-Mercury packages are simple zip files with `.merc` extension, they can contain any kind of files required to install a Halo Custom Edition mod, the purpose of a Mercury package is to provide an easy and automated way to install mods without suffering in the attempt, every package has [semantic versioning](https://www.jvandemo.com/a-simple-guide-to-semantic-versioning/) to keep track of every mod, also giving a way to provide updates between packages via binary or text difference, more info about this later on this documentation.
+Mercury packages are simple zip files with `.zip`, `.merc` or `.mercu` extension (depending of the
+case), they can contain any kind of files required to install a Halo Custom Edition mod, the purpose of
+a Mercury package is to provide an easy and automated way to install mods without suffering in the
+attempt, every package has [semantic
+versioning](https://www.jvandemo.com/a-simple-guide-to-semantic-versioning/) to keep track of every
+mod, also giving a way to provide updates between packages via binary or text difference, more info
+about this later on this documentation.
 
 # Package content
 
@@ -181,21 +187,16 @@ We are working on a platform to allow different creators to upload their own pac
 
 ## How I can provide an update for my Mercury package?
 
-You don't have to create an update for every package you create, if your package has all the properties mentioned here correctly set and all the required files inside your `.merc` file our repository or platform should be able to create the update automatically between your last package and your new ones, however an update for different builds can't be created automatically due to [semantic versioning](https://www.jvandemo.com/a-simple-guide-to-semantic-versioning/) guidelines, check the [detailed semantic version specifications](https://semver.org/) for more information.
+You don't have to create an update for every package you create, if your package has all the
+properties mentioned here correctly set and all the required files inside your `.merc` file our
+platform should be able to create the update automatically between your last package and your new
+ones, however an update for different builds can't be created automatically due
+to [semantic versioning](https://www.jvandemo.com/a-simple-guide-to-semantic-versioning/) guideline,
+ check the [detailed semantic version specifications](https://semver.org/) for more information.
 
 ## Can I host my own packages repository?
 
 For sure, Mercury is using an internal API called Vulcano to provide access to different packages, select newest package from repository and more, if you want to host your own packages you can contact us and add your repository to Vulcano as an available mirror for package downloading.
-
-## Is there a tool to create an automated package build process?
-
-Sadly nope, but we are working on a new action for Mercury, someting like:
-
-```
-cd MySuperModFolder\
-mercury pack --nextMajor
-```
-Something like this should do the trick in the future, however it is not that hard to build your own packages via bash scripting or something similar.
 
 # Join us on Discord
 Feel free to join the [Shadowmods Discord Server](https://discord.shadowmods.net) if you want to

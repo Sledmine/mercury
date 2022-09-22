@@ -11,7 +11,7 @@ Mercury is a CLI program, so it is designed to be used on a terminal, it attempt
 
 In order to install Mercury you need to download the installer from the [GitHub releases page](https://github.com/Sledmine/Mercury/releases/).
 
-Make sure that your downloading the latest version available, installation is pretty straightforward, look for the installer that matches your operative system.
+Make sure that you are downloading the latest version available, installation is pretty straightforward, look for the installer that matches your operative system.
 
 ## On Windows
 

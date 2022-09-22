@@ -1,10 +1,10 @@
-# Mercury Lua Bundler
+# Lua Bundler
 
 Mercury can be used to create a distributable script from a modular lua project that has pure lua
 modules, resulting in a single script with modules built inside, all what is needed is a simple
 bundle.json file on the root of our lua project and that will do the magic.
 
-# Code Project Structure
+## Code Project Structure
 
 Let's see a simple example of how to bundle a modular lua project, here is a short structure of
 our code project:
@@ -42,7 +42,7 @@ that ignites the script entry point, this file would be bundled too.
 Finally this is the file that will tell Mercury how our project would be bundled in single script
 output, all the info required for that is here.
 
-# Bundle File
+## Bundle File
 
 As explained above, the bundle.json file has all the requirements to bundle our project, the content
 of a bundle.json file could be something like this:
@@ -52,14 +52,14 @@ of a bundle.json file could be something like this:
     "name": "My Project",
     "target": "lua53",
     "include": [
-        "modules\\"
+        "modules/"
     ],
     "modules": [
         "json",
-        "stuff\\mymodule"
+        "stuff/module"
     ],
-    "main":"myscript",
-    "output": "dist\\myscriptbundled.lua"
+    "main":"script",
+    "output": "dist/bundled.lua"
 }
 ```
 
@@ -110,14 +110,14 @@ a few examples of how to use them:
 
 ## Create a bundle.json template file
 ```
-cd MySuperProjectFolder
+cd project
 mercury luabundle -t
 ```
 This command will create `bundle.json` file with common properties by default, this will help you to start the creation of a modular lua project, the `-t` flag stands for the short version of the `--template` flag, meaning this command will create an example of a `bundle.json` file
 
 ## Bundle a project directly
 ```
-cd MySuperProjectFolder
+cd project
 mercury luabundle
 ```
 This should read our `bundle.json` file and generate a single output script based on the information
@@ -125,7 +125,7 @@ from this file, it will keep all our comments and modules in the exact same sour
 
 ## Bundle a project and compiling the resultant file
 ```
-cd MySuperProjectFolder
+cd project
 mercury luabundle -c
 ```
 The `-c` flag stands for the short version of the `--compile` flag, meaning that this bundle would
@@ -134,7 +134,7 @@ be compiled **AFTER** gathering and bundling all the modules required in the `bu
 
 ## Bundle a project using a different bundle.json file
 ```
-cd MySuperProjectFolder
+cd project
 mercury luabundle server
 ```
 This command will look for a file called `serverBundle.json` and will read the properties from there

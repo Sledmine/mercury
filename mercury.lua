@@ -196,7 +196,7 @@ end)
 -- Pack command
 local packCmd = parser:command("pack", "Pack a given directory into a mercury package.")
 packCmd:description("Create a Mercury package from a specific directory.")
-packCmd:argument("packDir", "Path to the directory to pack."):args("?")
+packCmd:argument("packDir", "Path to the directory to pack.")
 packCmd:argument("mercPath", "Output path for the resultant package."):args("?")
 packCmd:flag("-t --template", "Create a package folder template.")
 packCmd:action(function(args, name)
@@ -205,7 +205,7 @@ packCmd:action(function(args, name)
         packtemplate()
         return
     else
-        local result = pack(args.packDir, args.mercPath)
+        local result = pack(args.packDir, args.mercPath or ".")
         environment.clean()
         if result then
             os.exit(0)

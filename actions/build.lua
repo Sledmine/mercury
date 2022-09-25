@@ -18,33 +18,31 @@ local paths = environment.paths()
 ---@field script_source "data" | "tags"
 ---@field commands table<string, string[]>
 
---Provide a runner command for each invader command 
+-- Provide a runner command for each invader command 
 local runner = replace((os.getenv("INVADER_RUNNER") or ""), "$PWD", fs.cd())
 local resourceMapsPath = os.getenv("INVADER_RESOURCE_MAPS_PATH")
 local buildMapCmd = runner .. [[invader-build ]]
 
 local function flag(name, value)
     if not value then
-       buildMapCmd = buildMapCmd .. "--" .. name .. " "
-       return
+        buildMapCmd = buildMapCmd .. "--" .. name .. " "
+        return
     end
     buildMapCmd = buildMapCmd .. "--" .. name .. " " .. value .. " "
 end
 
 local function build(yamlFilePath, command, verbose, isRelease, outputPath)
-    local yamlFile = readFile(yamlFilePath or "buildspec.yaml", "t")
-    if not yamlFile then
-        cprint("Error, at reading buildspec.yaml")
-        return false
-    end
+    local yamlFile = readFile(yamlFilePath, "t") or readFile("buildspec.yml", "t") or
+                         readFile("buildspec.yaml", "t")
+    verify(yamlFile, "No buildspec.yml or buildspec.yaml file found")
 
     -- Build project using yml definition
     ---@type buildfile
     local buildspec = yaml.parse(yamlFile)
     verify(buildspec.version, "Spec version must be defined")
     verify(buildspec.version == 1, "Spec version must be equal to 1")
-    --verify(buildspec.game_engine, "Game engine must be defined")
-    --verify(buildspec.game_engine == "gbx-custom", "Game engine must be gbx-custom")
+    -- verify(buildspec.game_engine, "Game engine must be defined")
+    -- verify(buildspec.game_engine == "gbx-custom", "Game engine must be gbx-custom")
     if command then
         verify(buildspec.commands[command], "Command is not defined")
         for _, cmd in ipairs(buildspec.commands[command]) do

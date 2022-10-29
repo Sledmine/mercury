@@ -1,0 +1,36 @@
+{
+    "$id": "https://github.com/Sledmine/mercury/buildspec.schema.json",
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "title": "Halo CE Buildspec",
+    "type": "object",
+    "properties": {
+        "tag_space": {
+            "type": "string",
+            "description": "Tag space size that will be reserved for map usage."
+        },
+        "extend_limits": {
+            "type": "boolean",
+            "description": "Extend map limits to the maximum possible size."
+        },
+        "resource_usage": {
+            "type": "string",
+            "description": "Resource usage mode, can be 'none', 'check' or 'always'."
+        },
+        "with_index": {
+            "type": "string",
+            "description": "Include an index file in the build."
+        },
+        "script_resource": {
+            "type": "string",
+            "description": "Script resource mode, can be 'data or 'tags', tags is the default."
+        },
+        "auto_forge": {
+            "type": "boolean",
+            "description": "Ensure the map will be network compatible with the target engine's stock maps."
+        },
+        "stock_resource_bounds": {
+            "type": "boolean",
+            "description": "Only index tags if the tag's index is within stock Custom Edition's resource map bounds."
+        },
+    }
+}

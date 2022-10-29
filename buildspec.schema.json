@@ -1,12 +1,19 @@
 {
     "$id": "https://github.com/Sledmine/mercury/buildspec.schema.json",
-    "$schema": "https://json-schema.org/draft/2020-12/schema",
     "title": "Halo CE Buildspec",
     "type": "object",
     "properties": {
+        "version": {
+            "type": "number",
+            "description": "The version of the buildspec schema to use."
+        },
         "tag_space": {
             "type": "string",
-            "description": "Tag space size that will be reserved for map usage."
+            "description": "Tag space size that will be reserved for map usage.",
+            "enum": [
+                "64M",
+                "128M"
+            ]
         },
         "extend_limits": {
             "type": "boolean",
@@ -14,7 +21,12 @@
         },
         "resource_usage": {
             "type": "string",
-            "description": "Resource usage mode, can be 'none', 'check' or 'always'."
+            "description": "Resource usage mode, can be 'none', 'check' or 'always'.",
+            "enum": [
+                "none",
+                "check",
+                "always"
+            ]
         },
         "with_index": {
             "type": "string",
@@ -22,7 +34,11 @@
         },
         "script_resource": {
             "type": "string",
-            "description": "Script resource mode, can be 'data or 'tags', tags is the default."
+            "description": "Script resource mode, can be 'data or 'tags', tags is the default.",
+            "enum": [
+                "data",
+                "tags"
+            ]
         },
         "auto_forge": {
             "type": "boolean",
@@ -32,5 +48,9 @@
             "type": "boolean",
             "description": "Only index tags if the tag's index is within stock Custom Edition's resource map bounds."
         },
+        "scenarios": {
+            "type": "array",
+            "description": "List of scenarios to build."
+        }
     }
 }

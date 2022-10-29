@@ -51,6 +51,13 @@
         "scenarios": {
             "type": "array",
             "description": "List of scenarios to build."
+        },
+        "commands": {
+            "type": "object",
+            "description": "Commands map that belong to this project buildspec."
         }
-    }
+    },
+    "required": [
+        "version"
+    ]
 }

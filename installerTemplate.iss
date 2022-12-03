@@ -20,7 +20,7 @@ DisableProgramGroupPage=yes
 LicenseFile=LICENSE
 ;PrivilegesRequired=lowest
 ArchitecturesInstallIn64BitMode=$ARCH64
-OutputDir=bin
+OutputDir=dist
 OutputBaseFilename=mercury-{#VERSION}+$OSTARGET.$ARCH
 Compression=lzma
 SolidCompression=yes
@@ -40,16 +40,19 @@ english.AddToPath="Add Mercury to PATH variable"
 spanish.AddToPath="Agregar Mercury a variable PATH"
 
 [Files]
-Source: "bin\ansicon\$ARCH\ANSI32.dll"; DestDir: "{app}"; Flags: ignoreversion
-;Source: "bin\ansicon\$ARCH\ANSI64.dll"; DestDir: "{app}"; Flags: ignoreversion
-Source: "bin\ansicon\$ARCH\ansicon.exe"; DestDir: "{app}"; Flags: ignoreversion
+Source: "bin\ansicon\$ARCH\ANSI32.dll"; DestDir: "{app}"; Flags: ignoreversion onlyifdoesntexist
+;Source: "bin\ansicon\$ARCH\ANSI64.dll"; DestDir: "{app}"; Flags: ignoreversion onlyifdoesntexist
+Source: "bin\ansicon\$ARCH\ansicon.exe"; DestDir: "{app}"; Flags: ignoreversion onlyifdoesntexist
+Source: "bin\luv\$ARCH\luv.dll"; DestDir: "{app}\clib"; Flags: ignoreversion
 Source: "bin\xdelta3\$ARCH\xdelta3.exe"; DestDir: "{app}"; Flags: ignoreversion
-Source: "bin\mercury.exe"; DestDir: "{app}"; Flags: ignoreversion
+Source: "build\mercury.exe"; DestDir: "{app}"; Flags: ignoreversion
 Source: "mercury_admin.cmd"; DestDir: "{app}"; Flags: ignoreversion
+Source: "mercury_console.cmd"; DestDir: "{app}"; Flags: ignoreversion
 
 [Icons]
 Name: "{group}\{cm:UninstallProgram,{#NAME}}"; Filename: "{uninstallexe}"
-Name: "{userdesktop}\Mercury Console"; Filename: "{app}\mercury_admin.cmd"; IconFilename: "{app}\mercury.exe"
+Name: "{userdesktop}\Mercury Console (Admin)"; Filename: "{app}\mercury_admin.cmd"; IconFilename: "{app}\mercury.exe"
+Name: "{userdesktop}\Mercury Console"; Filename: "{app}\mercury_console.cmd"; WorkingDir: "{app}"; IconFilename: "{app}\mercury.exe"
 
 [Tasks]
 Name: envPath; Description: {cm:AddToPath}

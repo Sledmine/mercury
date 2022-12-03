@@ -2,7 +2,6 @@ local glue = require "glue"
 local ends = glue.string.ends
 local path = require "path"
 local fs = require "fs"
-local readFile = glue.readfile
 local yaml = require "tinyyaml"
 local paths = environment.paths()
 
@@ -93,7 +92,9 @@ local function build(yamlFilePath, command, verbose, isRelease, outputPath)
     end
     flag("game-engine", buildspec.game_engine or "gbx-custom")
     -- Compile every scenario in the spec file
+    local projectBuildMapCmd = buildMapCmd
     for _, scenarioPath in ipairs(buildspec.scenarios) do
+        buildMapCmd = projectBuildMapCmd
         if isRelease and ends(scenarioPath, "_dev") then
             local scenarioName = path.file(scenarioPath)
             -- Remove the _dev suffix from the scenario name
@@ -103,9 +104,11 @@ local function build(yamlFilePath, command, verbose, isRelease, outputPath)
         local buildCommand = buildMapCmd .. "\"" .. scenarioPath .. "\""
         cprint("Compiling scenario: " .. scenarioPath)
         dprint(buildCommand)
-        if not os.execute(buildCommand) then
-            cprint("Error, at building scenario: " .. scenarioPath)
-            return false
+        if not IsDebugModeEnabled then
+            if not os.execute(buildCommand) then
+                cprint("Error, at building scenario: " .. scenarioPath)
+                return false
+            end
         end
     end
     cprint("Success, project builded.")

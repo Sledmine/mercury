@@ -73,7 +73,7 @@ function luabundler.template()
             main = "main",
             output = "dist/.lua"
         }
-        glue.writefile("bundle.json", pjson.stringify(template, nil, 4), "t")
+        writeFile("bundle.json", pjson.stringify(template, nil, 4))
         cprint("Success, bundle.json template has been created successfully.")
         return true
     end

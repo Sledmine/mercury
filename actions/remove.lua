@@ -20,7 +20,7 @@ local errors = {
 local function erasePackageFromIndex(packageLabel)
     -- Get current instance packages
     local installedPackages = environment.packages()
-    if (installedPackages) then
+    if installedPackages then
         -- Erase data for this package
         installedPackages[packageLabel] = nil
         -- Update current environment packages data with the new one
@@ -51,8 +51,8 @@ local function remove(packageLabel, noRestore, eraseBackups, recursive, index)
                 end
             end
         end
-        if (index) then
-            if (erasePackageFromIndex(packageLabel)) then
+        if index then
+            if erasePackageFromIndex(packageLabel) then
                 cprint("Done, package '" .. packageLabel .. "' has been forced removed by entry.")
                 return true
             else
@@ -65,7 +65,7 @@ local function remove(packageLabel, noRestore, eraseBackups, recursive, index)
             -- Path to the existing file to erase
             local finalFilePath = file.outputPath
             -- Start erasing proccess
-            dprint("Erasing \"" .. finalFilePath .. "\"... ", true)
+            dprint("Erasing \"" .. finalFilePath .. "\"... ")
             local result, description, errorCode = delete(finalFilePath)
             if (result) then
                 dprint("Done, file erased.")
@@ -107,7 +107,7 @@ local function remove(packageLabel, noRestore, eraseBackups, recursive, index)
             cprint("Done, package \"" .. packageLabel .. "\" has been removed.")
             return true
         else
-            cprint("Error, at trying to erase package from index")
+            cprint("Error, at trying to erase package from index.")
             return false, errors.indexErasement
         end
     end

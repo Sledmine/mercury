@@ -31,8 +31,8 @@ local function flag(name, value)
 end
 
 local function build(yamlFilePath, command, verbose, isRelease, outputPath)
-    local yamlFile = readFile(yamlFilePath, "t") or readFile("buildspec.yml", "t") or
-                         readFile("buildspec.yaml", "t")
+    local yamlFile = readFile(yamlFilePath) or readFile("buildspec.yml") or
+                         readFile("buildspec.yaml")
     verify(yamlFile, "No buildspec.yml or buildspec.yaml file found")
 
     -- Build project using yml definition

@@ -227,6 +227,16 @@ function readFile(path)
     return glue.readfile(path, "t")
 end
 
+function writeFile(path, data)
+    if isHostWindows() then
+        local file = assert(uv.fs_open(path, "w", 438))
+        uv.fs_write(file, data)
+        uv.fs_close(file)
+        return true
+    end
+    return glue.writefile(path, data, "t")
+end
+
 function exists(fileOrFolderPath)
     return fs.is(fileOrFolderPath)
 end

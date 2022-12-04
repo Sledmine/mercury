@@ -23,12 +23,13 @@ local errors = {
     updateError = "at trying to update a file",
     depedencyError = "at trying to install a package dependency",
     mercFileDoesNotExist = "mercury local package does not exist",
-    noManifest = "error at trying to read manifest.json from the package"
+    noManifest = "at trying to read manifest.json from the package",
+    updatingPackagesIndex = "at trying to update the packages index",
 }
 
 -- Install any mercury package
 local function insert(mercPath, forced, skipOptionals)
-    if (exists(mercPath)) then
+    if exists(mercPath) then
         local _, mercFilename = splitPath(mercPath)
         -- Unpack merc file
         dprint("Trying to unpack \"" .. mercFilename .. ".merc\" ...")
@@ -221,7 +222,9 @@ local function insert(mercPath, forced, skipOptionals)
                 installedPackages[package.label] = package:getProperties()
             end
             -- Update current environment packages data with the new one
-            environment.packages(installedPackages)
+            if not environment.packages(installedPackages) then
+                return false, errors.updatingPackagesIndex
+            end
             return true
         end
     end

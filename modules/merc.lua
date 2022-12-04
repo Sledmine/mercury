@@ -76,7 +76,7 @@ function merc.pack(packDir, mercPath, breaking, feature, fix)
 
             -- TODO Add manifest base files extension
             local finalManifestPath = paths.mercuryTemp .. "/manifest.json"
-            glue.writefile(finalManifestPath, json.encode(manifest), "t")
+            writeFile(finalManifestPath, json.encode(manifest))
             cprint("done.")
 
             -- Start package zip creation
@@ -137,7 +137,7 @@ function merc.template()
         createFolder("lua-global")
         createFolder("lua-data-global")
         createFolder("lua-data-map")
-        glue.writefile("manifest.json", pjson.stringify(manifest, nil, 4), "t")
+        writeFile("manifest.json", pjson.stringify(manifest, nil, 4))
         cprint("Success, package folder with manifest template has been created.")
         return true
     end
@@ -251,7 +251,7 @@ function merc.diff(oldpackagePath, newPackagePath, diffPackagePath)
             end
         end
         newManifest.targetVersion = oldManifest.version
-        glue.writefile(diffExtractionPath .. "/manifest.json", json.encode(newManifest), "t")
+        writeFile(diffExtractionPath .. "/manifest.json", json.encode(newManifest))
 
         if (exists(diffPackagePath)) then
             delete(diffPackagePath)

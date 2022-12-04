@@ -63,7 +63,6 @@ local function getMyGamesHaloCEPath()
         cprint([[On Windows: set MY_GAMES_PATH=D:\Users\117\Documents\My Games\Halo CE]])
         os.exit()
     end
-    --glue.writefile("test.txt", "My Games path: " .. fromutf8(documentsPath), "t")
     return documentsPath
 end
 
@@ -113,21 +112,21 @@ end
 
 --- Get mercury local installed packages
 ---@param newPackages packageMercury[]
----@return packageMercury[] packages
+---@return packageMercury[]? packages
 function environment.packages(newPackages)
     if (not newPackages) then
         if (exists(paths.mercuryIndex)) then
-            local installedPackages = json.decode(readFile(paths.mercuryIndex, "t"))
+            local installedPackages = json.decode(readFile(paths.mercuryIndex))
             if (installedPackages and #glue.keys(installedPackages) > 0) then
                 return installedPackages
             end
         end
     else
         local installedPackagesJson = json.encode(newPackages)
-        local result, error = glue.writefile(paths.mercuryIndex, installedPackagesJson, "t")
-        return result
+        if writeFile(paths.mercuryIndex, installedPackagesJson) then
+            return installedPackagesJson
+        end
     end
-    return nil
 end
 
 --- Clean temp data, temp folders, trash files...

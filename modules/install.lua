@@ -39,7 +39,7 @@ end
 ---@param forced boolean Forced mode installation
 ---@param skipOptionals boolean Ignore optional files at installation
 ---@param skipDependencies boolean Ignore dependencies at installation
----@return boolean result
+---@return boolean, string? result
 function install.package(packageLabel,
                          packageVersion,
                          forced,
@@ -74,7 +74,7 @@ function install.package(packageLabel,
             end
         end
     end
-    return false, getError(status)
+    return getError(status)
 end
 
 function install.update(packageLabel, silent)

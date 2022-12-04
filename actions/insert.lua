@@ -39,7 +39,7 @@ local function insert(mercPath, forced, skipOptionals)
         if (merc.unpack(mercPath, unpackPath)) then
             -- Load package manifest data
             local manifestPath = gpath(unpackPath, "/manifest.json")
-            local manifestJson = glue.readfile(manifestPath)
+            local manifestJson = readFile(manifestPath)
             if (not manifestJson) then
                 return false, errors.noManifest
             end
@@ -143,10 +143,14 @@ local function insert(mercPath, forced, skipOptionals)
                     end
 
                     -- Copy file into game folder
-                    if (copyFile(inputFilePath, outputFile)) then
+                    local copied, reason = copyFile(inputFilePath, outputFile)
+                    if copied then
                         dprint("Done, file succesfully installed.")
                     else
                         cprint("Error, at trying to install file: \"" .. file.path .. "\"")
+                        if reason then
+                            cprint("Reason: " .. reason)
+                        end
                         return false, errors.installationError
                     end
                     ::continue::

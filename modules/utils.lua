@@ -6,6 +6,10 @@
 local fs = require "fs"
 local path = require "path"
 local glue = require "glue"
+local uv
+if pcall(require, "luv") then
+    uv = require "luv"
+end
 
 local constants = require "Mercury.modules.constants"
 
@@ -71,7 +75,7 @@ function splitPath(inputPath)
     if (inputPath) then
         local folder = path.dir(inputPath)
         local fileName
-        if (jit.os == "Windows") then
+        if isHostWindows() then
             local splitPath = glue.string.split(inputPath, "\\")
             fileName = splitPath[#splitPath]
             table.remove(splitPath, #splitPath)
@@ -118,7 +122,44 @@ function delete(fileOrFolderPath, recursive)
 end
 
 --- Copy file to specific destination
-function copyFile(sourcePath, destinationPath)
+function copyFileWindows(sourcePath, destinationPath)
+    local reason
+    if (sourcePath and destinationPath) then
+        if (not exists(sourcePath)) then
+            dprint("Error, specified source file does not exist!")
+            dprint(sourcePath)
+            return false
+        end
+        local isSourceReadable = glue.canopen(sourcePath)
+        if (isSourceReadable) then
+            local source = assert(uv.fs_open(sourcePath, "r", 438))
+            local destination = assert(uv.fs_open(destinationPath, "w", 438))
+            reason = errorMessage
+            if (destination) then
+                local bytesToRead = 64 * 1024
+                while true do
+                    local bytes = uv.fs_read(source, bytesToRead)
+                    if bytes == "" then
+                        break
+                    end
+                    uv.fs_write(destination, bytes)
+                end
+                -- assert(SHA256(sourcePath) == SHA256(destinationPath))
+                uv.fs_close(source)
+                uv.fs_close(destination)
+                return true
+            else
+                dprint("Error, " .. destinationPath .. " destination can not be open.")
+            end
+        else
+            dprint("Error, " .. sourcePath .. " source can not be open.")
+        end
+    end
+    return false, reason
+end
+
+--- Copy file to specific destination
+function copyFileLinux(sourcePath, destinationPath)
     if (sourcePath and destinationPath) then
         if (not exists(sourcePath)) then
             dprint("Error, specified source file does not exist!")
@@ -138,7 +179,7 @@ function copyFile(sourcePath, destinationPath)
                     end
                     destination:write(bytes)
                 end
-                --assert(SHA256(sourcePath) == SHA256(destinationPath))
+                -- assert(SHA256(sourcePath) == SHA256(destinationPath))
                 source:close()
                 destination:close()
                 return true
@@ -150,6 +191,13 @@ function copyFile(sourcePath, destinationPath)
         end
     end
     return false
+end
+
+function copyFile(sourcePath, destinationPath)
+    if isHostWindows() then
+        return pcall(copyFileWindows, sourcePath, destinationPath)
+    end
+    return copyFileLinux(sourcePath, destinationPath)
 end
 
 --- Move file to specific destinatio
@@ -166,6 +214,17 @@ function moveFile(sourcePath, destinationPath)
         return fs.move(sourcePath, destinationPath)
     end
     return false
+end
+
+function readFile(path)
+    if isHostWindows() then
+        local file = assert(uv.fs_open(path, "r", 438))
+        local stat = assert(uv.fs_fstat(file))
+        local data = assert(uv.fs_read(file, stat.size, 0))
+        uv.fs_close(file)
+        return data
+    end
+    return glue.readfile(path, "t")
 end
 
 function exists(fileOrFolderPath)
@@ -191,7 +250,7 @@ function gpath(...)
     local stringPath = ""
     if (args) then
         for _, currentPath in pairs(args) do
-            if (jit.os == "Windows") then
+            if (isHostWindows()) then
                 stringPath = stringPath .. wpath(currentPath)
             else
                 stringPath = stringPath .. upath(currentPath)
@@ -220,14 +279,19 @@ function filesIn(dir, recursive)
     return files
 end
 
+---Get SHA256 checksum of a file
+---@param filePath string
+---@return string?
 function SHA256(filePath)
     local stream = assert(io.popen("sha256sum " .. filePath, "r"))
-    local result = stream:read("*all")
-    stream:close()
-    -- print(result)
-    local splitOutput = glue.string.split(result, " ")
-    -- print(inspect(splitOutput))
-    return splitOutput[1]
+    if stream then
+        local result = stream:read("*all")
+        stream:close()
+        if result ~= "" then
+            local splitOutput = glue.string.split(result, " ")
+            return splitOutput[1]
+        end
+    end
 end
 
 --- Execute command line based on OS platform
@@ -257,8 +321,15 @@ function verify(assertion, message)
     return true
 end
 
---Replace string of another string in a string escaping pattern chars
+-- Replace string of another string in a string escaping pattern chars
 function replace(str, find, replace)
     local find = find:gsub("([%^%$%(%)%%%.%[%]%*%+%-%?])", "%%%1")
     return str:gsub(find, replace)
+end
+
+function getenv(name)
+    if isHostWindows() then
+        return uv.os_getenv(name)
+    end
+    return os.getenv(name)
 end

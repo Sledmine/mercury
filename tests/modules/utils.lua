@@ -71,7 +71,11 @@ function testUtils:testCopyFile()
     local copyFilePath = filePath .. ".copy"
     copyFile(filePath, copyFilePath)
 
-    lu.assertEquals(SHA256(filePath), SHA256(copyFilePath), "Checksum verification must be equal")
+    local sha256FilePath = SHA256(filePath)
+    local sha256CopyFilePath = SHA256(copyFilePath)
+    lu.assertNotIsNil(sha256FilePath)
+    lu.assertNotIsNil(sha256CopyFilePath)
+    lu.assertEquals(sha256FilePath, sha256FilePath, "Checksum verification must be equal")
 end
 
 local function runTests()

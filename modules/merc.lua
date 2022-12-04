@@ -55,7 +55,7 @@ end
 function merc.pack(packDir, mercPath, breaking, feature, fix)
     if (packDir and mercPath and exists(packDir .. "/manifest.json")) then
         -- Read base manifest file
-        local manifest = json.decode(glue.readfile(packDir .. "/manifest.json", "t"))
+        local manifest = json.decode(readFile(packDir .. "/manifest.json"))
         if (manifest) then
             cprint("Automatically indexing manifest files from package folder... ", true)
             local packageFiles = filesIn(packDir, true)
@@ -170,9 +170,9 @@ function merc.diff(oldpackagePath, newPackagePath, diffPackagePath)
     end
     cprint("done.")
     ---@type packageMercury
-    local oldManifest = json.decode(glue.readfile(oldExtractionPath .. "/manifest.json", "t"))
+    local oldManifest = json.decode(readFile(oldExtractionPath .. "/manifest.json"))
     ---@type packageMercury
-    local newManifest = json.decode(glue.readfile(newExtractionPath .. "/manifest.json", "t"))
+    local newManifest = json.decode(readFile(newExtractionPath .. "/manifest.json"))
     if (oldManifest and newManifest and oldManifest.label == newManifest.label) then
         -- Create diff files
         for oldFileIndex, oldFile in pairs(oldManifest.files) do

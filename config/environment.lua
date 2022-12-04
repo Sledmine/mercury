@@ -4,7 +4,6 @@
 -- Create and provide environment stuff to use over the code
 ------------------------------------------------------------------------------
 local environment = {}
-
 local lfs = require "lfs"
 local glue = require "glue"
 local json = require "cjson"
@@ -22,8 +21,8 @@ local registryEntries = {
 
 local function getGamePath()
     -- Override game path using environment variables
-    local gamePath = os.getenv("HALO_CE_PATH")
-    if (jit.os == "Windows" and not gamePath) then
+    local gamePath = getenv("HALO_CE_PATH")
+    if (isHostWindows() and not gamePath) then
         local query
         local arch = os.getenv("PROCESSOR_ARCHITECTURE")
         if (arch == "x86") then
@@ -48,8 +47,8 @@ end
 
 local function getMyGamesHaloCEPath()
     -- Override documents path using environment variables
-    local documentsPath = os.getenv("MY_GAMES_PATH") or os.getenv("HALO_CE_DATA_PATH")
-    if (jit.os == "Windows" and not documentsPath) then
+    local documentsPath = getenv("MY_GAMES_PATH") or getenv("HALO_CE_DATA_PATH")
+    if (isHostWindows() and not documentsPath) then
         local query = registry.getkey(registryEntries.documents)
         if (query and query.values["Personal"]) then
             documentsPath = query.values["Personal"]["value"] .. "\\My Games\\Halo CE"
@@ -64,6 +63,7 @@ local function getMyGamesHaloCEPath()
         cprint([[On Windows: set MY_GAMES_PATH=D:\Users\117\Documents\My Games\Halo CE]])
         os.exit()
     end
+    --glue.writefile("test.txt", "My Games path: " .. fromutf8(documentsPath), "t")
     return documentsPath
 end
 
@@ -117,7 +117,7 @@ end
 function environment.packages(newPackages)
     if (not newPackages) then
         if (exists(paths.mercuryIndex)) then
-            local installedPackages = json.decode(glue.readfile(paths.mercuryIndex, "t"))
+            local installedPackages = json.decode(readFile(paths.mercuryIndex, "t"))
             if (installedPackages and #glue.keys(installedPackages) > 0) then
                 return installedPackages
             end

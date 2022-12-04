@@ -78,7 +78,7 @@ local function latest()
                 if os.getenv("PROCESSOR_ARCHITECTURE") == "x86" then
                     findArch = "x86"
                 end
-                if jit.os ~= "Windows" then
+                if not isHostWindows() then
                     findOS = "ubuntu"
                 end
                 dprint(findOS)
@@ -93,13 +93,14 @@ local function latest()
                         cprint("Downloading, new version...")
                         local code = download.url(url, outputPath)
                         if code == 200 then
-                            if jit.os == "Windows" then
+                            if isHostWindows() then
                                 os.execute(("explorer \"%s\""):format(outputPath))
                                 -- os.execute(("explorer \"%s\""):format(url))
                             else
                                 cprint("Installing binary in system using sudo...")
                                 if not IsDebugModeEnabled then
-                                    os.execute(([[sudo install "%s" /usr/bin/mercury]]):format(outputPath))
+                                    os.execute(([[sudo install "%s" /usr/bin/mercury]]):format(
+                                                   outputPath))
                                 end
                                 -- GNOME only!
                                 -- os.execute(("gio open \"%s\" &"):format(outputPath))

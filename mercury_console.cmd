@@ -1,0 +1,1 @@
+cmd /Q /K "title Mercury Console & cls"

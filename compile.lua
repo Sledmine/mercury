@@ -76,7 +76,7 @@ local versionInfo = {
 local iconPath = "Mercury/assets/icons/mercury.ico"
 -- This requires a certain link on the luapower root
 local mainLua = "mercury"
-local outputPath = "Mercury/bin/mercury.exe"
+local outputPath = "Mercury/build/mercury.exe"
 
 ------------ Compilation process ------------
 local luapowerArchs = {x64 = "64", x86 = "32"}
@@ -102,7 +102,7 @@ local function compileMercury(compilationArch)
                                          table.concat(staticLibs, " "), table.concat(modules, " "),
                                          mainLua, iconPath, version, table.concat(versionInfo, ";"),
                                          outputPath:gsub(".exe", ""), tostring(version))
-        print(bundleBash)
+        -- print(bundleBash)
         return os.execute(bundleBash)
     else
         os.execute([[rmdir bundle-tmp]])
@@ -120,7 +120,7 @@ local function compileMercury(compilationArch)
                                         mainLua, iconPath, windowsVersion .. ".0",
                                         table.concat(versionInfo, ";"), outputPath,
                                         tostring(version))
-        print(bundleCmd)
+        -- print(bundleCmd)
         return os.execute(bundleCmd)
     end
 
@@ -154,8 +154,10 @@ local function compileInstaller(compilationArch)
 end
 
 if (jit.os == "Windows") then
-    compileMercury("x86")
-    compileInstaller("x86")
+    if compileMercury("x86") then
+        compileInstaller("x86")
+    end
 end
-compileMercury("x64")
-compileInstaller("x64")
+if compileMercury("x64") then
+    compileInstaller("x64")
+end

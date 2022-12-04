@@ -1,5 +1,11 @@
 # Changelog
 
+# 3.2.1
+- Expand HTTP request timeout to 5000 milliseconds
+- Add UTF8 operations like copy and getenv trough libuv for Windows only
+- Fix multi scenario building
+- Fix bug with installer to not replace ANSICON while updating
+
 # 3.2.0
 - Added current downloading map name to `map` command
 - Added `build` command for standard projects building using a buildspec.yaml file

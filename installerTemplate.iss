@@ -44,6 +44,7 @@ Source: "bin\ansicon\$ARCH\ANSI32.dll"; DestDir: "{app}"; Flags: ignoreversion o
 ;Source: "bin\ansicon\$ARCH\ANSI64.dll"; DestDir: "{app}"; Flags: ignoreversion onlyifdoesntexist
 Source: "bin\ansicon\$ARCH\ansicon.exe"; DestDir: "{app}"; Flags: ignoreversion onlyifdoesntexist
 Source: "bin\luv\$ARCH\luv.dll"; DestDir: "{app}\clib"; Flags: ignoreversion
+Source: "bin\lua\$ARCH\lua51.dll"; DestDir: "{app}"; Flags: ignoreversion
 Source: "bin\xdelta3\$ARCH\xdelta3.exe"; DestDir: "{app}"; Flags: ignoreversion
 Source: "build\mercury.exe"; DestDir: "{app}"; Flags: ignoreversion
 Source: "mercury_admin.cmd"; DestDir: "{app}"; Flags: ignoreversion

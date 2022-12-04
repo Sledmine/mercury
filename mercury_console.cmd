@@ -1,1 +1,1 @@
-cmd /Q /K "title Mercury Console & cls"
+cmd /Q /K "title Mercury Console & cls & ansicon -p"

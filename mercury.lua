@@ -35,6 +35,10 @@ local build = require "Mercury.actions.build"
 
 local luabundler = require "Mercury.modules.luabundle"
 local constants = require "Mercury.modules.constants"
+--if isHostWindows() then
+--    constants.progressSymbolEmpty = constants.progressSymbolEmptyWindows
+--    constants.progressSymbolFull = constants.progressSymbolFullWindows
+--end
 
 -- Create argument parser with Mercury info
 local cliDescription =

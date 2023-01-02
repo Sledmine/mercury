@@ -38,12 +38,12 @@ end
 local function remove(packageLabel, noRestore, eraseBackups, recursive, index)
     if (search(packageLabel)) then
         local installedPackages = environment.packages()
-        cprint("Removing package \"" .. packageLabel .. "\"...")
+        cprint("Removing package " .. packageLabel .. "...")
         -- Load package as entity to provide normalization and extra package methods
         local package = PackageMercury:new(installedPackages[packageLabel])
         -- Remove dependencies recursively
         if (recursive) then
-            cprint("Warning, remove is in recursive mode.")
+            --cprint("Warning, remove is in recursive mode.")
             local packageDependencies = package.dependencies
             if (packageDependencies and #packageDependencies > 0) then
                 for dependency in each(packageDependencies) do
@@ -104,7 +104,7 @@ local function remove(packageLabel, noRestore, eraseBackups, recursive, index)
             end
         end
         if (erasePackageFromIndex(packageLabel)) then
-            cprint("Done, package \"" .. packageLabel .. "\" has been removed.")
+            --cprint("Done, package \"" .. packageLabel .. "\" has been removed.")
             return true
         else
             cprint("Error, at trying to erase package from index.")

@@ -1,6 +1,6 @@
 local constants = {}
 
-constants.mercuryVersion = "3.2.1-beta"
+constants.mercuryVersion = "3.3.0"
 constants.xd3CmdLine = "xdelta3 -d -s \"%s\" \"%s\" \"%s\""
 constants.xd3CmdDiffLine = "xdelta3 -v -f -e -s \"%s\" \"%s\" \"%s\""
 constants.latestReleaseApi = "https://api.github.com/repos/Sledmine/Mercury/releases/latest"
@@ -14,5 +14,11 @@ constants.unzipCmdLine = "unzip -q -o \"%s\" -d \"%s\""
 constants.unzipCmdDebugLine = "unzip -o \"%s\" -d \"%s\""
 constants.copyCmdWindowsLine = "copy /Y \"%s\" \"%s\""
 constants.copyCmdLinuxLine = "cp -f \"%s\" \"%s\""
+--constants.loadingSymbol = "⠋⠙⠹⠸⠼⠴⠦⠧⠇⠏"
+constants.progressSymbolEmpty = "░"
+constants.progressSymbolFull = "█"
+--constants.progressSymbolEmptyWindows = " "
+--constants.progressSymbolFullWindows = "■"
+constants.maximumProgressSize = 20
 
 return constants

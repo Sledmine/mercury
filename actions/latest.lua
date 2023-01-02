@@ -62,7 +62,7 @@ local download = require "Mercury.modules.download"
 
 -- Get latest Mercury version available
 local function latest()
-    cprint("Checking for a newer Mercury version... ", true)
+    -- cprint("Checking for a newer Mercury version... ", true)
     local response = requests.get(constants.latestReleaseApi)
     if (response and response.status_code == 200) then
         ---@type githubApiResponse
@@ -72,7 +72,6 @@ local function latest()
             local version = tagName:gsub("v", "")
             -- Current version is an older version than the latest release
             if (v(constants.mercuryVersion) < v(version)) then
-                cprint(string.format("Found new version %s.", version))
                 local findOS = "windows"
                 local findArch = "x64"
                 if os.getenv("PROCESSOR_ARCHITECTURE") == "x86" then
@@ -90,7 +89,7 @@ local function latest()
                         local url = asset.browser_download_url:gsub("https://github.com",
                                                                     constants.githubPass)
                         dprint(url)
-                        cprint("Downloading, new version...")
+                        cprint("Downloading new Mercury version " .. version)
                         local code = download.url(url, outputPath)
                         if code == 200 then
                             if isHostWindows() then
@@ -117,7 +116,6 @@ local function latest()
             end
         end
     end
-    cprint("up to date.")
     return true
 end
 

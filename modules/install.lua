@@ -26,9 +26,9 @@ local function getError(status)
     local errorDescription = errors[tostring(status)] or status or "unknown error"
     dprint(status)
     if (type(status) == "string" and status:find("warning")) then
-        cprint("Warning, " .. errorDescription .. ".")
+        cprint("Warning " .. errorDescription .. ".")
     else
-        cprint("Error, " .. errorDescription .. ".")
+        cprint("Error " .. errorDescription .. ".")
     end
     return false, errorDescription
 end
@@ -54,23 +54,17 @@ function install.package(packageLabel,
         end
     end
     -- Create local variables before implementation, it can be used to avoid too much else if
-    local status, result, response
-    status, response = api.getPackage(packageLabel, packageVersion)
-    if (status == 200 and response) then
-        ---@type packageMetadata
-        local meta = json.decode(response)
-        if (meta and meta.mirrors) then
-            cprint("Found version " .. meta.version .. ".")
-            dprint("Package metadata:")
-            dprint(meta)
-            local packagePath
-            status, packagePath = download.package(meta)
-            if (status == 200) then
-                result, status = insert(packagePath, forced, skipOptionals)
-                if (result) then
-                    cprint("Success, package \"" .. packageLabel .. "\" has been installed.")
-                    return true
-                end
+    local result
+    local meta = api.getPackage(packageLabel, packageVersion)
+    if meta and meta.mirrors then
+        cprint("Downloading " .. packageLabel .. "-" .. meta.version .. "...")
+        local packagePath
+        status, packagePath = download.package(meta)
+        if status == 200 then
+            result, status = insert(packagePath, forced, skipOptionals)
+            if result then
+                cprint("Done package " .. packageLabel .. " has been installed.")
+                return true
             end
         end
     end
@@ -79,36 +73,31 @@ end
 
 function install.update(packageLabel, silent)
     local currentPackage = search(packageLabel)
-    if (not currentPackage) then
-        cprint("Error, package \"" .. packageLabel .. "\" is not installed.")
+    if not currentPackage then
+        cprint("Error package \"" .. packageLabel .. "\" is not installed.")
         return false
     end
     -- Create local variables before implementation, it can be used to avoid too much else if
-    local status, result, response
-    status, response = api.getUpdate(packageLabel, currentPackage.version)
-    if (status == 200 and response) then
-        ---@type packageMetadata
-        local meta = json.decode(response)
-        if (meta) then
-            cprint("Found version " .. meta.version .. ".")
-            dprint("Package metadata:")
-            dprint(meta)
-            local updatePath
-            status, updatePath = download.package(meta)
-            if (status == 200) then
-                result, status = insert(updatePath)
-                if (result) then
-                    if (not install.update(packageLabel, true)) then
-                        cprint("Success, package \"" .. packageLabel .. "\" updated to version " .. meta.version .. ".")
-                    end
-                    return true
+    local status, result
+    local meta = api.getUpdate(packageLabel, currentPackage.version)
+    if meta and meta.mirrors then
+        cprint("Downloading update for " .. packageLabel .. "-" .. meta.version .. "...")
+        local updatePath
+        status, updatePath = download.package(meta)
+        if status == 200 then
+            result, status = insert(updatePath)
+            if result then
+                if not install.update(packageLabel, true) then
+                    cprint("Done package " .. packageLabel .. " updated to version " ..
+                               meta.version .. ".")
                 end
+                return true
             end
-        else
-            status = "no update warning"
         end
+    else
+        status = "no update warning"
     end
-    if (silent) then
+    if silent then
         return false, status
     end
     return false, getError(status)

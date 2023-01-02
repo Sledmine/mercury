@@ -24,7 +24,7 @@ local errors = {
     depedencyError = "at trying to install a package dependency",
     mercFileDoesNotExist = "mercury local package does not exist",
     noManifest = "at trying to read manifest.json from the package",
-    updatingPackagesIndex = "at trying to update the packages index",
+    updatingPackagesIndex = "at trying to update the packages index"
 }
 
 -- Install any mercury package
@@ -32,7 +32,7 @@ local function insert(mercPath, forced, skipOptionals)
     if exists(mercPath) then
         local _, mercFilename = splitPath(mercPath)
         -- Unpack merc file
-        dprint("Trying to unpack \"" .. mercFilename .. ".merc\" ...")
+        cprint("Unpacking " .. mercFilename .. " zip...")
         local unpackPath = gpath(paths.mercuryUnpacked, "/", mercFilename)
         if (not exists(unpackPath)) then
             createFolder(unpackPath)
@@ -50,7 +50,7 @@ local function insert(mercPath, forced, skipOptionals)
             dprint(package)
             -- Get other package dependencies
             if (package.dependencies) then
-                cprint("Checking package dependencies...")
+                cprint("Downloading " .. package.label .. " dependencies...")
                 for dependencyIndex, dependency in pairs(package.dependencies) do
                     local existingDependency = search(dependency.label)
                     -- Check if we have this package dependency already installed
@@ -59,7 +59,7 @@ local function insert(mercPath, forced, skipOptionals)
                         if (dependency.version and v(existingDependency.version) <
                             v(dependency.version)) then
                             --  TODO Allow user to decide for this step
-                            cprint("Warning, newer dependency is required, removing old one \"" ..
+                            cprint("Warning, newer dependency is required, removing \"" ..
                                        dependency.label .. "-" .. dependency.version .. "\"")
                             --  TODO Add skip optionals to remove action
                             local result, error = remove(dependency.label, true)
@@ -72,13 +72,9 @@ local function insert(mercPath, forced, skipOptionals)
                             end
                         else
                             if (dependency.version) then
-                                cprint("Warning, dependency \"" .. dependency.label .. "-" ..
+                                dprint("Warning, dependency \"" .. dependency.label .. "-" ..
                                            dependency.version ..
                                            "\" is being skipped, newer or equal dependency is already installed.")
-                            else
-                                -- FIXME This can be innacurate sometimes depending on dependency version required
-                                cprint("Warning, dependency \"" .. dependency.label ..
-                                           "\" is already installed.")
                             end
                         end
                     else
@@ -94,7 +90,7 @@ local function insert(mercPath, forced, skipOptionals)
 
             -- Insert new files into the game
             if (package.files) then
-                cprint("Inserting " .. mercFilename .. " files... ")
+                cprint("Copying files to game folders... ")
                 for fileIndex, file in pairs(package.files) do
                     if (file.type == "optional" and skipOptionals) then
                         cprint("Warning, skipping optional file: \"" .. file.path .. "\".")
@@ -137,7 +133,8 @@ local function insert(mercPath, forced, skipOptionals)
                             if (result) then
                                 cprint("done.")
                             else
-                                cprint("Error, at trying to create a backup for: \"" .. file.path .. "\"")
+                                cprint("Error, at trying to create a backup for: \"" .. file.path ..
+                                           "\"")
                                 return false, errors.backupCreationError
                             end
                         end

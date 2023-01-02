@@ -13,6 +13,7 @@ https.timeout = timeout
 local ftp = require "socket.ftp"
 local url = require "socket.url"
 local ltn12 = require "ltn12"
+local constants = require "Mercury.modules.constants"
 
 local _M = {}
 
@@ -59,13 +60,20 @@ end
 -- returns a string with the current state of the download
 local remaining_s = "%s received, %s/s throughput, %2.0f%% done, %s remaining"
 local elapsed_s = "%s received, %s/s throughput, %s elapsed                "
+local 
 function gauge(got, delta, size)
     local rate = got / delta
+    -- return a progress bar if we have a size
     if size and size >= 1 then
-        return string.format(remaining_s, nicesize(got), nicesize(rate), 100 * got / size,
-                             nicetime((size - got) / rate))
+        local progress = got / size
+        local progressSize = constants.maximumProgressSize * progress
+        local bar = string.rep(constants.progressSymbolFull, progressSize)
+        bar = bar .. string.rep(constants.progressSymbolEmpty, constants.maximumProgressSize - progressSize)
+        return string.format("%s %2.0f%% (%s)", bar, 100 * progress, nicesize(got))
     else
-        return string.format(elapsed_s, nicesize(got), nicesize(rate), nicetime(delta))
+        -- return full bar size progress with elapsed time
+        local bar = string.rep(constants.progressSymbolFull, constants.maximumProgressSize)
+        return string.format("%s 100%% (%s)                   ", bar, nicesize(got))
     end
 end
 

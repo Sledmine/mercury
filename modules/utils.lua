@@ -11,7 +11,32 @@ if pcall(require, "luv") then
     uv = require "luv"
 end
 
-local constants = require "Mercury.modules.constants"
+local terminalColor = {
+    ["black"] = "[90m",
+    ["red"] = "[91m",
+    ["green"] = "[92m",
+    ["yellow"] = "[93m",
+    ["blue"] = "[94m",
+    ["magenta"] = "[95m",
+    ["cyan"] = "[96m",
+    ["white"] = "[97m",
+    ["reset"] = "[0m"
+}
+
+local keywordsWithColor = {
+    ["Done"] = terminalColor.green,
+    ["Downloading"] = terminalColor.blue,
+    ["Success"] = terminalColor.green,
+    ["Searching"] = terminalColor.yellow,
+    ["Error"] = terminalColor.red,
+    ["Warning"] = terminalColor.yellow,
+    ["Unpacking"] = terminalColor.yellow,
+    ["Packing"] = terminalColor.yellow,
+    ["Copying"] = terminalColor.yellow,
+    -- ["Bundling"] = terminalColor.yellow,
+    -- ["Compiling"] = terminalColor.yellow,
+    ["Removing"] = terminalColor.red
+}
 
 ---Overloaded color printing function
 ---@param message any
@@ -20,21 +45,19 @@ function cprint(message, removeNextLine)
     if (type(message) == "table" or not message) then
         print(inspect(message))
     else
-        local messageWithColor = string.gsub(message, "Done", "[92mDone[0m")
-        messageWithColor = string.gsub(messageWithColor, "done.", "[92mdone[0m.")
-        messageWithColor = string.gsub(messageWithColor, "Downloading", "[94mDownloading[0m")
-        messageWithColor = string.gsub(messageWithColor, "Success", "[92mSuccess[0m")
-        messageWithColor = string.gsub(messageWithColor, "Found", "[92mFound[0m")
-        messageWithColor = string.gsub(messageWithColor, "Searching", "[94mSearching[0m")
-        messageWithColor = string.gsub(messageWithColor, "Error", "[91mError[0m")
-        messageWithColor = string.gsub(messageWithColor, "Warning", "[93mWarning[0m")
-        messageWithColor = string.gsub(messageWithColor, "Unpacking", "[93mUnpacking[0m")
-        messageWithColor = string.gsub(messageWithColor, "Packing", "[93mPacking[0m")
-        messageWithColor = string.gsub(messageWithColor, "Inserting", "[93mInserting[0m")
-        messageWithColor = string.gsub(messageWithColor, "Bundling", "[93mBundling[0m")
-        messageWithColor = string.gsub(messageWithColor, "Compiling", "[93mCompiling[0m")
-        messageWithColor = string.gsub(messageWithColor, "Removing", "[91mRemoving[0m")
-        io.write(messageWithColor)
+        local newMessage = message
+        for _, keyword in pairs(glue.keys(keywordsWithColor)) do
+            if (string.find(message, keyword, 1, true)) then
+                local newKeyword = "[" .. keyword:upper() .. "]"
+                if not getenv("MERCURY_NO_COLOR") or getenv("MERCURY_NO_COLOR") == "0" then
+                    newMessage = string.gsub(message, keyword, keywordsWithColor[keyword] .. newKeyword ..
+                                                 terminalColor.reset)
+                else
+                    newMessage = string.gsub(message, keyword, newKeyword)
+                end
+            end
+        end
+        io.write(newMessage)
         if (not removeNextLine) then
             io.write("\n")
         end

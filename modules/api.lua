@@ -8,6 +8,7 @@ local api = {}
 local fdownload = require "Mercury.modules.fdownload"
 local constants = require "Mercury.modules.constants"
 local requests = require "requests"
+local json = require "cjson"
 
 api.protocol = "https"
 api.repositoryHost = constants.repositoryHost
@@ -43,27 +44,41 @@ end
 
 ---@param packageLabel string
 ---@param packageVersion string
+---@return packageMetadata?
 function api.getPackage(packageLabel, packageVersion)
-    cprint("Searching for \"" .. packageLabel .. "\" in our repository... ", true)
+    --cprint("Searching for \"" .. packageLabel .. "\" in our repository... ", true)
     local packageUrl = vulcanoUrl() .. "/package/" .. packageLabel
     if (packageVersion) then
         packageUrl = packageUrl .. "/" .. packageVersion
     end
     dprint(packageUrl)
     local status, response = get(packageUrl)
-    cprint("done.")
-    return status, response
+    if status == 200 and response then
+        local meta = json.decode(response)
+        if meta then
+            dprint("Package metadata:")
+            dprint(meta)
+            return meta
+        end
+    end
 end
 
 ---@param packageLabel string
 ---@param packageVersion string
+---@return packageMetadata?
 function api.getUpdate(packageLabel, packageVersion)
-    cprint("Searching update for \"" .. packageLabel .. "-" .. packageVersion .. "\" in our repository... ", true)
+    --cprint("Searching update for \"" .. packageLabel .. "-" .. packageVersion .. "\" in our repository... ", true)
     local packageUrl = vulcanoUrl() .. "/update/" .. packageLabel .. "/" .. packageVersion
     dprint(packageUrl)
     local status, response = get(packageUrl)
-    cprint("done.")
-    return status, response
+    if status == 200 and response then
+        local meta = json.decode(response)
+        dprint("Update metadata:")
+        dprint(meta)
+        if meta then
+            return meta
+        end
+    end
 end
 
 function api.fetch()

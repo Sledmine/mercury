@@ -64,14 +64,14 @@ local function flagsCheck(args)
     end
     if (args.debug) then
         IsDebugModeEnabled = true
-        cprint("Warning, Debug mode enabled.")
+        cprint("Warning Debug mode enabled.")
     end
     if (args.test) then
         IsTestModeEnabled = true
         -- Override respository connection data
         api.protocol = "http"
         api.repositoryHost = "localhost:8180"
-        cprint("Warning, Test mode enabled.")
+        cprint("Warning Test mode enabled.")
     end
     if (args.unsafe) then
         -- Use http protocol for API requests

@@ -17,7 +17,7 @@ local function listPackages(jsonPrint, tablePrint)
         end
         return true
     end
-    cprint("Warning, There are not any installed packages using Mercury... yet.")
+    cprint("Warning There are not any installed packages using Mercury... yet.")
     return false
 end
 

@@ -49,7 +49,7 @@ function install.package(packageLabel,
         if (forced) then
             remove(packageLabel, true, true)
         else
-            cprint("Warning, package \"" .. packageLabel .. "\" is already installed.")
+            cprint("Warning package \"" .. packageLabel .. "\" is already installed.")
             return false
         end
     end

@@ -141,7 +141,7 @@ function merc.template()
         cprint("Success, package folder with manifest template has been created.")
         return true
     end
-    cprint("Warning, there is already a manifest in this folder!")
+    cprint("Warning there is already a manifest in this folder!")
     return false
 end
 
@@ -187,10 +187,10 @@ function merc.diff(oldpackagePath, newPackagePath, diffPackagePath)
                         local diffFilePath = upath(
                                                  diffExtractionPath .. "/" .. newFile.path .. ".xd3")
 
-                        cprint("Searching, for differences in " .. oldFile.path)
+                        cprint("Searching for differences in " .. oldFile.path)
                         --dprint(SHA256(oldFilePath) .. " -> " .. SHA256(newFilePath))
                         if (SHA256(oldFilePath) ~= SHA256(newFilePath)) then
-                            cprint("\tWarning, " .. oldFile.path ..
+                            cprint("\tWarning " .. oldFile.path ..
                                        " has differences between packages, creating xd3 diff!")
 
                             local diffFileFolderPath = path.dir(diffFilePath)
@@ -236,7 +236,7 @@ function merc.diff(oldpackagePath, newPackagePath, diffPackagePath)
                 end
             end
             if (not isFileOnNewPackage) then
-                cprint("Warning, file " .. oldFile.path .. " is not present on the new package.")
+                cprint("Warning file " .. oldFile.path .. " is not present on the new package.")
             end
         end
 
@@ -246,7 +246,7 @@ function merc.diff(oldpackagePath, newPackagePath, diffPackagePath)
                 copyFile(newExtractionPath .. "/" .. file.path,
                          diffExtractionPath .. "/" .. file.path)
             else
-                cprint("Warning, file \"" .. file.path .. "\" does not exist!")
+                cprint("Warning file \"" .. file.path .. "\" does not exist!")
                 table.remove(newManifest.files, fileIndex)
             end
         end

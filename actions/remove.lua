@@ -43,7 +43,7 @@ local function remove(packageLabel, noRestore, eraseBackups, recursive, index)
         local package = PackageMercury:new(installedPackages[packageLabel])
         -- Remove dependencies recursively
         if (recursive) then
-            --cprint("Warning, remove is in recursive mode.")
+            --cprint("Warning remove is in recursive mode.")
             local packageDependencies = package.dependencies
             if (packageDependencies and #packageDependencies > 0) then
                 for dependency in each(packageDependencies) do
@@ -53,10 +53,10 @@ local function remove(packageLabel, noRestore, eraseBackups, recursive, index)
         end
         if index then
             if erasePackageFromIndex(packageLabel) then
-                cprint("Done, package '" .. packageLabel .. "' has been forced removed by entry.")
+                cprint("Done package " .. packageLabel .. " has been forced removed by entry.")
                 return true
             else
-                cprint("Error, at trying to remove package from index")
+                cprint("Error at trying to remove package from index")
                 return false, errors.indexErasement
             end
         end
@@ -67,33 +67,33 @@ local function remove(packageLabel, noRestore, eraseBackups, recursive, index)
             -- Start erasing proccess
             dprint("Erasing \"" .. finalFilePath .. "\"... ")
             local result, description, errorCode = delete(finalFilePath)
-            if (result) then
-                dprint("Done, file erased.")
-                if (exists(finalFilePath .. ".bak") and not noRestore) then
-                    if (not noRestore) then
-                        cprint("Warning, restoring \"" .. file.path .. "\" backup... ", true)
+            if result then
+                dprint("Done file erased.")
+                if exists(finalFilePath .. ".bak") then
+                    if eraseBackups then
+                        cprint("Erasing backup for \"" .. finalFilePath .. "\"...", true)
+                        local backupFilePath = finalFilePath .. ".bak"
+                        delete(backupFilePath)
+                        if (exists(backupFilePath)) then
+                            cprint("Error at deleting backup for \"" .. backupFilePath .. "\"")
+                        else
+                            cprint("done.")
+                        end
+                    end
+                    if not eraseBackups and not noRestore then
+                        cprint("Restoring backup for \"" .. file.path .. "\"... ", true)
                         move(finalFilePath .. ".bak", finalFilePath)
                         if (exists(finalFilePath)) then
                             cprint("done.")
                         else
-                            cprint("Error, at restore backup for \"" .. finalFilePath .. "\"")
-                        end
-                    end
-                    if (eraseBackups) then
-                        cprint("Warning, Backups erase enabled deleting file now... ", true)
-                        local backupFilePath = finalFilePath .. ".bak"
-                        delete(backupFilePath)
-                        if (exists(backupFilePath)) then
-                            cprint("Error, at deleting backup for \"" .. backupFilePath .. "\"")
-                        else
-                            cprint("done.")
+                            cprint("Error at restore backup for \"" .. finalFilePath .. "\"")
                         end
                     end
                 end
             else
                 -- TODO Find info for these codes, those are related with the fs
                 if (errorCode == 2 or errorCode == 3) then
-                    cprint("Warning, \"" .. file.path ..
+                    cprint("Warning \"" .. file.path ..
                                "\" was not found, previously erased or moved")
                 else
                     cprint("Error, at trying to erase \"" .. file.path .. "\"")
@@ -111,7 +111,7 @@ local function remove(packageLabel, noRestore, eraseBackups, recursive, index)
             return false, errors.indexErasement
         end
     end
-    cprint("Warning, package \"" .. packageLabel .. "\" is not installed.")
+    cprint("Warning package \"" .. packageLabel .. "\" is not installed.")
     return false, errors.packageNotInstalled
 end
 

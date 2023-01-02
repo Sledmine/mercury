@@ -59,7 +59,7 @@ local function insert(mercPath, forced, skipOptionals)
                         if (dependency.version and v(existingDependency.version) <
                             v(dependency.version)) then
                             --  TODO Allow user to decide for this step
-                            cprint("Warning, newer dependency is required, removing \"" ..
+                            cprint("Warning newer dependency is required, removing \"" ..
                                        dependency.label .. "-" .. dependency.version .. "\"")
                             --  TODO Add skip optionals to remove action
                             local result, error = remove(dependency.label, true)
@@ -72,7 +72,7 @@ local function insert(mercPath, forced, skipOptionals)
                             end
                         else
                             if (dependency.version) then
-                                dprint("Warning, dependency \"" .. dependency.label .. "-" ..
+                                dprint("Warning dependency \"" .. dependency.label .. "-" ..
                                            dependency.version ..
                                            "\" is being skipped, newer or equal dependency is already installed.")
                             end
@@ -93,7 +93,7 @@ local function insert(mercPath, forced, skipOptionals)
                 cprint("Copying files to game folders... ")
                 for fileIndex, file in pairs(package.files) do
                     if (file.type == "optional" and skipOptionals) then
-                        cprint("Warning, skipping optional file: \"" .. file.path .. "\".")
+                        cprint("Warning skipping optional file: \"" .. file.path .. "\".")
                         goto continue
                     end
 
@@ -114,7 +114,7 @@ local function insert(mercPath, forced, skipOptionals)
                         if (forced or package.updates) then
                             if (not package.updates) then
                                 cprint(
-                                    "Warning, forced mode was enabled, erasing conflict file: \"" ..
+                                    "Warning forced mode was enabled, erasing conflict file: \"" ..
                                         file.path .. "\"... ", true)
                             end
                             local result, desc, error = delete(outputFile)
@@ -127,7 +127,7 @@ local function insert(mercPath, forced, skipOptionals)
                                 return false, errors.eraseFileError
                             end
                         else
-                            cprint("Warning, creating backup for conflict file: \"" .. file.path ..
+                            cprint("Backup conflict file \"" .. file.path ..
                                        "\"... ", true)
                             local result, desc, error = move(outputFile, outputFile .. ".bak")
                             if (result) then

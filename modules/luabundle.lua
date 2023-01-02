@@ -58,7 +58,7 @@ function luabundler.bundle(bundleName, compile)
         end
         return true
     end
-    cprint("Warning, there is not a " .. bundleFileName .. " in this folder, be sure to create one.")
+    cprint("Warning there is not a " .. bundleFileName .. " in this folder, be sure to create one.")
     return false
 end
 
@@ -77,7 +77,7 @@ function luabundler.template()
         cprint("Success, bundle.json template has been created successfully.")
         return true
     end
-    cprint("Warning, there is already a bundle file in this folder!")
+    cprint("Warning there is already a bundle file in this folder!")
     return false
 end
 

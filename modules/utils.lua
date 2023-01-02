@@ -27,15 +27,15 @@ local keywordsWithColor = {
     ["Done"] = terminalColor.green,
     ["Downloading"] = terminalColor.blue,
     ["Success"] = terminalColor.green,
-    ["Searching"] = terminalColor.yellow,
+    ["Searching"] = terminalColor.blue,
     ["Error"] = terminalColor.red,
     ["Warning"] = terminalColor.yellow,
-    ["Unpacking"] = terminalColor.yellow,
-    ["Packing"] = terminalColor.yellow,
-    ["Copying"] = terminalColor.yellow,
-    -- ["Bundling"] = terminalColor.yellow,
-    -- ["Compiling"] = terminalColor.yellow,
-    ["Removing"] = terminalColor.red
+    ["Unpacking"] = terminalColor.magenta,
+    ["Packing"] = terminalColor.magenta,
+    --["Copying"] = terminalColor.magenta,
+    ["Backup"] = terminalColor.cyan,
+    ["Removing"] = terminalColor.red,
+    ["Erasing"] = terminalColor.red
 }
 
 ---Overloaded color printing function
@@ -127,7 +127,7 @@ function createFolder(folderPath)
         dprint("Creating folder: " .. folderPath)
         return fs.mkdir(folderPath, true)
     else
-        dprint("Warning, folder " .. folderPath .. " already exists.")
+        dprint("Warning folder " .. folderPath .. " already exists.")
         return nil
     end
     return false

@@ -30,6 +30,7 @@ WizardSmallImageFile="assets\images\WizardSmallImageFile.bmp"
 SetupIconFile="assets\icons\mercury.ico"
 UninstallDisplayIcon="assets\icons\mercury.ico"
 ChangesEnvironment=true
+CloseApplications=no
 
 [Languages] 
 Name: "english"; MessagesFile: "compiler:Default.isl"

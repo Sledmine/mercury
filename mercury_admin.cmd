@@ -26,5 +26,5 @@ if '%errorlevel%' NEQ '0' (
 
 :gotAdmin
     pushd "%~dp0"
-    cmd /Q /K "title Mercury Console & ansicon -p"
+    cmd /Q /K "title Mercury Console & chcp 65001 & cls & ansicon -p"
 :--------------------------------------    

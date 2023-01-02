@@ -71,7 +71,7 @@ local function remove(packageLabel, noRestore, eraseBackups, recursive, index)
                 dprint("Done file erased.")
                 if exists(finalFilePath .. ".bak") then
                     if eraseBackups then
-                        cprint("Erasing backup for \"" .. finalFilePath .. "\"...", true)
+                        cprint("Erasing backup for \"" .. file.path .. "\"... ", true)
                         local backupFilePath = finalFilePath .. ".bak"
                         delete(backupFilePath)
                         if (exists(backupFilePath)) then

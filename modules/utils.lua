@@ -35,7 +35,6 @@ local keywordsWithColor = {
     --["Copying"] = terminalColor.magenta,
     ["Backup"] = terminalColor.cyan,
     ["Removing"] = terminalColor.red,
-    ["Erasing"] = terminalColor.red
 }
 
 ---Overloaded color printing function

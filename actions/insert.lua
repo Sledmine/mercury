@@ -157,8 +157,9 @@ local function insert(mercPath, forced, skipOptionals)
 
             -- Apply updates to files if available
             if (package.updates) then
+                cprint("Updating files from game folders... ")
                 for fileIndex, file in pairs(package.updates) do
-                    cprint("Updating \"" .. file.path .. "\" ... ", true)
+                    cprint("Updating \"" .. file.path .. "\"... ", true)
                     -- File update from mercury unpack path
                     local diffFilePath = gpath(unpackPath, "/", file.diffPath)
                     -- Normalized final insert output file path

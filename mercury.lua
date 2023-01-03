@@ -10,6 +10,10 @@ inspect = require "inspect"
 
 -- Global data and utils for different operations
 utils = require "Mercury.modules.utils"
+if isHostWindows() then
+    -- Fix for Windows UTF-8 filenames in io and os operations
+    require "Mercury.modules.utf8_filenames"
+end
 -- Get all environment variables and configurations
 environment = require "Mercury.config.environment"
 local paths = environment.paths()
@@ -17,7 +21,6 @@ local paths = environment.paths()
 environment.migrate()
 
 -- Modules
--- FIXME Install is a global module due to recursive calls, a better solution should be provided
 install = require "Mercury.modules.install"
 api = require "Mercury.modules.api"
 
@@ -35,10 +38,6 @@ local build = require "Mercury.actions.build"
 
 local luabundler = require "Mercury.modules.luabundle"
 local constants = require "Mercury.modules.constants"
---if isHostWindows() then
---    constants.progressSymbolEmpty = constants.progressSymbolEmptyWindows
---    constants.progressSymbolFull = constants.progressSymbolFullWindows
---end
 
 -- Create argument parser with Mercury info
 local cliDescription =

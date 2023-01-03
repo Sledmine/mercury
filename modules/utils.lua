@@ -32,9 +32,9 @@ local keywordsWithColor = {
     ["Warning"] = terminalColor.yellow,
     ["Unpacking"] = terminalColor.magenta,
     ["Packing"] = terminalColor.magenta,
-    --["Copying"] = terminalColor.magenta,
+    -- ["Copying"] = terminalColor.magenta,
     ["Backup"] = terminalColor.cyan,
-    ["Removing"] = terminalColor.red,
+    ["Removing"] = terminalColor.red
 }
 
 ---Overloaded color printing function
@@ -49,8 +49,8 @@ function cprint(message, removeNextLine)
             if (string.find(message, keyword, 1, true)) then
                 local newKeyword = "[" .. keyword:upper() .. "]"
                 if not getenv("MERCURY_NO_COLOR") or getenv("MERCURY_NO_COLOR") == "0" then
-                    newMessage = string.gsub(message, keyword, keywordsWithColor[keyword] .. newKeyword ..
-                                                 terminalColor.reset)
+                    newMessage = string.gsub(message, keyword, keywordsWithColor[keyword] ..
+                                                 newKeyword .. terminalColor.reset)
                 else
                     newMessage = string.gsub(message, keyword, newKeyword)
                 end
@@ -331,7 +331,7 @@ function run(command)
     -- Binaries should be isolated on Windows, use binaries from executable folder
     if (isHostWindows()) then
         local exedir = fs.exedir()
-        if (exedir:find("mingw")) then
+        if exedir:find("mingw") then
             return os.execute(command)
         else
             return os.execute("set PATH=" .. exedir .. ";%PATH% && " .. command)

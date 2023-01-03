@@ -81,7 +81,7 @@ function install.update(packageLabel, silent)
     local status, result
     local meta = api.getUpdate(packageLabel, currentPackage.version)
     if meta and meta.mirrors then
-        cprint("Downloading update for " .. packageLabel .. "-" .. meta.version .. "...")
+        cprint("Downloading update to " .. packageLabel .. "-" .. meta.version .. "...")
         local updatePath
         status, updatePath = download.package(meta)
         if status == 200 then

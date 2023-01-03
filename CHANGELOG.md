@@ -1,10 +1,13 @@
 # Changelog
 
-# 3.2.1
-- Expand HTTP request timeout to 5000 milliseconds
-- Add UTF8 operations like copy and getenv trough libuv for Windows only
-- Fix multi scenario building
-- Fix bug with installer to not replace ANSICON while updating
+# 3.3.0
+- Fixed multi scenario building using `build` command
+- Expanded HTTP request timeout to 5000 milliseconds, improving downloading stability
+- Fixed bug with installer at attempting to replace ANSICON while updating
+- Added UTF8 support in Windows operations like copy and getenv using libuv also by changing Windows code page to 65001 in the Mercury console
+- Simplified Mercury console output, now with a more friendly progress bar at downloading files
+- Fixed bug with installer at attempting to close other Mercury console instances
+- Fixed bug with backups removal and restoring in `remove` command
 
 # 3.2.0
 - Added current downloading map name to `map` command

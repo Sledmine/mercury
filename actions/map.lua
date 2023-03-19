@@ -16,8 +16,8 @@ end
 -- TODO Add delete and list flags to provide complete map management
 --- Download maps from a external repository
 ---@param mapName string File name of the map to download
----@param alternativePath string Path to download the map as zip filePath any
----@param alternativeRepository string URL of the repository to download the map
+---@param alternativePath? string Path to download the map as zip filePath any
+---@param alternativeRepository? string URL of the repository to download the map
 local function map(mapName, alternativePath, alternativeRepository)
     local downloadUrl = (alternativeRepository or constants.mapRepositoryDownload):format(mapName)
     dprint(downloadUrl)

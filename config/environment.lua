@@ -111,7 +111,7 @@ function environment.paths()
 end
 
 --- Get mercury local installed packages
----@param newPackages packageMercury[]
+---@param newPackages? packageMercury[]
 ---@return packageMercury[]? packages
 function environment.packages(newPackages)
     if (not newPackages) then

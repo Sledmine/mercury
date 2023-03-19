@@ -36,9 +36,9 @@ end
 --- Attempt to install a package with the requrired operations
 ---@param packageLabel string Label of the package to install
 ---@param packageVersion string Version of the package to install
----@param forced boolean Forced mode installation
----@param skipOptionals boolean Ignore optional files at installation
----@param skipDependencies boolean Ignore dependencies at installation
+---@param forced? boolean Forced mode installation
+---@param skipOptionals? boolean Ignore optional files at installation
+---@param skipDependencies? boolean Ignore dependencies at installation
 ---@return boolean, string? result
 function install.package(packageLabel,
                          packageVersion,

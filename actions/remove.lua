@@ -31,13 +31,13 @@ end
 
 --- Remove/uninstall a package from the game
 ---@param packageLabel string Label of the package to remove
----@param noRestore boolean Do not restore previous backup files
----@param eraseBackups boolean Erase previous backup files
----@param recursive boolean Erase all the dependencies of this package
----@param index boolean Forced remove by erasing the package entry from the packages index
+---@param noRestore? boolean Do not restore previous backup files
+---@param eraseBackups? boolean Erase previous backup files
+---@param recursive? boolean Erase all the dependencies of this package
+---@param index? boolean Forced remove by erasing the package entry from the packages index
 local function remove(packageLabel, noRestore, eraseBackups, recursive, index)
     if (search(packageLabel)) then
-        local installedPackages = environment.packages()
+        local installedPackages = environment.packages() or {}
         cprint("Removing package " .. packageLabel .. "...")
         -- Load package as entity to provide normalization and extra package methods
         local package = PackageMercury:new(installedPackages[packageLabel])

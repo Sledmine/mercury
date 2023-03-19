@@ -3,12 +3,12 @@
 -- Sledmine
 -- Script to simplify mercury bundle process
 ------------------------------------------------------------------------------
+package.path = package.path .. ";Mercury/?.lua"
 local glue = require "glue"
 local fs = require "fs"
 ------------ Bundle configuration ------------
-
 local v = require "semver"
-local constants = require "Mercury.modules.constants"
+local constants = require "modules.constants"
 local version = v(constants.mercuryVersion)
 
 local staticLibs = {

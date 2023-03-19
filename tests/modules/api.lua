@@ -7,9 +7,9 @@ local lu = require "luaunit"
 inspect = require "inspect"
 
 -- Global modules
-require "Mercury.modules.utils"
+require "modules.utils"
 
-local api = require "Mercury.modules.api"
+local api = require "modules.api"
 
 testApi = {}
 

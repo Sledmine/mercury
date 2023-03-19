@@ -13,7 +13,7 @@ https.timeout = timeout
 local ftp = require "socket.ftp"
 local url = require "socket.url"
 local ltn12 = require "ltn12"
-local constants = require "Mercury.modules.constants"
+local constants = require "modules.constants"
 
 local _M = {}
 

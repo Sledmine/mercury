@@ -8,7 +8,7 @@ local glue = require "glue"
 inspect = require "inspect"
 
 -- Global modules
-require "Mercury.modules.utils"
+require "modules.utils"
 
 testUtils = {}
 

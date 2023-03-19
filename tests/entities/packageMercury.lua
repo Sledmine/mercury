@@ -10,15 +10,15 @@ local glue = require "glue"
 inspect = require "inspect"
 
 -- Global modules
-require "Mercury.modules.utils"
+require "modules.utils"
 
 -- Local modules
-environment = require "Mercury.config.environment"
+environment = require "config.environment"
 -- Get all environment variables and configurations
 local paths = environment.paths()
 
 -- Entity
-local PackageMercury = require "Mercury.entities.packageMercury"
+local PackageMercury = require "entities.packageMercury"
 
 testUtils = {}
 

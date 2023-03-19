@@ -1,9 +1,9 @@
 local json = require "cjson"
 local requests = require "requests"
-local constants = require "Mercury.modules.constants"
+local constants = require "modules.constants"
 local paths = environment.paths()
 local v = require "semver"
-local download = require "Mercury.modules.download"
+local download = require "modules.download"
 
 ---@class githubAuthor
 ---@field login string

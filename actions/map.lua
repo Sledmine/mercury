@@ -1,6 +1,6 @@
 local paths = require"Mercury.config.environment".paths()
-local constants = require "Mercury.modules.constants"
-local download = require "Mercury.modules.download"
+local constants = require "modules.constants"
+local download = require "modules.download"
 local zip = require "minizip2"
 
 local function unpackMap(mapPath)

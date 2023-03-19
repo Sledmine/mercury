@@ -5,8 +5,8 @@
 ----------------------------------------------------------------------
 local api = {}
 
-local fdownload = require "Mercury.modules.fdownload"
-local constants = require "Mercury.modules.constants"
+local fdownload = require "modules.fdownload"
+local constants = require "modules.constants"
 local requests = require "requests"
 local json = require "cjson"
 

@@ -1,4 +1,4 @@
-local search = require "Mercury.actions.search"
+local search = require "actions.search"
 local json = require "cjson"
 
 local function listPackages(jsonPrint, tablePrint)

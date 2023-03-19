@@ -3,12 +3,12 @@ local json = require "cjson"
 local install = {}
 
 -- Actions
-local search = require "Mercury.actions.search"
-local remove = require "Mercury.actions.remove"
-local insert = require "Mercury.actions.insert"
+local search = require "actions.search"
+local remove = require "actions.remove"
+local insert = require "actions.insert"
 
 -- Modules
-local download = require "Mercury.modules.download"
+local download = require "modules.download"
 
 local errors = {
     ["404"] = "file, package or update not found for download",

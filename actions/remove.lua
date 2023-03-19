@@ -6,9 +6,9 @@
 local json = require "cjson"
 local glue = require "glue"
 
-local PackageMercury = require "Mercury.entities.packageMercury"
+local PackageMercury = require "entities.packageMercury"
 
-local search = require "Mercury.actions.search"
+local search = require "actions.search"
 
 local errors = {
     indexErasement = "an error occurred at erasing package from the index",

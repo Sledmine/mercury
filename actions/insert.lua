@@ -7,14 +7,14 @@ local json = require "cjson"
 local glue = require "glue"
 local v = require "semver"
 
-local constants = require "Mercury.modules.constants"
-local merc = require "Mercury.modules.merc"
+local constants = require "modules.constants"
+local merc = require "modules.merc"
 local paths = environment.paths()
 
-local search = require "Mercury.actions.search"
-local remove = require "Mercury.actions.remove"
+local search = require "actions.search"
+local remove = require "actions.remove"
 
-local PackageMercury = require "Mercury.entities.packageMercury"
+local PackageMercury = require "entities.packageMercury"
 
 local errors = {
     eraseFileError = "an error ocurred at erasing some files",

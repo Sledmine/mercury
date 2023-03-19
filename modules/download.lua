@@ -7,7 +7,7 @@ local glue = require "glue"
 
 local download = {}
 
-local fdownload = require "Mercury.modules.fdownload"
+local fdownload = require "modules.fdownload"
 local paths = environment.paths()
 
 ---@param packageMeta packageMetadata

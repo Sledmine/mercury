@@ -16,7 +16,7 @@ local path = require "path"
 
 local paths = environment.paths()
 
-local constants = require "Mercury.modules.constants"
+local constants = require "modules.constants"
 
 --- Unzip a Mercury package
 ---@param filepath string Package path that will be unziped

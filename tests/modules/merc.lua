@@ -5,9 +5,9 @@
 ------------------------------------------------------------------------------
 local lu = require "luaunit"
 inspect = require "inspect"
-require "Mercury.modules.utils"
-environment = require "Mercury.config.environment"
-local merc = require "Mercury.modules.merc"
+require "modules.utils"
+environment = require "config.environment"
+local merc = require "modules.merc"
 
 testMerc = {}
 

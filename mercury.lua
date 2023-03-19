@@ -3,41 +3,52 @@
 -- Sledmine
 -- Package Manager for Halo Custom Edition
 ------------------------------------------------------------------------------
+package.path = package.path .. ";Mercury/?.lua"
 -- Luapower modules
 local argparse = require "argparse"
 local glue = require "glue"
 inspect = require "inspect"
 
+-- Luapower bundle requires
+local luareq = require
+function require(modname)
+    local ok, mod = pcall(luareq, modname)
+    if not ok then
+        return luareq("Mercury." .. modname)
+    end
+    return mod
+end
+
 -- Global data and utils for different operations
-utils = require "Mercury.modules.utils"
+utils = require "modules.utils"
 if isHostWindows() then
     -- Fix for Windows UTF-8 filenames in io and os operations
-    require "Mercury.modules.utf8_filenames"
+    require "modules.utf8_filenames"
 end
 -- Get all environment variables and configurations
-environment = require "Mercury.config.environment"
+environment = require "config.environment"
 local paths = environment.paths()
 -- Migrate old paths and files to newer ones if needed
 environment.migrate()
 
 -- Modules
-install = require "Mercury.modules.install"
-api = require "Mercury.modules.api"
+install = require "modules.install"
+api = require "modules.api"
 
 -- Commands to expose on Mercury
-local remove = require "Mercury.actions.remove"
-local list = require "Mercury.actions.list"
-local insert = require "Mercury.actions.insert"
-local latest = require "Mercury.actions.latest"
-local fetch = require "Mercury.actions.fetch"
+local remove = require "actions.remove"
+local list = require "actions.list"
+local insert = require "actions.insert"
+local latest = require "actions.latest"
+local fetch = require "actions.fetch"
 local pack = require"Mercury.modules.merc".pack
 local packdiff = require"Mercury.modules.merc".diff
 local packtemplate = require"Mercury.modules.merc".template
-local map = require "Mercury.actions.map"
-local build = require "Mercury.actions.build"
+local map = require "actions.map"
+local build = require "actions.build"
 
-local luabundler = require "Mercury.modules.luabundle"
-local constants = require "Mercury.modules.constants"
+local luabundler = require "modules.luabundle"
+local constants = require "modules.constants"
 
 -- Create argument parser with Mercury info
 local cliDescription =

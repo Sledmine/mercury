@@ -98,19 +98,23 @@ installCmd:flag("-o --skipOptionals", "Ignore optional files at installation.")
 installCmd:option("--repository", "Specify a custom repository to use.")
 installCmd:action(function(args, name)
     flagsCheck(args)
+    local code = 0
     if (latest()) then
         -- TODO Add parsing for custom repository protocol
         if (args.repository) then
             api.repositoryHost = args.repository
         end
-        for packageIndex, package in pairs(args.package) do
+        for _, package in pairs(args.package) do
             local packageLabel = glue.string.split(package, "-")[1]
             local packageSplit = glue.string.split(package, packageLabel .. "-")
             local packageVersion = packageSplit[2]
-            install.package(packageLabel, packageVersion, args.force, args.skipOptionals)
+            if not install.package(packageLabel, packageVersion, args.force, args.skipOptionals) then
+                code = 1
+            end
         end
     end
     environment.clean()
+    os.exit(code)
 end)
 
 -- List command
@@ -135,7 +139,9 @@ updateCmd:action(function(args, name)
     if (args.repository) then
         api.repositoryHost = args.repository
     end
-    install.update(args.packageLabel)
+    if not install.update(args.packageLabel) then
+        os.exit(1)
+    end
     environment.clean()
 end)
 
@@ -149,7 +155,9 @@ removeCmd:flag("-r --recursive", "Remove all the dependencies of this package.")
 removeCmd:flag("-i --index", "Force remove by erasing entry from package index.")
 removeCmd:action(function(args, name)
     flagsCheck(args)
-    remove(args.packageLabel, args.norestore, args.erasebackups, args.recursive, args.index)
+    if not remove(args.packageLabel, args.norestore, args.erasebackups, args.recursive, args.index) then
+        os.exit(1)
+    end
     -- environment.clean()
 end)
 
@@ -160,13 +168,16 @@ insertCmd:argument("mercPath", "Path of the merc file to insert")
 insertCmd:flag("-f --force", "Remove any conflicting files without creating a backup.")
 insertCmd:flag("-o --skipOptionals", "Ignore optional files at installation.")
 insertCmd:action(function(args, name)
+    local code = 0
     flagsCheck(args)
-    if (insert(args.mercPath, args.force, args.skipOptionals)) then
+    if insert(args.mercPath, args.force, args.skipOptionals) then
         cprint("Done, files have been inserted.")
     else
         cprint("Error, at inserting merc.")
+        code = 1
     end
     environment.clean()
+    os.exit(code)
 end)
 
 local mapCmd = parser:command("map")
@@ -203,18 +214,18 @@ packCmd:argument("packDir", "Path to the directory to pack.")
 packCmd:argument("mercPath", "Output path for the resultant package."):args("?")
 packCmd:flag("-t --template", "Create a package folder template.")
 packCmd:action(function(args, name)
+    local code = 0
     flagsCheck(args)
     if (args.template) then
         packtemplate()
         return
     else
-        local result = pack(args.packDir, args.mercPath or ".")
-        environment.clean()
-        if result then
-            os.exit(0)
+        if not pack(args.packDir, args.mercPath or ".") then
+            code = 1
         end
-        os.exit(1)
+        environment.clean()
     end
+    os.exit(code)
 end)
 
 -- Diff command
@@ -224,13 +235,13 @@ packdiffCmd:argument("oldPackagePath", "Path to old package used as target.")
 packdiffCmd:argument("newPackagePath", "Path to new package as the source.")
 packdiffCmd:argument("diffPackagePath", "Path to diff package as the result."):args("?")
 packdiffCmd:action(function(args, name)
+    local code = 0
     flagsCheck(args)
-    local result = packdiff(args.oldPackagePath, args.newPackagePath, args.diffPackagePath)
-    environment.clean()
-    if (result) then
-        os.exit(0)
+    if not packdiff(args.oldPackagePath, args.newPackagePath, args.diffPackagePath) then
+        code = 1
     end
-    os.exit(1)
+    environment.clean()
+    os.exit(code)
 end)
 
 -- Bundle command
@@ -245,10 +256,10 @@ luabundleCmd:action(function(args, name)
         luabundler.template()
         return
     end
-    if luabundler.bundle(args.bundleFile, args.compile) then
-        os.exit(0)
+    if not luabundler.bundle(args.bundleFile, args.compile) then
+        os.exit(1)
     end
-    os.exit(1)
+    os.exit(0)
 end)
 
 local buildCmd = parser:command("build", "Build a Mercury project using a buildspec file.")

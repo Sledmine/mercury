@@ -1,0 +1,1 @@
+complete -W "fetch install list update remove insert map latest pack packdiff luabundle build about" mercury

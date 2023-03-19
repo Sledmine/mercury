@@ -150,7 +150,7 @@ removeCmd:flag("-i --index", "Force remove by erasing entry from package index."
 removeCmd:action(function(args, name)
     flagsCheck(args)
     remove(args.packageLabel, args.norestore, args.erasebackups, args.recursive, args.index)
-    --environment.clean()
+    -- environment.clean()
 end)
 
 -- Insert command
@@ -175,7 +175,7 @@ mapCmd:argument("map", "File name of the map to be downloaded"):args("+")
 mapCmd:option("-o --output",
               "Path to download the map as a zip file, prevents map unpacking and installation.")
 mapCmd:flag("--hac2",
-              "Use the well known (but kinda slow) HAC2 maps repository instead of the default one.")
+            "Use the well known (but kinda slow) HAC2 maps repository instead of the default one.")
 mapCmd:action(function(args, name)
     flagsCheck(args)
     for _, mapName in pairs(args.map) do
@@ -253,13 +253,25 @@ end)
 
 local buildCmd = parser:command("build", "Build a Mercury project using a buildspec file.")
 buildCmd:description("Compile and build a Mercury project trough Invader and other tools.")
---buildCmd:argument("yamlFilePath", "Path to the buildspec file."):args("?")
+-- buildCmd:argument("yamlFilePath", "Path to the buildspec file."):args("?")
 buildCmd:argument("command", "Command to execute."):args("?")
 buildCmd:flag("--verbose", "Output more verbose messages to console.")
 buildCmd:flag("--release", "Flag this build as a release.")
+buildCmd:flag("--template", "Create a buildspec template file on current directory.")
 buildCmd:option("--output", "Output path for the build result."):args("?")
 buildCmd:action(function(args, name)
     flagsCheck(args)
+    if (args.template) then
+        writeFile("buildspec.yaml", [[version: 1
+tag_space: 64M
+extend_limits: false
+scenarios:
+  - levels/test/test
+commands:
+  release:
+    - mercury build --release --output package/game-maps/]])
+        return
+    end
     if build("buildspec.yaml", args.command, args.verbose, args.release, (args.output or {})[1]) then
         os.exit(0)
     end

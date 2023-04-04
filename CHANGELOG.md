@@ -1,5 +1,10 @@
 # Changelog
 
+# 3.4.0
+- Fixed HTTP request timeout not being applied because of an override by another HTTP client
+- Add `--template` flag to `build` command, this will create a template of a buildspec.yaml file in the current directory
+- Fixed multiple exit codes in different commands (install, update, remove, luabundle, build)
+
 # 3.3.0
 - Fixed multi scenario building using `build` command
 - Expanded HTTP request timeout to 5000 milliseconds, improving downloading stability

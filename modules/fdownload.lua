@@ -7,9 +7,7 @@
 local socket = require "socket"
 local http = require "socket.http"
 local https = require "socket.https"
-local timeout = 5000
-http.timeout = timeout
-https.timeout = timeout
+local timeout = 60
 local ftp = require "socket.ftp"
 local url = require "socket.url"
 local ltn12 = require "ltn12"
@@ -139,6 +137,7 @@ function getbyhttps(u, file)
     else
         save = redirect
     end
+    https.TIMEOUT = timeout
     local r, c, h, s = https.request {
         url = u,
         sink = save
@@ -162,6 +161,7 @@ function getbyhttp(u, file)
     else
         save = redirect
     end
+    http.TIMEOUT = timeout
     local r, c, h, s = http.request {
         url = u,
         sink = save

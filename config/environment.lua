@@ -40,7 +40,7 @@ local function getGamePath()
         cprint("Example:")
         cprint([[On Linux: export HALO_CE_PATH="/home/117/.wine/c/Halo Custom Edition"]])
         cprint([[On Windows: set HALO_CE_PATH=D:\Games\Halo Custom Edition]])
-        os.exit()
+        os.exit(1)
     end
     return gamePath
 end
@@ -61,7 +61,7 @@ local function getMyGamesHaloCEPath()
         cprint("Example:")
         cprint([[On Linux: export MY_GAMES_PATH="/home/117/Documents/My Games/Halo CE"]])
         cprint([[On Windows: set MY_GAMES_PATH=D:\Users\117\Documents\My Games\Halo CE]])
-        os.exit()
+        os.exit(1)
     end
     return documentsPath
 end

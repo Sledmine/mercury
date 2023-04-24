@@ -1,5 +1,8 @@
 # Changelog
 
+# 3.4.1
+- Fixed exit code when no game paths are defined
+
 # 3.4.0
 - Fixed HTTP request timeout not being applied because of an override by another HTTP client
 - Add `--template` flag to `build` command, this will create a template of a buildspec.yaml file in the current directory

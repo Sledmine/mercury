@@ -48,13 +48,17 @@ Source: "bin\luv\$ARCH\luv.dll"; DestDir: "{app}\clib"; Flags: ignoreversion
 Source: "bin\lua\$ARCH\lua51.dll"; DestDir: "{app}"; Flags: ignoreversion
 Source: "bin\xdelta3\$ARCH\xdelta3.exe"; DestDir: "{app}"; Flags: ignoreversion
 Source: "build\mercury.exe"; DestDir: "{app}"; Flags: ignoreversion
+Source: "ui\dist\mercury-ui\mercury-ui-win_x64.exe"; DestDir: "{app}"; Flags: ignoreversion
+Source: "ui\dist\mercury-ui\resources.neu"; DestDir: "{app}"; Flags: ignoreversion
+Source: "ui\dist\mercury-ui\WebView2Loader.dll"; DestDir: "{app}"; Flags: ignoreversion
 Source: "mercury_admin.cmd"; DestDir: "{app}"; Flags: ignoreversion
 Source: "mercury_console.cmd"; DestDir: "{app}"; Flags: ignoreversion
 
 [Icons]
 Name: "{group}\{cm:UninstallProgram,{#NAME}}"; Filename: "{uninstallexe}"
-Name: "{userdesktop}\Mercury Console (Admin)"; Filename: "{app}\mercury_admin.cmd"; IconFilename: "{app}\mercury.exe"
+;Name: "{userdesktop}\Mercury Console (Admin)"; Filename: "{app}\mercury_admin.cmd"; IconFilename: "{app}\mercury.exe"
 Name: "{userdesktop}\Mercury Console"; Filename: "{app}\mercury_console.cmd"; WorkingDir: "{app}"; IconFilename: "{app}\mercury.exe"
+Name: "{userdesktop}\Mercury UI"; Filename: "{app}\mercury-ui-win_x64.exe"; WorkingDir: "{app}"; IconFilename: "{app}\mercury.exe"
 
 [Tasks]
 Name: envPath; Description: {cm:AddToPath}

@@ -103,7 +103,8 @@ local function compileMercury(compilationArch)
                                          mainLua, iconPath, version, table.concat(versionInfo, ";"),
                                          outputPath:gsub(".exe", ""), tostring(version))
         -- print(bundleBash)
-        return os.execute(bundleBash)
+        os.execute(bundleBash)
+        return true
     else
         os.execute([[rmdir bundle-tmp]])
         -- Multi arch compilation using different path definitions for x86 and x64 builds
@@ -150,6 +151,11 @@ local function compileInstaller(compilationArch)
         end
     else
         print("Installer compilation for Linux is not supported yet, aiming for a .deb package!")
+        local lsbRelease = io.popen("lsb_release -a 2>/dev/null"):read("*a")
+        -- Parse release version
+        local ubuntuVersion = lsbRelease:match("Release:%s*(%d+.%d+)")
+        os.execute("cp Mercury/build/mercury Mercury/dist/mercury-" .. tostring(version) .. "+ubuntu." ..
+                       ubuntuVersion)
     end
 end
 

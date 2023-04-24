@@ -2,7 +2,7 @@
 
 # 3.4.1
 - Fixed exit code when no game paths are defined
-- Added Mercury UI to installer
+- Added Mercury UI to installer (will not work for 32 bits installations, sorry)
 
 # 3.4.0
 - Fixed HTTP request timeout not being applied because of an override by another HTTP client

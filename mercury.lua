@@ -135,7 +135,9 @@ listCmd:flag("-j --json", "Show list in json format.")
 listCmd:flag("-t --table", "Show list in a lua table format.")
 listCmd:action(function(args, name)
     flagsCheck(args)
-    list(args.json, args.table)
+    if not list(args.json, args.table) then
+        os.exit(1)
+    end
 end)
 
 -- Update command

@@ -1,5 +1,9 @@
 # Changelog
 
+# 3.4.2
+- Fixed exit code for `list` command
+- Removed "Mercury Admin" shortcut desktop from installer
+
 # 3.4.1
 - Fixed exit code when no game paths are defined
 - Added Mercury UI to installer (will not work for 32 bits installations, sorry)

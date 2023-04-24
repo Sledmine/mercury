@@ -54,6 +54,9 @@ Source: "ui\dist\mercury-ui\WebView2Loader.dll"; DestDir: "{app}"; Flags: ignore
 Source: "mercury_admin.cmd"; DestDir: "{app}"; Flags: ignoreversion
 Source: "mercury_console.cmd"; DestDir: "{app}"; Flags: ignoreversion
 
+[InstallDelete]
+Type: files; Name: "{userdesktop}\Mercury Console (Admin).lnk"
+
 [Icons]
 Name: "{group}\{cm:UninstallProgram,{#NAME}}"; Filename: "{uninstallexe}"
 ;Name: "{userdesktop}\Mercury Console (Admin)"; Filename: "{app}\mercury_admin.cmd"; IconFilename: "{app}\mercury.exe"

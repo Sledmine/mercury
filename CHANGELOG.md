@@ -1,5 +1,11 @@
 # Changelog
 
+# 3.5.0
+- Added `--manifest` flag to `pack` command, allows to retrieve manifest from a package
+- Added properties validation to `pack --template` for manifest files
+- Updated description for some commands
+- Added `-s --scenario` to `build` command, allows to build a specific scenario or scenarios
+
 # 3.4.2
 - Fixed exit code for `list` command
 - Removed "Mercury Admin" shortcut desktop from installer

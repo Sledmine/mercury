@@ -30,7 +30,7 @@ local function flag(name, value)
     buildMapCmd = buildMapCmd .. "--" .. name .. " " .. value .. " "
 end
 
-local function build(yamlFilePath, command, verbose, isRelease, outputPath)
+local function build(yamlFilePath, command, verbose, isRelease, outputPath, scenarios)
     local yamlFile = readFile(yamlFilePath) or readFile("buildspec.yml") or
                          readFile("buildspec.yaml")
     verify(yamlFile, "No buildspec.yml or buildspec.yaml file found")
@@ -94,6 +94,12 @@ local function build(yamlFilePath, command, verbose, isRelease, outputPath)
     -- Compile every scenario in the spec file
     local projectBuildMapCmd = buildMapCmd
     for _, scenarioPath in ipairs(buildspec.scenarios) do
+        if scenarios then
+            local scenarioName = path.file(scenarioPath)
+            if not table.indexof(scenarios, scenarioName) then
+                goto continue
+            end
+        end
         buildMapCmd = projectBuildMapCmd
         if isRelease and ends(scenarioPath, "_dev") then
             local scenarioName = path.file(scenarioPath)
@@ -110,8 +116,9 @@ local function build(yamlFilePath, command, verbose, isRelease, outputPath)
                 return false
             end
         end
+        ::continue::
     end
-    cprint("Success, project builded.")
+    cprint("Success, project built.")
     return true
 end
 

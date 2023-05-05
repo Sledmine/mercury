@@ -22,9 +22,9 @@ local constants = require "modules.constants"
 ---@param filepath string Package path that will be unziped
 ---@param unpackDir string Directory path to place output files
 function merc.unzip(filepath, unpackDir)
-    if (exists(filepath)) then
+    if exists(filepath) then
         local unzipCmd = constants.unzipCmdLine:format(filepath, unpackDir)
-        if (IsDebugModeEnabled) then
+        if IsDebugModeEnabled then
             unzipCmd = constants.unzipCmdDebugLine:format(filepath, unpackDir)
         end
         local result = run(unzipCmd)
@@ -36,8 +36,8 @@ end
 
 function merc.unpack(filepath, unpackDir)
     local packageZip = zip.open(filepath, "r")
-    if (packageZip) then
-        if (createFolder(unpackDir) or createFolder(unpackDir) == nil) then
+    if packageZip then
+        if createFolder(unpackDir) or createFolder(unpackDir) == nil then
             packageZip:extract_all(unpackDir)
             packageZip:close()
             return true
@@ -53,7 +53,7 @@ end
 ---@param packDir string
 ---@param mercPath string
 function merc.pack(packDir, mercPath, breaking, feature, fix)
-    if (packDir and mercPath and exists(packDir .. "/manifest.json")) then
+    if packDir and mercPath and exists(packDir .. "/manifest.json") then
         -- Read base manifest file
         local manifest = json.decode(readFile(packDir .. "/manifest.json"))
         if (manifest) then
@@ -67,7 +67,7 @@ function merc.pack(packDir, mercPath, breaking, feature, fix)
                         fileExtension == "txt") then
                         fileType = "optional"
                     end
-                    --local relativePath = filePath:gsub(packDir, "")
+                    -- local relativePath = filePath:gsub(packDir, "")
                     local relativePath = path.rel(filePath, packDir)
                     glue.append(manifest.files,
                                 {path = relativePath, type = fileType, outputPath = relativePath})
@@ -112,7 +112,9 @@ end
 
 --- Attempt to create a template package folder
 function merc.template()
-    if (not exists("manifest.json")) then
+    if not exists "manifest.json" then
+        local options = {category = {"map", "script", "addon", "config", "fix"}}
+
         local manifest = {
             label = "",
             name = "",
@@ -121,13 +123,44 @@ function merc.template()
             author = "",
             category = ""
         }
-        for property, value in pairs(manifest) do
-            print("-> Set " .. property .. ":")
-            local value = io.read("l")
-            if (value and value ~= "") then
-                manifest[property] = value
+
+        for property in pairs(manifest) do
+            if options[property] then
+                print("-> Set " .. property .. ":",
+                      ("(%s) "):format(table.concat(options[property], ", ")))
+            else
+                print("-> Set " .. property .. ":")
             end
+            local value = io.read("l")
+
+            if not (value and value ~= "") then
+                cprint("Error, invalid value for " .. property .. ".")
+                return false
+            end
+
+            if property == "version" then
+                -- Verify version is a semver string
+                if not value:match("%d+%.%d+%.%d+") then
+                    cprint("Error, version must be a valid semver string, see: https://semver.org/")
+                    return false
+                end
+            elseif property == "label" then
+                -- Verify label is all lowercase and no spaces or special characters
+                if not value:match("%l+") then
+                    cprint("Error, label must be all lowercase and no spaces or special characters.")
+                    return false
+                end
+            elseif options[property] then
+                -- Verify value is a valid option
+                if not table.indexof(options[property], value) then
+                    cprint("Error, invalid value for " .. property .. ".")
+                    return false
+                end
+            end
+
+            manifest[property] = value
         end
+
         manifest.files = {}
         manifest.manifestVersion = "1.1.0"
         createFolder("game-root")
@@ -188,7 +221,7 @@ function merc.diff(oldpackagePath, newPackagePath, diffPackagePath)
                                                  diffExtractionPath .. "/" .. newFile.path .. ".xd3")
 
                         cprint("Searching for differences in " .. oldFile.path)
-                        --dprint(SHA256(oldFilePath) .. " -> " .. SHA256(newFilePath))
+                        -- dprint(SHA256(oldFilePath) .. " -> " .. SHA256(newFilePath))
                         if (SHA256(oldFilePath) ~= SHA256(newFilePath)) then
                             cprint("\tWarning " .. oldFile.path ..
                                        " has differences between packages, creating xd3 diff!")
@@ -268,6 +301,25 @@ function merc.diff(oldpackagePath, newPackagePath, diffPackagePath)
         end
     end
     cprint("Error, at attempting to create diff package.")
+    return false
+end
+
+function merc.manifest(packagePath)
+    local package = zip.open(packagePath, "r")
+    if package then
+        local manifest
+        for entry in package:entries() do
+            if entry.filename == "manifest.json" then
+                manifest = package:read("*a")
+            end
+        end
+        if manifest then
+            print(manifest)
+        end
+        package:close()
+        return true
+    end
+    cprint("Error, at attempting to read manifest file.")
     return false
 end
 

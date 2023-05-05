@@ -34,6 +34,7 @@ environment.migrate()
 -- Modules
 install = require "modules.install"
 api = require "modules.api"
+luna = require "modules.luna"
 
 -- Commands to expose on Mercury
 local remove = require "actions.remove"
@@ -41,9 +42,10 @@ local list = require "actions.list"
 local insert = require "actions.insert"
 local latest = require "actions.latest"
 local fetch = require "actions.fetch"
-local pack = require"Mercury.modules.merc".pack
-local packdiff = require"Mercury.modules.merc".diff
-local packtemplate = require"Mercury.modules.merc".template
+local pack = require"modules.merc".pack
+local packdiff = require"modules.merc".diff
+local packtemplate = require"modules.merc".template
+local packmanifest = require"modules.merc".manifest
 local map = require "actions.map"
 local build = require "actions.build"
 
@@ -64,26 +66,26 @@ parser:command_target("command")
 -- General flags
 parser:flag("-v", "Get Mercury version.")
 parser:flag("--debug", "Enable debug mode, some debug messages will appear.")
-parser:flag("--test", "Enable test mode, testing behaviour will occur.")
-parser:flag("--unsafe", "Set API requests to unsafe mode.")
+--parser:flag("--test", "Enable test mode, testing behaviour will occur.")
+--parser:flag("--unsafe", "Set API requests to unsafe mode.")
 
 local function flagsCheck(args)
-    if (args.v) then
+    if args.v then
         cprint(constants.mercuryVersion)
         os.exit(1)
     end
-    if (args.debug) then
+    if args.debug then
         IsDebugModeEnabled = true
         cprint("Warning Debug mode enabled.")
     end
-    if (args.test) then
+    if args.test then
         IsTestModeEnabled = true
         -- Override respository connection data
         api.protocol = "http"
         api.repositoryHost = "localhost:8180"
         cprint("Warning Test mode enabled.")
     end
-    if (args.unsafe) then
+    if args.unsafe then
         -- Use http protocol for API requests
         api.protocol = "http"
     end
@@ -194,7 +196,7 @@ insertCmd:action(function(args, name)
 end)
 
 local mapCmd = parser:command("map")
-mapCmd:description("Download a specific map from our HAC2 mirror repository.")
+mapCmd:description("Download a specific map from our maps repository.")
 mapCmd:argument("map", "File name of the map to be downloaded"):args("+")
 mapCmd:option("-o --output",
               "Path to download the map as a zip file, prevents map unpacking and installation.")
@@ -214,7 +216,7 @@ end)
 
 -- Latest (upgrade mercury) command
 local latestCmd = parser:command("latest", "Get latest Mercury version from GitHub.")
-latestCmd:description("Open GitHub release page if there is a newer Mercury version available.")
+latestCmd:description("Download latest Mercury version if available.")
 latestCmd:action(function(args, name)
     flagsCheck(args)
     latest()
@@ -226,11 +228,17 @@ packCmd:description("Create a Mercury package from a specific directory.")
 packCmd:argument("packDir", "Path to the directory to pack.")
 packCmd:argument("mercPath", "Output path for the resultant package."):args("?")
 packCmd:flag("-t --template", "Create a package folder template.")
+packCmd:flag("-m --manifest", "Get manifest from an existing package.")
 packCmd:action(function(args, name)
     local code = 0
     flagsCheck(args)
-    if (args.template) then
+    if args.template then
         packtemplate()
+        return
+    elseif args.manifest then
+        if not packmanifest(args.packDir) then
+            code = 1
+        end
         return
     else
         if not pack(args.packDir, args.mercPath or ".") then
@@ -243,7 +251,7 @@ end)
 
 -- Diff command
 local packdiffCmd = parser:command("packdiff")
-packdiffCmd:description("Create an update package from two Mercury packages difference.")
+packdiffCmd:description("Create an update package from the difference of two packages.")
 packdiffCmd:argument("oldPackagePath", "Path to old package used as target.")
 packdiffCmd:argument("newPackagePath", "Path to new package as the source.")
 packdiffCmd:argument("diffPackagePath", "Path to diff package as the result."):args("?")
@@ -259,7 +267,7 @@ end)
 
 -- Bundle command
 local luabundleCmd = parser:command("luabundle", "Bundle lua files into one distributable script.")
-luabundleCmd:description("Bundle modular lua projects into a single script.")
+luabundleCmd:description("Bundle modular lua project into a single script.")
 luabundleCmd:argument("bundleFile", "Bundle file name, \"bundle\" by default."):args("?")
 luabundleCmd:flag("-c --compile", "Compile output file using target compiler.")
 luabundleCmd:flag("-t --template", "Create a bundle template file on current directory.")
@@ -282,6 +290,7 @@ buildCmd:argument("command", "Command to execute."):args("?")
 buildCmd:flag("--verbose", "Output more verbose messages to console.")
 buildCmd:flag("--release", "Flag this build as a release.")
 buildCmd:flag("--template", "Create a buildspec template file on current directory.")
+buildCmd:flag("-s --scenario", "Build specific scenarios."):args("+")
 buildCmd:option("--output", "Output path for the build result."):args("?")
 buildCmd:action(function(args, name)
     flagsCheck(args)
@@ -296,7 +305,7 @@ commands:
     - mercury build --release --output package/game-maps/]])
         return
     end
-    if build("buildspec.yaml", args.command, args.verbose, args.release, (args.output or {})[1]) then
+    if build("buildspec.yaml", args.command, args.verbose, args.release, (args.output or {})[1], args.scenario) then
         os.exit(0)
     end
     os.exit(1)
@@ -314,8 +323,6 @@ end)
 -- Show commands information if no args
 if (not arg[1]) then
     print(parser:get_help())
-    print("\nCurrent Game Path: " .. paths.gamePath)
-    print("Current My Games Data Path: " .. paths.myGamesPath)
 end
 
 -- Override args array with parser ones

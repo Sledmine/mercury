@@ -64,21 +64,19 @@ local download = require "modules.download"
 local function latest()
     -- cprint("Checking for a newer Mercury version... ", true)
     local response = requests.get(constants.latestReleaseApi)
-    if (response and response.status_code == 200) then
+    if response and response.status_code == 200 then
+        dprint(response)
         ---@type githubApiResponse
         local release = json.decode(response.text)
-        if (release and not release.prerelease and not release.draft) then
+        if release and not release.prerelease and not release.draft then
             local tagName = release.tag_name
             local version = tagName:gsub("v", "")
             -- Current version is an older version than the latest release
-            if (v(constants.mercuryVersion) < v(version)) then
-                local findOS = "windows"
-                local findArch = "x64"
-                if os.getenv("PROCESSOR_ARCHITECTURE") == "x86" then
-                    findArch = "x86"
-                end
-                if not isHostWindows() then
-                    findOS = "ubuntu"
+            if v(constants.mercuryVersion) < v(version) then
+                local findOS = "ubuntu"
+                local findArch = jit.arch
+                if isHostWindows() then
+                    findOS = "windows"
                 end
                 dprint(findOS)
                 dprint(findArch)

@@ -138,18 +138,21 @@ local function template()
     createFolder("data")
     createFolder("tags")
     createFolder("hek")
-    
-    local hekDataSymlink = gpath(pwd(),"/", "hek", "/", "data")
-    local hekTagsSymlink = gpath(pwd(),"/", "hek", "/", "tags")
+
+    local hekDataSymlink = gpath(pwd(), "/", "hek", "/", "data")
+    local hekTagsSymlink = gpath(pwd(), "/", "hek", "/", "tags")
     -- Use absolute paths for symlinks?
     local relativeDataPath = gpath("..", "/", "data")
     local relativeTagsPath = gpath("..", "/", "tags")
 
-    if not exists(hekDataSymlink) then
-        createSymlink(hekDataSymlink, relativeDataPath, true)
+    local created, reason = createSymlink(hekDataSymlink, relativeDataPath, true)
+    if not created then
+        cprint("Warning data symlink can not be created: " .. (reason or "unknown"))
     end
-    if not exists(hekTagsSymlink) then
-        createSymlink(hekTagsSymlink, relativeTagsPath, true)
+
+    local created, reason = createSymlink(hekTagsSymlink, relativeTagsPath, true)
+    if not created then
+        cprint("Warning tags symlink can not be created: " .. (reason or "unknown"))
     end
 
     if not exists("buildspec.yml") and not exists("buildspec.yaml") then
@@ -158,7 +161,7 @@ local function template()
         return true
     end
 
-    cprint("Warning buildspec.yml or buildspec.yaml already exists")
+    cprint("Warning buildspec file already exists")
     return false
 end
 

@@ -102,17 +102,17 @@ local function insert(mercPath, forced, skipOptionals)
                     -- Normalized final insert output file path
                     local outputFile = file.outputPath
                     -- Final output file folder
-                    local outputFileFolder = splitPath(outputFile)
+                    local outputFileFolder = splitPath(outputFile) --[[@as string]]
                     -- Create folder for current file
-                    if (not exists(outputFileFolder)) then
+                    if not exists(outputFileFolder) then
                         createFolder(outputFileFolder)
                     end
-                    dprint("Inserting file \"" .. file.path .. "\" ...")
-                    dprint("Input, \"" .. inputFilePath .. "\" ...")
-                    dprint("Output, \"" .. outputFile .. "\" ...")
-                    if (exists(outputFile)) then
-                        if (forced or package.updates) then
-                            if (not package.updates) then
+                    dprint("Inserting file \"" .. file.path .. "\"\n")
+                    dprint("Input -> \"" .. inputFilePath .. "\"")
+                    dprint("Output -> \"" .. outputFile .. "\"")
+                    if exists(outputFile) then
+                        if forced or package.updates then
+                            if not package.updates then
                                 cprint(
                                     "Warning forced mode was enabled, erasing conflict file: \"" ..
                                         file.path .. "\"... ", true)
@@ -124,17 +124,17 @@ local function insert(mercPath, forced, skipOptionals)
                                 end
                             else
                                 cprint("Error, at trying to erase \"" .. file.path .. "\"")
+                                cprint("Reason: " .. tostring((desc or error or "unknown")))
                                 return false, errors.eraseFileError
                             end
                         else
-                            cprint("Backup conflict file \"" .. file.path ..
-                                       "\"... ", true)
+                            cprint("Backup conflict file \"" .. file.path .. "\"... ", true)
                             local result, desc, error = move(outputFile, outputFile .. ".bak")
                             if (result) then
                                 cprint("done.")
                             else
-                                cprint("Error, at trying to create a backup for: \"" .. file.path ..
-                                           "\"")
+                                cprint("Error, at creating backup for: \"" .. file.path .. "\"")
+                                cprint("Reason: " .. tostring((desc or error or "unknown")))
                                 return false, errors.backupCreationError
                             end
                         end

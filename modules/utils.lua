@@ -404,14 +404,17 @@ end
 ---@param symlink string
 ---@param path string
 ---@param isDirectory boolean
+---@return boolean, string?
 function createSymlink(symlink, path, isDirectory)
     cprint("Symlinking " .. symlink .. " -> " .. path)
-    --if isHostWindows() then
-    --    if isDirectory then
-    --        return os.execute("mklink /D " .. symlink .. " " .. path)
-    --    end
-    --    return os.execute("mklink " .. symlink .. " " .. path)
-    --end
+    if isHostWindows() then
+        if isDirectory then
+            local result = os.execute("mklink /D " .. symlink .. " " .. path)
+            return result or false, "command_failed"
+        end
+        local result = os.execute("mklink " .. symlink .. " " .. path)
+        return result or false, "command_failed"
+    end
     -- return os.execute("ln -s " .. path .. " " .. symlink)
     return fs.mksymlink(symlink, path, isDirectory)
 end

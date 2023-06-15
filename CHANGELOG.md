@@ -5,6 +5,7 @@
 - Added properties validation to `pack --template` for manifest files
 - Updated description for some commands
 - Added `-s --scenario` to `build` command, allows to build a specific scenario or scenarios
+- Added `--template` flag to `build` command, this will bootstrap a build project
 
 # 3.4.2
 - Fixed exit code for `list` command

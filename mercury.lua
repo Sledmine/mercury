@@ -47,7 +47,8 @@ local packdiff = require"modules.merc".diff
 local packtemplate = require"modules.merc".template
 local packmanifest = require"modules.merc".manifest
 local map = require "actions.map"
-local build = require "actions.build"
+local build = require "actions.build".build
+local buildtemplate = require "actions.build".template
 
 local luabundler = require "modules.luabundle"
 local constants = require "modules.constants"
@@ -295,14 +296,7 @@ buildCmd:option("--output", "Output path for the build result."):args("?")
 buildCmd:action(function(args, name)
     flagsCheck(args)
     if (args.template) then
-        writeFile("buildspec.yaml", [[version: 1
-tag_space: 64M
-extend_limits: false
-scenarios:
-  - levels/test/test
-commands:
-  release:
-    - mercury build --release --output package/game-maps/]])
+        buildtemplate()
         return
     end
     if build("buildspec.yaml", args.command, args.verbose, args.release, (args.output or {})[1], args.scenario) then

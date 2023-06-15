@@ -95,7 +95,9 @@ local function build(yamlFilePath, command, verbose, isRelease, outputPath, scen
     local projectBuildMapCmd = buildMapCmd
     for _, scenarioPath in ipairs(buildspec.scenarios) do
         if scenarios then
+            dprint(scenarios)
             local scenarioName = path.file(scenarioPath)
+            dprint(scenarioName)
             if not table.indexof(scenarios, scenarioName) then
                 goto continue
             end
@@ -122,4 +124,42 @@ local function build(yamlFilePath, command, verbose, isRelease, outputPath, scen
     return true
 end
 
-return build
+local templateSpec = [[version: 1
+tag_space: 64M
+extend_limits: false
+scenarios:
+  - levels/test/test
+commands:
+  release:
+    - mercury build --release --output package/game-maps/]]
+
+local function template()
+    cprint("Bootstrapping project...")
+    createFolder("data")
+    createFolder("tags")
+    createFolder("hek")
+    
+    local hekDataSymlink = gpath(pwd(),"/", "hek", "/", "data")
+    local hekTagsSymlink = gpath(pwd(),"/", "hek", "/", "tags")
+    -- Use absolute paths for symlinks?
+    local relativeDataPath = gpath("..", "/", "data")
+    local relativeTagsPath = gpath("..", "/", "tags")
+
+    if not exists(hekDataSymlink) then
+        createSymlink(hekDataSymlink, relativeDataPath, true)
+    end
+    if not exists(hekTagsSymlink) then
+        createSymlink(hekTagsSymlink, relativeTagsPath, true)
+    end
+
+    if not exists("buildspec.yml") and not exists("buildspec.yaml") then
+        writeFile("buildspec.yaml", templateSpec)
+        cprint("Success project build template created.")
+        return true
+    end
+
+    cprint("Warning buildspec.yml or buildspec.yaml already exists")
+    return false
+end
+
+return {build = build, template = template}

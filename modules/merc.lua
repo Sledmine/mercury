@@ -37,7 +37,7 @@ end
 function merc.unpack(filepath, unpackDir)
     local packageZip = zip.open(filepath, "r")
     if packageZip then
-        if createFolder(unpackDir) or createFolder(unpackDir) == nil then
+        if exists(unpackDir) or createFolder(unpackDir) then
             packageZip:extract_all(unpackDir)
             packageZip:close()
             return true

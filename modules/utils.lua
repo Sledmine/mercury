@@ -34,7 +34,8 @@ local keywordsWithColor = {
     ["Packing"] = terminalColor.magenta,
     -- ["Copying"] = terminalColor.magenta,
     ["Backup"] = terminalColor.cyan,
-    ["Removing"] = terminalColor.red
+    ["Removing"] = terminalColor.red,
+    ["Symlinking"] = terminalColor.green
 }
 
 ---Overloaded color printing function
@@ -69,7 +70,7 @@ function dprint(value)
         if (type(value) == "table") then
             print(inspect(value))
         else
-            cprint(value)
+            cprint(tostring(value))
         end
     end
 end
@@ -122,13 +123,11 @@ function splitPath(inputPath)
 end
 
 function createFolder(folderPath)
-    if (not exists(folderPath)) then
+    if not exists(folderPath) then
         dprint("Creating folder: " .. folderPath)
         return fs.mkdir(folderPath, true)
-    else
-        dprint("Warning folder " .. folderPath .. " already exists.")
-        return nil
     end
+    dprint("Warning folder " .. folderPath .. " already exists.")
     return false
 end
 
@@ -222,7 +221,10 @@ function copyFile(sourcePath, destinationPath)
     return copyFileLinux(sourcePath, destinationPath)
 end
 
---- Move file to specific destinatio
+--- Move file to specific destination
+---@param sourcePath string
+---@param destinationPath string
+---@return boolean
 function moveFile(sourcePath, destinationPath)
     if (sourcePath and destinationPath) then
         if (not exists(sourcePath)) then
@@ -238,6 +240,9 @@ function moveFile(sourcePath, destinationPath)
     return false
 end
 
+--- Attempt to read a file (unicode friendly)
+---@param path string
+---@return string
 function readFile(path)
     if isHostWindows() then
         local file = assert(uv.fs_open(path, "r", 438))
@@ -259,10 +264,16 @@ function writeFile(path, data)
     return glue.writefile(path, data, "t")
 end
 
+--- Return true if the given path exists
+---@param fileOrFolderPath string
+---@return boolean
 function exists(fileOrFolderPath)
     return fs.is(fileOrFolderPath)
 end
 
+--- Return true if the given path is a file
+---@param filePath string
+---@return boolean
 function isFile(filePath)
     return path.ext(filePath)
 end
@@ -277,6 +288,9 @@ function wpath(unixpath)
     return unixpath:gsub("/", "\\")
 end
 
+--- Generate a path from a list of strings
+---@vararg string
+---@return string
 function gpath(...)
     local args = {...}
     local stringPath = ""
@@ -292,6 +306,10 @@ function gpath(...)
     return stringPath
 end
 
+--- Return a list of files in a directory
+---@param dir string
+---@param recursive boolean
+---@return string[]
 function filesIn(dir, recursive)
     local files = {}
     for name, d in fs.dir(dir) do
@@ -327,6 +345,8 @@ function SHA256(filePath)
 end
 
 --- Execute command line based on OS platform
+---@param command string
+---@return boolean?
 function run(command)
     -- Binaries should be isolated on Windows, use binaries from executable folder
     if (isHostWindows()) then
@@ -340,10 +360,16 @@ function run(command)
     return os.execute(command)
 end
 
+--- Return true if the host is Windows
+---@return boolean
 function isHostWindows()
     return jit.os == "Windows"
 end
 
+--- Verify assertion and exit if assertion is false
+---@param assertion boolean
+---@param message string
+---@return boolean?
 function verify(assertion, message)
     if not assertion then
         cprint("Error, " .. message .. ".")
@@ -353,15 +379,45 @@ function verify(assertion, message)
     return true
 end
 
--- Replace string of another string in a string escaping pattern chars
+--- Replace string of another string in a string escaping pattern chars
+---@param str string
+---@param find string
+---@param replace string
+---@return string
 function replace(str, find, replace)
     local find = find:gsub("([%^%$%(%)%%%.%[%]%*%+%-%?])", "%%%1")
-    return str:gsub(find, replace)
+    local replaced = str:gsub(find, replace)
+    return replaced
 end
 
+--- Get an environment variable
+---@param name string
+---@return string?
 function getenv(name)
     if isHostWindows() then
         return uv.os_getenv(name)
     end
     return os.getenv(name)
+end
+
+--- Create a symlink
+---@param symlink string
+---@param path string
+---@param isDirectory boolean
+function createSymlink(symlink, path, isDirectory)
+    cprint("Symlinking " .. symlink .. " -> " .. path)
+    --if isHostWindows() then
+    --    if isDirectory then
+    --        return os.execute("mklink /D " .. symlink .. " " .. path)
+    --    end
+    --    return os.execute("mklink " .. symlink .. " " .. path)
+    --end
+    -- return os.execute("ln -s " .. path .. " " .. symlink)
+    return fs.mksymlink(symlink, path, isDirectory)
+end
+
+--- Return current working directory
+---@return string
+function pwd()
+    return fs.cd()
 end

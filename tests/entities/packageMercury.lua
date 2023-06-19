@@ -13,7 +13,7 @@ inspect = require "inspect"
 require "modules.utils"
 
 -- Local modules
-config = require "config.environment"
+config = require "cli.config"
 -- Get all environment variables and configurations
 local paths = config.paths()
 

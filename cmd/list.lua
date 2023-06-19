@@ -1,4 +1,4 @@
-local search = require "actions.search"
+local search = require "cmd.search"
 local json = require "cjson"
 
 local function listPackages(jsonPrint, tablePrint)

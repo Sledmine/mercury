@@ -37,18 +37,18 @@ api = require "modules.api"
 luna = require "modules.luna"
 
 -- Commands to expose on Mercury
-local remove = require "actions.remove"
-local list = require "actions.list"
-local insert = require "actions.insert"
-local latest = require "actions.latest"
-local fetch = require "actions.fetch"
+local remove = require "cmd.remove"
+local list = require "cmd.list"
+local insert = require "cmd.insert"
+local latest = require "cmd.latest"
+local fetch = require "cmd.fetch"
 local pack = require"modules.merc".pack
 local packdiff = require"modules.merc".diff
 local packtemplate = require"modules.merc".template
 local packmanifest = require"modules.merc".manifest
-local map = require "actions.map"
-local build = require "actions.build".build
-local buildtemplate = require "actions.build".template
+local map = require "cmd.map"
+local build = require "cmd.build".build
+local buildtemplate = require "cmd.build".template
 
 local luabundler = require "modules.luabundle"
 local constants = require "modules.constants"

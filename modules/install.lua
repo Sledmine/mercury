@@ -3,9 +3,9 @@ local json = require "cjson"
 local install = {}
 
 -- Actions
-local search = require "actions.search"
-local remove = require "actions.remove"
-local insert = require "actions.insert"
+local search = require "cmd.search"
+local remove = require "cmd.remove"
+local insert = require "cmd.insert"
 
 -- Modules
 local download = require "modules.download"

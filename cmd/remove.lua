@@ -8,7 +8,7 @@ local glue = require "glue"
 
 local PackageMercury = require "entities.packageMercury"
 
-local search = require "actions.search"
+local search = require "cmd.search"
 
 local errors = {
     indexErasement = "an error occurred at erasing package from the index",

@@ -11,8 +11,8 @@ local constants = require "modules.constants"
 local merc = require "modules.merc"
 local paths = config.paths()
 
-local search = require "actions.search"
-local remove = require "actions.remove"
+local search = require "cmd.search"
+local remove = require "cmd.remove"
 
 local PackageMercury = require "entities.packageMercury"
 

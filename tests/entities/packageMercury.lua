@@ -13,9 +13,9 @@ inspect = require "inspect"
 require "modules.utils"
 
 -- Local modules
-environment = require "config.environment"
+config = require "config.environment"
 -- Get all environment variables and configurations
-local paths = environment.paths()
+local paths = config.paths()
 
 -- Entity
 local PackageMercury = require "entities.packageMercury"

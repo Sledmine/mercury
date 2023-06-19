@@ -1,7 +1,7 @@
 local json = require "cjson"
 local requests = require "requests"
 local constants = require "modules.constants"
-local paths = environment.paths()
+local paths = config.paths()
 local v = require "semver"
 local download = require "modules.download"
 

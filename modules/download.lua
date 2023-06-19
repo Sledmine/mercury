@@ -8,7 +8,7 @@ local glue = require "glue"
 local download = {}
 
 local fdownload = require "modules.fdownload"
-local paths = environment.paths()
+local paths = config.paths()
 
 ---@param packageMeta packageMetadata
 function download.package(packageMeta)

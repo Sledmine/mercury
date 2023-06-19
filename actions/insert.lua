@@ -9,7 +9,7 @@ local v = require "semver"
 
 local constants = require "modules.constants"
 local merc = require "modules.merc"
-local paths = environment.paths()
+local paths = config.paths()
 
 local search = require "actions.search"
 local remove = require "actions.remove"
@@ -200,7 +200,7 @@ local function insert(mercPath, forced, skipOptionals)
             end
 
             -- Get current instance packages
-            local installedPackages = environment.packages() or {}
+            local installedPackages = config.packages() or {}
             -- Substract required package properties and store them
             if (package.updates) then
                 -- TODO Check out this, there are probably better ways to do it
@@ -220,7 +220,7 @@ local function insert(mercPath, forced, skipOptionals)
                 installedPackages[package.label] = package:getProperties()
             end
             -- Update current environment packages data with the new one
-            if not environment.packages(installedPackages) then
+            if not config.packages(installedPackages) then
                 return false, errors.updatingPackagesIndex
             end
             return true

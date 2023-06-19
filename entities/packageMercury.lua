@@ -5,7 +5,7 @@
 ------------------------------------------------------------------------------
 local json = require "cjson"
 local glue = require "glue"
-local paths = environment.paths()
+local paths = config.paths()
 
 local class = require "middleclass"
 

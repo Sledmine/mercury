@@ -19,12 +19,12 @@ local errors = {
 --  TODO Migrate the return of this action to an errors table
 local function erasePackageFromIndex(packageLabel)
     -- Get current instance packages
-    local installedPackages = environment.packages()
+    local installedPackages = config.packages()
     if installedPackages then
         -- Erase data for this package
         installedPackages[packageLabel] = nil
         -- Update current environment packages data with the new one
-        return environment.packages(installedPackages)
+        return config.packages(installedPackages)
     end
     return false
 end
@@ -37,7 +37,7 @@ end
 ---@param index? boolean Forced remove by erasing the package entry from the packages index
 local function remove(packageLabel, noRestore, eraseBackups, recursive, index)
     if (search(packageLabel)) then
-        local installedPackages = environment.packages() or {}
+        local installedPackages = config.packages() or {}
         cprint("Removing package " .. packageLabel .. "...")
         -- Load package as entity to provide normalization and extra package methods
         local package = PackageMercury:new(installedPackages[packageLabel])

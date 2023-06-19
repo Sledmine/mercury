@@ -26,10 +26,10 @@ if isHostWindows() then
     require "modules.utf8_filenames"
 end
 -- Get all environment variables and configurations
-environment = require "config.environment"
-local paths = environment.paths()
+config = require "cli.config"
+local paths = config.paths()
 -- Migrate old paths and files to newer ones if needed
-environment.migrate()
+config.migrate()
 
 -- Modules
 install = require "modules.install"
@@ -127,7 +127,7 @@ installCmd:action(function(args, name)
             end
         end
     end
-    environment.clean()
+    config.clean()
     os.exit(code)
 end)
 
@@ -158,7 +158,7 @@ updateCmd:action(function(args, name)
     if not install.update(args.packageLabel) then
         os.exit(1)
     end
-    environment.clean()
+    config.clean()
 end)
 
 -- Remove command
@@ -192,7 +192,7 @@ insertCmd:action(function(args, name)
         cprint("Error, at inserting merc.")
         code = 1
     end
-    environment.clean()
+    config.clean()
     os.exit(code)
 end)
 
@@ -212,7 +212,7 @@ mapCmd:action(function(args, name)
             map(mapName, args.output)
         end
     end
-    environment.clean()
+    config.clean()
 end)
 
 -- Latest (upgrade mercury) command
@@ -245,7 +245,7 @@ packCmd:action(function(args, name)
         if not pack(args.packDir, args.mercPath or ".") then
             code = 1
         end
-        environment.clean()
+        config.clean()
     end
     os.exit(code)
 end)
@@ -262,7 +262,7 @@ packdiffCmd:action(function(args, name)
     if not packdiff(args.oldPackagePath, args.newPackagePath, args.diffPackagePath) then
         code = 1
     end
-    environment.clean()
+    config.clean()
     os.exit(code)
 end)
 

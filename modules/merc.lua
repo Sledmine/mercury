@@ -14,7 +14,7 @@ local pjson = require "pretty.json"
 local v = require "semver"
 local path = require "path"
 
-local paths = environment.paths()
+local paths = config.paths()
 
 local constants = require "modules.constants"
 

@@ -373,7 +373,7 @@ end
 function verify(assertion, message)
     if not assertion then
         cprint("Error, " .. message .. ".")
-        environment.clean()
+        config.clean()
         os.exit(1)
     end
     return true

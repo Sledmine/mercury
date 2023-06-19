@@ -1,4 +1,4 @@
-local paths = require"Mercury.config.environment".paths()
+local paths = config.paths()
 local constants = require "modules.constants"
 local download = require "modules.download"
 local zip = require "minizip2"

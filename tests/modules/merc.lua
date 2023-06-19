@@ -6,7 +6,7 @@
 local lu = require "luaunit"
 inspect = require "inspect"
 require "modules.utils"
-environment = require "config.environment"
+config = require "cli.config"
 local merc = require "modules.merc"
 
 testMerc = {}
@@ -50,7 +50,7 @@ function testMerc:testPack()
 end
 
 function testMerc:testDiff()
-    environment.clean()
+    config.clean()
     delete(self.diffUnpackedFolder)
     delete(self.diffPackageFolder .. "test-1.0.1.mercu")
     lu.assertIsTrue(merc.diff(self.oldPackagePath, self.newPackagePath, self.diffPackageFolder))

@@ -3,7 +3,7 @@ local ends = glue.string.ends
 local path = require "path"
 local fs = require "fs"
 local yaml = require "tinyyaml"
-local paths = environment.paths()
+local paths = config.paths()
 
 ---@class buildfile
 ---@field version number

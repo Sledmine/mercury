@@ -7,6 +7,7 @@
 - Added `-s --scenario` to `build` command, allows to build a specific scenario or scenarios
 - Added `--template` flag to `build` command, this will bootstrap a build project
 - Fixed upgrading to latest version downloading update based on CPU arch instead of Mercury binary arch
+- Added `config` command to manage Mercury configuration
 
 # 3.4.2
 - Fixed exit code for `list` command

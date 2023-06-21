@@ -35,7 +35,8 @@ local keywordsWithColor = {
     -- ["Copying"] = terminalColor.magenta,
     ["Backup"] = terminalColor.cyan,
     ["Removing"] = terminalColor.red,
-    ["Symlinking"] = terminalColor.green
+    ["Symlinking"] = terminalColor.green,
+    ["CONF"] = terminalColor.cyan
 }
 
 ---Overloaded color printing function
@@ -254,6 +255,9 @@ function readFile(path)
     return glue.readfile(path, "t")
 end
 
+--- Attempt to write a text file (unicode friendly)
+---@param path string
+---@param data string
 function writeFile(path, data)
     if isHostWindows() then
         local file = assert(uv.fs_open(path, "w", 438))
@@ -261,7 +265,7 @@ function writeFile(path, data)
         uv.fs_close(file)
         return true
     end
-    return glue.writefile(path, data, "t")
+    return luna.file.write(path, data)
 end
 
 --- Return true if the given path exists
@@ -423,4 +427,10 @@ end
 ---@return string
 function pwd()
     return fs.cd()
+end
+
+--- Return the directory of the current executable
+---@return string
+function exedir()
+    return fs.exedir()
 end

@@ -122,6 +122,17 @@ function string.template(s, t)
     end))
 end
 
+--- Return if a string includes a given substring.
+---@param s string
+---@param substring string
+---@return boolean
+---@nodiscard
+function string.includes(s, substring)
+    assert(s ~= nil, "string.includes: s must not be nil")
+    assert(substring ~= nil, "string.includes: substring must not be nil")
+    return string.find(s, substring, 1, true) ~= nil
+end
+
 luna.string.split = string.split
 luna.string.ltrim = string.ltrim
 luna.string.rtrim = string.rtrim
@@ -132,6 +143,7 @@ luna.string.fromhex = string.fromhex
 luna.string.startswith = string.startswith
 luna.string.endswith = string.endswith
 luna.string.template = string.template
+luna.string.includes = string.includes
 
 luna.table = {}
 
@@ -270,6 +282,21 @@ function table.map(t, f)
         mapped[k] = f(v, k)
     end
     return mapped
+end
+
+--- Returns a table merged from all tables passed as arguments.
+---@generic K, V
+---@vararg table<K, V>
+---@return table<K, V>
+---@nodiscard
+function table.merge(...)
+    local merged = {}
+    for _, t in ipairs { ... } do
+        for k, v in pairs(t) do
+            merged[k] = v
+        end
+    end
+    return merged
 end
 
 luna.table.copy = table.copy

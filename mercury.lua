@@ -8,6 +8,8 @@ package.path = package.path .. ";Mercury/?.lua"
 local argparse = require "argparse"
 local glue = require "glue"
 inspect = require "inspect"
+local json = require "cjson"
+luna = require "modules.luna"
 
 -- Luapower bundle requires
 local luareq = require
@@ -27,6 +29,7 @@ if isHostWindows() then
 end
 -- Get all environment variables and configurations
 config = require "cli.config"
+config.load()
 local paths = config.paths()
 -- Migrate old paths and files to newer ones if needed
 config.migrate()
@@ -34,7 +37,6 @@ config.migrate()
 -- Modules
 install = require "modules.install"
 api = require "modules.api"
-luna = require "modules.luna"
 
 -- Commands to expose on Mercury
 local remove = require "cmd.remove"
@@ -47,17 +49,18 @@ local packdiff = require"modules.merc".diff
 local packtemplate = require"modules.merc".template
 local packmanifest = require"modules.merc".manifest
 local map = require "cmd.map"
-local build = require "cmd.build".build
-local buildtemplate = require "cmd.build".template
+local build = require"cmd.build".build
+local buildtemplate = require"cmd.build".template
 
 local luabundler = require "modules.luabundle"
 local constants = require "modules.constants"
 
 -- Create argument parser with Mercury info
-local cliDescription =
-    "Mercury Webpage: %s\nJoin us on Discord: https://discord.shadowmods.net/\nSupport Mercury on GitHub: https://github.com/Sledmine/Mercury"
-local parser = argparse("mercury", "Package Manager for Halo Custom Edition.",
-                        cliDescription:format(constants.mercuryWeb))
+local cliDescription = ([[Mercury Webpage: %s
+Join us on Discord: https://discord.shadowmods.net/
+Support Mercury on GitHub: https://github.com/Sledmine/Mercury"
+]]):format(constants.mercuryWeb)
+local parser = argparse("mercury", "Package Manager for Halo Custom Edition.", cliDescription)
 -- Disable command required message                        
 parser:require_command(false)
 
@@ -67,10 +70,32 @@ parser:command_target("command")
 -- General flags
 parser:flag("-v", "Get Mercury version.")
 parser:flag("--debug", "Enable debug mode, some debug messages will appear.")
---parser:flag("--test", "Enable test mode, testing behaviour will occur.")
---parser:flag("--unsafe", "Set API requests to unsafe mode.")
+-- parser:flag("--test", "Enable test mode, testing behaviour will occur.")
+-- parser:flag("--unsafe", "Set API requests to unsafe mode.")
 
-local function flagsCheck(args)
+--- Check flags and paths before executing any command
+---@param args table
+---@param skipPathValidation? boolean
+local function flagsCheck(args, skipPathValidation)
+    if not skipPathValidation then
+        if not paths.gamePath then
+            cprint("Error, Halo Custom Edition path was not found on the system.")
+            cprint("Force game path by setting \"HALO_CE_PATH\" as an environment variable.\n")
+            cprint("Example:")
+            cprint([[On Linux: export HALO_CE_PATH="/home/117/.wine/c/Halo Custom Edition"]])
+            cprint([[On Windows: set HALO_CE_PATH=D:\Games\Halo Custom Edition]])
+            os.exit(1)
+        end
+        if not paths.myGamesPath then
+            cprint("Error, at trying to get \"My Games\" path from the system.")
+            cprint(
+                "Force game path by setting \"MY_GAMES_PATH\" or \"HALO_CE_DATA_PATH\" as an environment variable.\n")
+            cprint("Example:")
+            cprint([[On Linux: export MY_GAMES_PATH="/home/117/Documents/My Games/Halo CE"]])
+            cprint([[On Windows: set MY_GAMES_PATH=D:\Users\117\Documents\My Games\Halo CE]])
+            os.exit(1)
+        end
+    end
     if args.v then
         cprint(constants.mercuryVersion)
         os.exit(1)
@@ -97,7 +122,7 @@ local fetchCmd = parser:command("fetch")
 fetchCmd:description("Return the latest package index available on Vulcano.")
 fetchCmd:flag("-j --json", "Show list in json format.")
 fetchCmd:action(function(args, name)
-    flagsCheck(args)
+    flagsCheck(args, true)
     fetch(args.json)
 end)
 
@@ -219,7 +244,7 @@ end)
 local latestCmd = parser:command("latest", "Get latest Mercury version from GitHub.")
 latestCmd:description("Download latest Mercury version if available.")
 latestCmd:action(function(args, name)
-    flagsCheck(args)
+    flagsCheck(args, true)
     latest()
 end)
 
@@ -232,7 +257,7 @@ packCmd:flag("-t --template", "Create a package folder template.")
 packCmd:flag("-m --manifest", "Get manifest from an existing package.")
 packCmd:action(function(args, name)
     local code = 0
-    flagsCheck(args)
+    flagsCheck(args, true)
     if args.template then
         packtemplate()
         return
@@ -258,7 +283,7 @@ packdiffCmd:argument("newPackagePath", "Path to new package as the source.")
 packdiffCmd:argument("diffPackagePath", "Path to diff package as the result."):args("?")
 packdiffCmd:action(function(args, name)
     local code = 0
-    flagsCheck(args)
+    flagsCheck(args, true)
     if not packdiff(args.oldPackagePath, args.newPackagePath, args.diffPackagePath) then
         code = 1
     end
@@ -273,7 +298,7 @@ luabundleCmd:argument("bundleFile", "Bundle file name, \"bundle\" by default."):
 luabundleCmd:flag("-c --compile", "Compile output file using target compiler.")
 luabundleCmd:flag("-t --template", "Create a bundle template file on current directory.")
 luabundleCmd:action(function(args, name)
-    flagsCheck(args)
+    flagsCheck(args, true)
     if (args.template) then
         luabundler.template()
         return
@@ -299,19 +324,60 @@ buildCmd:action(function(args, name)
         buildtemplate()
         return
     end
-    if build("buildspec.yaml", args.command, args.verbose, args.release, (args.output or {})[1], args.scenario) then
+    if build("buildspec.yaml", args.command, args.verbose, args.release, (args.output or {})[1],
+             args.scenario) then
         os.exit(0)
     end
     os.exit(1)
 end)
 
+-- Config command
+local configCmd = parser:command("config", "Manage Mercury configuration.")
+configCmd:argument("key", "Configuration key to get or set."):args("?")
+configCmd:argument("value", "Value to set to the given key."):args("?")
+-- configCmd:flag("-l --list", "List all configuration keys and values.")
+configCmd:flag("-r --raw", "Print raw configuration values.")
+configCmd:flag("-j --json", "Print configuration values as JSON.")
+-- configCmd:flag("-r --reset", "Reset configuration to default values.")
+configCmd:action(function(args, name)
+    flagsCheck(args, true)
+    local output = config.get()
+    if args.key then
+        if args.value then
+            if config.set(args.key, args.value) then
+                cprint("Success configuration key \"" .. args.key .. "\" set to \"" .. args.value ..
+                           "\".")
+            else
+                cprint(
+                    "Error setting configuration key \"" .. args.key .. "\" to \"" .. args.value ..
+                        "\".")
+            end
+            return
+        else
+            output = config.get(args.key)
+        end
+    end
+    if args.json then
+        print(json.encode(output))
+        return
+    end
+    if not args.raw then
+        inspect(output)
+        return
+    end
+    print(output)
+end)
+
 -- About command
 local aboutCmd = parser:command("about", "Get Mercury information.")
 aboutCmd:action(function(args, name)
-    cprint("Package manager for Halo Custom Edition.")
-    cprint("Licensed in GNU General Public License v3.0\n")
-    cprint("My Games path: \"" .. paths.myGamesPath .. "\"")
-    cprint("Current Halo CE path: \"" .. paths.gamePath .. "\"")
+    print("Mercury v" .. constants.mercuryVersion)
+    print("Package manager for Halo Custom Edition.\n")
+    local gamePath = paths.gamePath
+    local dataPath = paths.myGamesPath
+    cprint("CONF Game path: \"" .. gamePath .. "\"")
+    cprint("CONF Data path (My Games Path): \"" .. dataPath .. "\"\n")
+    print(cliDescription)
 end)
 
 -- Show commands information if no args

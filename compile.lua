@@ -50,9 +50,9 @@ local modules = {
     "tinyyaml.lua",
     -- "luaunit.lua", -- Testing purposes only, keep it here for tracking, not needed for release
     -- Mercury modules
-    "Mercury/actions/*.lua",
+    "Mercury/cmd/*.lua",
     "Mercury/modules/*.lua",
-    "Mercury/config/*.lua",
+    "Mercury/cli/*.lua",
     "Mercury/entities/*.lua",
     "Mercury/internal/*.lua",
     "Mercury/lib/*.lua",

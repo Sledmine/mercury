@@ -9,7 +9,6 @@ local argparse = require "argparse"
 local glue = require "glue"
 inspect = require "inspect"
 local json = require "cjson"
-luna = require "modules.luna"
 
 -- Luapower bundle requires
 local luareq = require
@@ -21,6 +20,7 @@ function require(modname)
     return mod
 end
 
+luna = require "modules.luna"
 -- Global data and utils for different operations
 utils = require "modules.utils"
 if isHostWindows() then

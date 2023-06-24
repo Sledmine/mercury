@@ -104,19 +104,15 @@ easymock
 
 ## I use a portable version of Halo Custom Edition, can I use Mercury?
 
-Yes, you can by setting a environment variable pointing to your Halo Custom Edition path,
-environment variables have a different way for being set on Linux and Windows:
+Yes, you can by setting the path in the Mercury configuration or setting an environment variable.
+To con figure Mercury use this command for example:
 
-On Linux:
-```bash
-export HALO_CE_PATH="/home/.wine/drive_c/Halo Custom Edition"
-export HALO_CE_DATA_PATH="/home/Documents/My Games"
 ```
-Do not forget to add those lines to your .bashrc or .zshrc file make them permanent variables.
+mercury config game.path "C:\Halo CE"
+```
 
-On Windows:
-```cmd
-set HALO_CE_PATH=D:\Games\Halo Custom Edition
-set HALO_CE_DATA_PATH=D:\Users\Sledmine\Documents\My Games\Halo CE
+Or by setting an environment variable:
 ```
-These variables will not remain permanent, look into how to set them permanently.
+set HALO_CE_PATH=C:\Halo CE
+```
+**NOTE:** You can do this on Linux too!

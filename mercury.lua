@@ -80,19 +80,18 @@ local function flagsCheck(args, skipPathValidation)
     if not skipPathValidation then
         if not paths.gamePath then
             cprint("Error, Halo Custom Edition path was not found on the system.")
-            cprint("Force game path by setting \"HALO_CE_PATH\" as an environment variable.\n")
-            cprint("Example:")
-            cprint([[On Linux: export HALO_CE_PATH="/home/117/.wine/c/Halo Custom Edition"]])
-            cprint([[On Windows: set HALO_CE_PATH=D:\Games\Halo Custom Edition]])
+            cprint("Force game path by setting \"HALO_CE_PATH\" as an environment variable.")
+            cprint("You can also set it on Mercury config with:\n")
+            cprint("mercury config game.path \"my_halo_ce_path\"")
+            
             os.exit(1)
         end
         if not paths.myGamesPath then
             cprint("Error, at trying to get \"My Games\" path from the system.")
             cprint(
                 "Force game path by setting \"MY_GAMES_PATH\" or \"HALO_CE_DATA_PATH\" as an environment variable.\n")
-            cprint("Example:")
-            cprint([[On Linux: export MY_GAMES_PATH="/home/117/Documents/My Games/Halo CE"]])
-            cprint([[On Windows: set MY_GAMES_PATH=D:\Users\117\Documents\My Games\Halo CE]])
+            cprint("You can also set it on Mercury config with:\n")
+            cprint("mercury config game.data.path \"my_halo_ce_data_path\"")
             os.exit(1)
         end
     end
@@ -373,8 +372,8 @@ local aboutCmd = parser:command("about", "Get Mercury information.")
 aboutCmd:action(function(args, name)
     print("Mercury v" .. constants.mercuryVersion)
     print("Package manager for Halo Custom Edition.\n")
-    local gamePath = paths.gamePath
-    local dataPath = paths.myGamesPath
+    local gamePath = paths.gamePath or "Not found"
+    local dataPath = paths.myGamesPath or "Not found"
     cprint("CONF Game path: \"" .. gamePath .. "\"")
     cprint("CONF Data path (My Games Path): \"" .. dataPath .. "\"\n")
     print(cliDescription)

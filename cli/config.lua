@@ -29,9 +29,8 @@ local registryEntries = {
 }
 
 local function getGamePath()
-    -- Override game path using environment variables
-    local gamePath = getenv("HALO_CE_PATH")
-    if (isHostWindows() and not gamePath) then
+    local gamePath
+    if isHostWindows() then
         local query
         local arch = os.getenv("PROCESSOR_ARCHITECTURE")
         if (arch == "x86") then
@@ -46,10 +45,9 @@ local function getGamePath()
     return gamePath
 end
 
-local function getMyGamesHaloCEPath()
-    -- Override documents path using environment variables
-    local documentsPath = getenv("MY_GAMES_PATH") or getenv("HALO_CE_DATA_PATH")
-    if (isHostWindows() and not documentsPath) then
+local function getGameDataPath()
+    local documentsPath
+    if isHostWindows() then
         local query = registry.getkey(registryEntries.documents)
         if (query and query.values["Personal"]) then
             documentsPath = query.values["Personal"]["value"] .. "\\My Games\\Halo CE"
@@ -65,46 +63,59 @@ function config.paths()
 
     -- Singleton like method, return gathered paths instead of getting them every invocation
     if not paths then
-        local game = cfg.game.path or gpath(getGamePath())
-        local data = cfg.game.data.path or gpath(getMyGamesHaloCEPath())
+        ---@type string | nil
+        local game = getenv "HALO_CE_PATH" or config.get "game.path" or getGamePath()
+        ---@type string | nil
+        local data = getenv "HALO_CE_DATA_PATH" or config.get "game.data.path" or getGameDataPath()
 
-        if game and data then
-            local maps = gpath(game, "/maps")
-            local mods = gpath(game, "/mods")
+        local mercuryTemp = gpath((getenv "TEMP" or "/tmp") .. "/mercury")
+        local mercuryDownloads = gpath(mercuryTemp, "/downloads")
+        local mercuryUnpacked = gpath(mercuryTemp, "/unpacked")
+        createFolder(mercuryDownloads)
+        createFolder(mercuryUnpacked)
 
-            local mercuryTemp = gpath((getenv "TEMP" or "/tmp") .. "/mercury")
-            local mercuryDownloads = gpath(mercuryTemp, "/downloads")
-            local mercuryUnpacked = gpath(mercuryTemp, "/unpacked")
-            local mercuryIndex = gpath(game, "/mercury.json")
-            local mercuryOldIndex = gpath(game, "/mercury/installed/packages.json")
-
-            local luaScriptsGlobal = gpath(data, "/chimera/lua/scripts/global")
-            local luaScriptsMap = gpath(data, "/chimera/lua/scripts/map")
-            local luaScriptsSAPP = gpath(data, "/sapp/lua")
-            local luaDataGlobal = gpath(data, "/chimera/lua/data/global")
-            local luaDataMap = gpath(data, "/chimera/lua/data/map")
-
-            createFolder(mercuryDownloads)
-            createFolder(mercuryUnpacked)
-            paths = {
-                gamePath = game,
-                myGamesPath = data,
-                mercuryTemp = mercuryTemp,
-                mercuryDownloads = mercuryDownloads,
-                mercuryUnpacked = mercuryUnpacked,
-                mercuryOldIndex = mercuryOldIndex,
-                mercuryIndex = mercuryIndex,
-                luaScriptsGlobal = luaScriptsGlobal,
-                luaScriptsMap = luaScriptsMap,
-                luaScriptsSAPP = luaScriptsSAPP,
-                luaDataGlobal = luaDataGlobal,
-                luaDataMap = luaDataMap,
-                gameMaps = maps,
-                gameDLLMods = mods
-            }
+        local maps
+        local mods
+        local mercuryIndex
+        local mercuryOldIndex
+        if game then
+            maps = gpath(game, "/maps")
+            mods = gpath(game, "/mods")
+            mercuryIndex = gpath(game, "/mercury.json")
+            mercuryOldIndex = gpath(game, "/mercury/installed/packages.json")
         end
+
+        local luaScriptsGlobal
+        local luaScriptsMap
+        local luaScriptsSAPP
+        local luaDataGlobal
+        local luaDataMap
+        if data then
+            luaScriptsGlobal = gpath(data, "/chimera/lua/scripts/global")
+            luaScriptsMap = gpath(data, "/chimera/lua/scripts/map")
+            luaScriptsSAPP = gpath(data, "/sapp/lua")
+            luaDataGlobal = gpath(data, "/chimera/lua/data/global")
+            luaDataMap = gpath(data, "/chimera/lua/data/map")
+        end
+
+        paths = {
+            gamePath = game,
+            myGamesPath = data,
+            mercuryTemp = mercuryTemp,
+            mercuryDownloads = mercuryDownloads,
+            mercuryUnpacked = mercuryUnpacked,
+            mercuryOldIndex = mercuryOldIndex,
+            mercuryIndex = mercuryIndex,
+            luaScriptsGlobal = luaScriptsGlobal,
+            luaScriptsMap = luaScriptsMap,
+            luaScriptsSAPP = luaScriptsSAPP,
+            luaDataGlobal = luaDataGlobal,
+            luaDataMap = luaDataMap,
+            gameMaps = maps,
+            gameDLLMods = mods
+        }
     end
-    return paths
+    return paths or {}
 end
 
 --- Get mercury local installed packages
@@ -138,7 +149,7 @@ end
 
 --- Migrate deprecated or old files and paths
 function config.migrate()
-    if (exists(paths.mercuryOldIndex)) then
+    if exists(paths.mercuryOldIndex) then
         cprint("Warning, migrating old packages index path to new index path!")
         move(paths.mercuryOldIndex, paths.mercuryIndex)
         delete(gpath(paths.gamePath, "/mercury"), true)
@@ -159,14 +170,20 @@ end
 
 --- Get CLI configuration
 ---@param key string?
----@return configCLI
+---@return any
 function config.get(key)
     if key then
         if key:includes "." then
             local keys = key:split "."
-            local value = cfg
+            local value = cfg --[[@as any]]
             for _, k in ipairs(keys) do
                 value = value[k]
+            end
+            if type(value) == "string" then
+                value = value:trim()
+                if value == "" then
+                    value = nil
+                end
             end
             return value
         else
@@ -200,7 +217,6 @@ function config.set(key, value)
             cfg[key] = value
         end
         if writeFile(cfgPath, json.encode(cfg)) then
-            print(cfgPath)
             return true
         end
     end

@@ -297,8 +297,11 @@ end
 ---@return string
 function gpath(...)
     local args = {...}
-    local stringPath = ""
-    if (args) then
+    local stringPath
+    if args then
+        if #args > 0 then
+            stringPath = ""
+        end
         for _, currentPath in pairs(args) do
             if (isHostWindows()) then
                 stringPath = stringPath .. wpath(currentPath)

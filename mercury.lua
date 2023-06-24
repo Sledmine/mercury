@@ -375,7 +375,7 @@ aboutCmd:action(function(args, name)
     local gamePath = paths.gamePath or "Not found"
     local dataPath = paths.myGamesPath or "Not found"
     cprint("CONF Game path: \"" .. gamePath .. "\"")
-    cprint("CONF Data path (My Games Path): \"" .. dataPath .. "\"\n")
+    cprint("CONF Data path: \"" .. dataPath .. "\"\n")
     print(cliDescription)
 end)
 

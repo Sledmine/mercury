@@ -58,9 +58,10 @@ function cprint(message, removeNextLine)
                 end
             end
         end
-        io.write(newMessage)
-        if (not removeNextLine) then
-            io.write("\n")
+        io.stdout:write(newMessage)
+        if not removeNextLine then
+            io.stdout:write("\n")
+            io.stdout:flush()
         end
     end
 end

@@ -8,6 +8,10 @@
 - Added `--template` flag to `build` command, this will bootstrap a build project
 - Fixed upgrading to latest version downloading update based on CPU arch instead of Mercury binary arch
 - Added `config` command to manage Mercury configuration
+- Fixed search bar scrolling to top when searching packages in UI
+- Added status game path bar to UI
+- Added game path config button to UI
+- Added experimental live terminal output to UI, helps to see process of heavy commands
 
 # 3.4.2
 - Fixed exit code for `list` command

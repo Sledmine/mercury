@@ -1,5 +1,8 @@
 # Changelog
 
+# 3.5.1
+- Fixed an issue with nil paths when no game paths are defined
+
 # 3.5.0
 - Added `--manifest` flag to `pack` command, allows to retrieve manifest from a package
 - Added properties validation to `pack --template` for manifest files

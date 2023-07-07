@@ -273,7 +273,11 @@ end
 ---@param fileOrFolderPath string
 ---@return boolean
 function exists(fileOrFolderPath)
-    return fs.is(fileOrFolderPath)
+    if fileOrFolderPath then
+        return fs.exists(fileOrFolderPath)
+    end
+    -- TODO We might need to throw an error here instead
+    return false
 end
 
 --- Return true if the given path is a file

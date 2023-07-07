@@ -32,7 +32,7 @@ config = require "cli.config"
 config.load()
 local paths = config.paths()
 -- Migrate old paths and files to newer ones if needed
-config.migrate()
+--config.migrate()
 
 -- Modules
 install = require "modules.install"

@@ -274,7 +274,7 @@ end
 ---@return boolean
 function exists(fileOrFolderPath)
     if fileOrFolderPath then
-        return fs.exists(fileOrFolderPath)
+        return fs.is(fileOrFolderPath)
     end
     -- TODO We might need to throw an error here instead
     return false

@@ -296,13 +296,14 @@ luabundleCmd:description("Bundle modular lua project into a single script.")
 luabundleCmd:argument("bundleFile", "Bundle file name, \"bundle\" by default."):args("?")
 luabundleCmd:flag("-c --compile", "Compile output file using target compiler.")
 luabundleCmd:flag("-t --template", "Create a bundle template file on current directory.")
+luabundleCmd:flag("-r --reload", "Hot reload the bundle file after compilation.")
 luabundleCmd:action(function(args, name)
     flagsCheck(args, true)
     if (args.template) then
         luabundler.template()
         return
     end
-    if not luabundler.bundle(args.bundleFile, args.compile) then
+    if not luabundler.bundle(args.bundleFile, args.compile, args.reload) then
         os.exit(1)
     end
     os.exit(0)

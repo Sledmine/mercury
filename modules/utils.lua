@@ -40,9 +40,9 @@ local keywordsWithColor = {
 }
 
 ---Overloaded color printing function
----@param message any
----@param removeNextLine? boolean
-function cprint(message, removeNextLine)
+---@param message string | table | any
+---@param noNewLine? boolean
+function cprint(message, noNewLine)
     if (type(message) == "table" or not message) then
         print(inspect(message))
     else
@@ -59,7 +59,7 @@ function cprint(message, removeNextLine)
             end
         end
         io.stdout:write(newMessage)
-        if not removeNextLine then
+        if not noNewLine then
             io.stdout:write("\n")
             io.stdout:flush()
         end

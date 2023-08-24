@@ -1,7 +1,8 @@
 # Changelog
 
 # 3.5.1
-- Fixed an issue with nil paths when no game paths are defined
+- Fixed an issue with some constant nil paths when no specific game paths are defined
+- Added prototype flag `-r --reload` to `luabundle` command, allowing for hot reloading chimera scripts
 
 # 3.5.0
 - Added `--manifest` flag to `pack` command, allows to retrieve manifest from a package

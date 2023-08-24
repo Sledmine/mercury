@@ -57,6 +57,10 @@ Source: "mercury_console.cmd"; DestDir: "{app}"; Flags: ignoreversion
 [InstallDelete]
 Type: files; Name: "{userdesktop}\Mercury Console (Admin).lnk"
 
+[UninstallDelete]
+Type: files; Name: "{app}\mercuryconf.json"
+Type: files; Name: "{app}\neutralinojs.log"
+
 [Icons]
 Name: "{group}\{cm:UninstallProgram,{#NAME}}"; Filename: "{uninstallexe}"
 ;Name: "{userdesktop}\Mercury Console (Admin)"; Filename: "{app}\mercury_admin.cmd"; IconFilename: "{app}\mercury.exe"

@@ -67,13 +67,14 @@ Name: "{group}\{cm:UninstallProgram,{#NAME}}"; Filename: "{uninstallexe}"
 Name: "{userdesktop}\Mercury Console"; Filename: "{app}\mercury_console.cmd"; WorkingDir: "{app}"; IconFilename: "{app}\mercury.exe"
 Name: "{userdesktop}\Mercury UI"; Filename: "{app}\mercury-ui-win_x64.exe"; WorkingDir: "{app}"; IconFilename: "{app}\mercury.exe"
 
-[Tasks]
-Name: envPath; Description: {cm:AddToPath}
+;[Tasks]
+;Name: envPath; Description: {cm:AddToPath}
 
+;if (CurStep = ssPostInstall) and (WizardIsTaskSelected('envPath')) then
 [Code]
 procedure CurStepChanged(CurStep: TSetupStep);
 begin
-    if (CurStep = ssPostInstall) and (WizardIsTaskSelected('envPath')) then
+    if (CurStep = ssPostInstall) then
         EnvAddPath(ExpandConstant('{app}'));
 end;
 

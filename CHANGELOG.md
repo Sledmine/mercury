@@ -9,6 +9,7 @@
 - Downloaded packages will be kept in the Mercury temp cache folder when installation fails, this will allow to retry installation without downloading the package again
 - Added package image preview to UI
 - Packages installed by force will not remove previous package if target is not found in the Mercury packages repository
+- Mercury install will always add Mercury folder to PATH from now on
 
 # 3.5.0
 - Added `--manifest` flag to `pack` command, allows to retrieve manifest from a package

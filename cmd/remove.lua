@@ -35,19 +35,21 @@ end
 ---@param eraseBackups? boolean Erase previous backup files
 ---@param recursive? boolean Erase all the dependencies of this package
 ---@param index? boolean Forced remove by erasing the package entry from the packages index
-local function remove(packageLabel, noRestore, eraseBackups, recursive, index)
-    if (search(packageLabel)) then
+---@param keepOptionals? boolean Keep optional files
+local function remove(packageLabel, noRestore, eraseBackups, recursive, index, keepOptionals)
+    if search(packageLabel) then
         local installedPackages = config.packages() or {}
         cprint("Removing package " .. packageLabel .. "...")
         -- Load package as entity to provide normalization and extra package methods
         local package = PackageMercury:new(installedPackages[packageLabel])
         -- Remove dependencies recursively
-        if (recursive) then
-            --cprint("Warning remove is in recursive mode.")
+        if recursive then
+            -- cprint("Warning remove is in recursive mode.")
             local packageDependencies = package.dependencies
-            if (packageDependencies and #packageDependencies > 0) then
+            if packageDependencies and #packageDependencies > 0 then
                 for dependency in each(packageDependencies) do
-                    remove(dependency.label, noRestore, eraseBackups, recursive, index)
+                    remove(dependency.label, noRestore, eraseBackups, recursive, index,
+                           keepOptionals)
                 end
             end
         end
@@ -62,8 +64,12 @@ local function remove(packageLabel, noRestore, eraseBackups, recursive, index)
         end
         -- Normal remove, search for package files and erase them
         for fileIndex, file in pairs(package.files) do
+            if keepOptionals and file.type == "optional" then
+                goto continue
+            end
             -- Path to the existing file to erase
             local finalFilePath = file.outputPath
+
             -- Start erasing proccess
             dprint("Erasing \"" .. finalFilePath .. "\"... ")
             local result, description, errorCode = delete(finalFilePath)
@@ -92,7 +98,7 @@ local function remove(packageLabel, noRestore, eraseBackups, recursive, index)
                 end
             else
                 -- TODO Find info for these codes, those are related with the fs
-                if (errorCode == 2 or errorCode == 3) then
+                if errorCode == 2 or errorCode == 3 then
                     cprint("Warning \"" .. file.path ..
                                "\" was not found, previously erased or moved")
                 else
@@ -102,9 +108,9 @@ local function remove(packageLabel, noRestore, eraseBackups, recursive, index)
                     return false, errors.fileSystemError
                 end
             end
+            ::continue::
         end
-        if (erasePackageFromIndex(packageLabel)) then
-            --cprint("Done, package \"" .. packageLabel .. "\" has been removed.")
+        if erasePackageFromIndex(packageLabel) then
             return true
         else
             cprint("Error, at trying to erase package from index.")

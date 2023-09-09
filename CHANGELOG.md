@@ -10,6 +10,7 @@
 - Added package image preview to UI
 - Packages installed by force will not remove previous package if target is not found in the Mercury packages repository
 - Mercury install will always add Mercury folder to PATH from now on
+- Optional files will be kept when upgrading packages that are dependencies of other packages
 
 # 3.5.0
 - Added `--manifest` flag to `pack` command, allows to retrieve manifest from a package

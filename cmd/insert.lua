@@ -29,6 +29,9 @@ local errors = {
 }
 
 -- Install any mercury package
+---@param mercPath string Path to mercury package
+---@param forced? boolean Force installation
+---@param skipOptionals? boolean Skip optional files
 local function insert(mercPath, forced, skipOptionals)
     if not exists(mercPath) then
         cprint("Error, " .. mercPath .. " does not exist.")
@@ -91,12 +94,11 @@ local function insert(mercPath, forced, skipOptionals)
             if isDependencyRequired then
                 cprint("Upgrading " .. dependency.label .. " " .. existingDependency.version ..
                            " -> " .. dependency.version)
-                --  TODO Add skip optionals to remove action
-                if not remove(dependency.label, true) then
+                if not remove(dependency.label, true, false, false, false, true) then
                     -- Try to remove dependency by force/index
                     remove(dependency.label, false, false, false, true)
                 end
-                if not install.package(dependency.label, dependency.version) then
+                if not install.package(dependency.label, dependency.version, false, true) then
                     return false, errors.depedencyError
                 end
             end

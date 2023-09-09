@@ -247,7 +247,10 @@ local latestCmd = parser:command("latest", "Get latest Mercury version from GitH
 latestCmd:description("Download latest Mercury version if available.")
 latestCmd:action(function(args, name)
     flagsCheck(args, true)
-    latest()
+    if not latest() then
+        os.exit(1)
+    end
+    os.exit(0)
 end)
 
 -- Pack command

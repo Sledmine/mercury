@@ -13,7 +13,8 @@ local packageMercury = class "packageMercury"
 
 ---@class mercDependencies
 ---@field label string
----@field version string
+---@field version? string
+---@field forced? boolean
 
 ---@class mercFiles
 ---@field path string

@@ -32,7 +32,7 @@ config = require "cli.config"
 config.load()
 local paths = config.paths()
 -- Migrate old paths and files to newer ones if needed
---config.migrate()
+-- config.migrate()
 
 -- Modules
 install = require "modules.install"
@@ -83,7 +83,7 @@ local function flagsCheck(args, skipPathValidation)
             cprint("Force game path by setting \"HALO_CE_PATH\" as an environment variable.")
             cprint("You can also set it on Mercury config with:\n")
             cprint("mercury config game.path \"my_halo_ce_path\"")
-            
+
             os.exit(1)
         end
         if not paths.myGamesPath then
@@ -137,21 +137,23 @@ installCmd:option("--repository", "Specify a custom repository to use.")
 installCmd:action(function(args, name)
     flagsCheck(args)
     local code = 0
-    if (latest()) then
+    if latest() then
         -- TODO Add parsing for custom repository protocol
         if (args.repository) then
             api.repositoryHost = args.repository
         end
         for _, package in pairs(args.package) do
-            local packageLabel = glue.string.split(package, "-")[1]
-            local packageSplit = glue.string.split(package, packageLabel .. "-")
+            local packageLabel = package:split("-")[1]
+            local packageSplit = package:split(packageLabel .. "-")
             local packageVersion = packageSplit[2]
             if not install.package(packageLabel, packageVersion, args.force, args.skipOptionals) then
                 code = 1
+            else
+                config.clean()
+                cprint("Done package " .. packageLabel .. " has been installed.")
             end
         end
     end
-    config.clean()
     os.exit(code)
 end)
 
@@ -198,7 +200,8 @@ removeCmd:action(function(args, name)
     if not remove(args.packageLabel, args.norestore, args.erasebackups, args.recursive, args.index) then
         os.exit(1)
     end
-    -- environment.clean()
+    cprint("Done package " .. args.packageLabel .. " has been removed.")
+    os.exit(0)
 end)
 
 -- Insert command

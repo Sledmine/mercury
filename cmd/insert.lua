@@ -24,210 +24,220 @@ local errors = {
     depedencyError = "at trying to install a package dependency",
     mercFileDoesNotExist = "mercury local package does not exist",
     noManifest = "at trying to read manifest.json from the package",
-    updatingPackagesIndex = "at trying to update the packages index"
+    updatingPackagesIndex = "at trying to update the packages index",
+    unpackingMercFile = "at trying to unpack mercury package"
 }
 
 -- Install any mercury package
 local function insert(mercPath, forced, skipOptionals)
-    if exists(mercPath) then
-        local _, mercFilename = splitPath(mercPath)
-        -- Unpack merc file
-        cprint("Unpacking " .. mercFilename .. " zip...")
-        local unpackPath = gpath(paths.mercuryUnpacked, "/", mercFilename)
-        if (not exists(unpackPath)) then
-            createFolder(unpackPath)
+    if not exists(mercPath) then
+        cprint("Error, " .. mercPath .. " does not exist.")
+        return false, errors.mercFileDoesNotExist
+    end
+    local _, mercFilename = splitPath(mercPath)
+    -- Unpack merc file
+    local unpackPath = gpath(paths.mercuryUnpacked, "/", mercFilename)
+    if not exists(unpackPath) then
+        createFolder(unpackPath)
+    end
+    if not merc.unpack(mercPath, unpackPath) then
+        cprint("Error, at unpacking " .. mercFilename .. " zip.")
+        return false, errors.unpackingMercFile
+    end
+
+    -- Load package manifest data
+    local manifestPath = gpath(unpackPath, "/manifest.json")
+    local manifestJson = readFile(manifestPath)
+    if not manifestJson then
+        return false, errors.noManifest
+    end
+
+    ---@type packageMercury
+    local package = PackageMercury:new(manifestJson)
+    dprint("Package:")
+    dprint(package)
+
+    local dependenciesToGet = package.dependencies or {}
+    -- Get other package dependencies
+    dependenciesToGet = table.filter(dependenciesToGet, function(dependency)
+        return not search(dependency.label)
+    end)
+    local dependencyTree = table.map(dependenciesToGet, function(dependency)
+        return dependency.label .. (dependency.version and ("-" .. dependency.version) or "")
+    end)
+    if #dependenciesToGet > 0 then
+        cprint("Getting " .. package.label .. " dependencies:")
+        printTree(dependencyTree)
+    end
+
+    -- Use another ref for dependencies to avoid replacing metadata from package
+    local dependencies = package.dependencies or {}
+    for dependencyIndex, dependency in pairs(dependencies) do
+        local existingDependency = search(dependency.label)
+        -- Check if we have this package dependency already installed
+        if not existingDependency then
+            -- Dependency is not installed, go and get it
+            if not install.package(dependency.label, dependency.version, false, false) then
+                return false, errors.depedencyError
+            end
+            goto continue
         end
-        if (merc.unpack(mercPath, unpackPath)) then
-            -- Load package manifest data
-            local manifestPath = gpath(unpackPath, "/manifest.json")
-            local manifestJson = readFile(manifestPath)
-            if (not manifestJson) then
-                return false, errors.noManifest
+        -- Specific version was specified
+        if existingDependency and dependency.version then
+            local vExisting = v(existingDependency.version)
+            local vRequired = v(dependency.version)
+            -- Specific dependency was specified, check semantic version
+            local isDependencyRequired = (vExisting < vRequired) or dependency.forced
+            if isDependencyRequired then
+                cprint("Upgrading " .. dependency.label .. " " .. existingDependency.version ..
+                           " -> " .. dependency.version)
+                --  TODO Add skip optionals to remove action
+                if not remove(dependency.label, true) then
+                    -- Try to remove dependency by force/index
+                    remove(dependency.label, false, false, false, true)
+                end
+                if not install.package(dependency.label, dependency.version) then
+                    return false, errors.depedencyError
+                end
             end
-            ---@type packageMercury
-            local package = PackageMercury:new(manifestJson)
-            dprint("Package:")
-            dprint(package)
-            -- Get other package dependencies
-            if (package.dependencies) then
-                cprint("Downloading " .. package.label .. " dependencies...")
-                for dependencyIndex, dependency in pairs(package.dependencies) do
-                    local existingDependency = search(dependency.label)
-                    -- Check if we have this package dependency already installed
-                    if (existingDependency) then
-                        -- Specific dependency was specified, check semantic version
-                        if (dependency.version and v(existingDependency.version) <
-                            v(dependency.version)) then
-                            --  TODO Allow user to decide for this step
-                            cprint("Warning newer dependency is required, removing \"" ..
-                                       dependency.label .. "-" .. dependency.version .. "\"")
-                            --  TODO Add skip optionals to remove action
-                            local result, error = remove(dependency.label, true)
-                            if (not result) then
-                                remove(dependency.label, false, false, false, true)
-                            end
-                            result, error = install.package(dependency.label, dependency.version)
-                            if (not result) then
-                                return false, errors.depedencyError
-                            end
-                        else
-                            if (dependency.version) then
-                                dprint("Warning dependency \"" .. dependency.label .. "-" ..
-                                           dependency.version ..
-                                           "\" is being skipped, newer or equal dependency is already installed.")
-                            end
-                        end
-                    else
-                        -- Dependency is not installed, go and get it
-                        local result, error = install.package(dependency.label, dependency.version,
-                                                              false, false)
-                        if (not result) then
-                            return false, errors.depedencyError
-                        end
+        end
+        ::continue::
+    end
+
+    -- Insert new files into the game
+    if package.files then
+        dprint("Copying files to game folders... ")
+        for fileIndex, file in pairs(package.files) do
+            if file.type == "optional" and skipOptionals then
+                cprint("Warning skipping optional file: \"" .. file.path .. "\".")
+                goto continue
+            end
+
+            -- Source file path from mercury unpack path
+            local inputFilePath = gpath(unpackPath, "/", file.path)
+            -- Normalized final insert output file path
+            local outputFile = file.outputPath
+            -- Final output file folder
+            local outputFileFolder = splitPath(outputFile) --[[@as string]]
+            -- Create folder for current file
+            if not exists(outputFileFolder) then
+                dprint("Creating folder \"" .. outputFileFolder .. "\"")
+                createFolder(outputFileFolder)
+            end
+            dprint("Inserting file \"" .. file.path .. "\"\n")
+            dprint("Input -> \"" .. inputFilePath .. "\"")
+            dprint("Output -> \"" .. outputFile .. "\"")
+
+            -- File already exists, check if we need to erase it or backup it
+            if exists(outputFile) then
+                if forced or package.updates then
+                    if not package.updates then
+                        cprint("Warning erasing conflict file: \"" .. file.path .. "\"... ", true)
                     end
+                    local isDeleted, description, error = delete(outputFile)
+                    if not isDeleted then
+                        cprint("Error erasing \"" .. file.path .. "\"")
+                        cprint("Reason: " .. tostring((description or error or "unknown")))
+                        return false, errors.eraseFileError
+                    end
+                    if not package.updates then
+                        cprint("done.")
+                    end
+                else
+                    cprint("Backup conflict file \"" .. file.path .. "\"... ", true)
+                    local isMoved, description, error = move(outputFile, outputFile .. ".bak")
+                    if not isMoved then
+                        cprint("Error creating backup for: \"" .. file.path .. "\"")
+                        cprint("Reason: " .. tostring((description or error or "unknown")))
+                        return false, errors.backupCreationError
+                    end
+                    cprint("done.")
                 end
             end
 
-            -- Insert new files into the game
-            if (package.files) then
-                cprint("Copying files to game folders... ")
-                for fileIndex, file in pairs(package.files) do
-                    if (file.type == "optional" and skipOptionals) then
-                        cprint("Warning skipping optional file: \"" .. file.path .. "\".")
-                        goto continue
-                    end
-
-                    -- Source file path from mercury unpack path
-                    local inputFilePath = gpath(unpackPath, "/", file.path)
-                    -- Normalized final insert output file path
-                    local outputFile = file.outputPath
-                    -- Final output file folder
-                    local outputFileFolder = splitPath(outputFile) --[[@as string]]
-                    -- Create folder for current file
-                    if not exists(outputFileFolder) then
-                        createFolder(outputFileFolder)
-                    end
-                    dprint("Inserting file \"" .. file.path .. "\"\n")
-                    dprint("Input -> \"" .. inputFilePath .. "\"")
-                    dprint("Output -> \"" .. outputFile .. "\"")
-                    if exists(outputFile) then
-                        if forced or package.updates then
-                            if not package.updates then
-                                cprint(
-                                    "Warning forced mode was enabled, erasing conflict file: \"" ..
-                                        file.path .. "\"... ", true)
-                            end
-                            local result, desc, error = delete(outputFile)
-                            if (result) then
-                                if (not package.updates) then
-                                    cprint("done.")
-                                end
-                            else
-                                cprint("Error, at trying to erase \"" .. file.path .. "\"")
-                                cprint("Reason: " .. tostring((desc or error or "unknown")))
-                                return false, errors.eraseFileError
-                            end
-                        else
-                            cprint("Backup conflict file \"" .. file.path .. "\"... ", true)
-                            local result, desc, error = move(outputFile, outputFile .. ".bak")
-                            if (result) then
-                                cprint("done.")
-                            else
-                                cprint("Error, at creating backup for: \"" .. file.path .. "\"")
-                                cprint("Reason: " .. tostring((desc or error or "unknown")))
-                                return false, errors.backupCreationError
-                            end
-                        end
-                    end
-
-                    -- Copy file into game folder
-                    local copied, reason = copyFile(inputFilePath, outputFile)
-                    if copied then
-                        dprint("Done, file succesfully installed.")
-                    else
-                        cprint("Error, at trying to install file: \"" .. file.path .. "\"")
-                        if reason then
-                            cprint("Reason: " .. reason)
-                        end
-                        return false, errors.installationError
-                    end
-                    ::continue::
+            -- Copy file into game folder
+            local isCopied, reason = copyFile(inputFilePath, outputFile)
+            if not isCopied then
+                cprint("Error at trying to install file: \"" .. file.path .. "\"")
+                if reason then
+                    cprint("Reason: " .. reason)
                 end
+                return false, errors.installationError
             end
-
-            -- Apply updates to files if available
-            if (package.updates) then
-                cprint("Updating files from game folders... ")
-                for fileIndex, file in pairs(package.updates) do
-                    cprint("Updating \"" .. file.path .. "\"... ", true)
-                    -- File update from mercury unpack path
-                    local diffFilePath = gpath(unpackPath, "/", file.diffPath)
-                    -- Normalized final insert output file path
-                    local sourceFilePath = file.outputPath
-
-                    -- File path for temp updated file
-                    dprint("sourceFilePath: " .. sourceFilePath)
-                    dprint("diffFilePath: " .. diffFilePath)
-                    local updatedFilePath = sourceFilePath .. ".updated"
-                    dprint("updatedFilePath: " .. updatedFilePath)
-
-                    if (file.type == "binary" or file.type == "text") then
-                        -- Update file using xdelta3
-                        local xd3CmdLine = constants.xd3CmdLine
-                        local xd3Cmd = xd3CmdLine:format(sourceFilePath, diffFilePath,
-                                                         updatedFilePath)
-                        dprint("xd3Cmd: " .. xd3Cmd)
-
-                        --  TODO Add validation for update command
-                        local xd3Result = run(xd3Cmd)
-                        if (exists(updatedFilePath)) then
-                            -- Prepare a temp file name to replace it with the updated one
-                            local oldFilePath = sourceFilePath .. ".old"
-                            -- Move updated file to source file path
-                            if (move(sourceFilePath, oldFilePath) and
-                                move(updatedFilePath, sourceFilePath) and delete(oldFilePath)) then
-                                cprint("done.")
-                            else
-                                cprint("Error, at performing old files removal")
-                                return false, errors.eraseFileError
-                            end
-                        else
-                            cprint("Error, at updating \"" .. file.path .. "\"")
-                            return false, errors.updateError
-                        end
-                    end
-                end
-            end
-
-            -- Get current instance packages
-            local installedPackages = config.packages() or {}
-            -- Substract required package properties and store them
-            if (package.updates) then
-                -- TODO Check out this, there are probably better ways to do it
-                local updateProps = package:getProperties()
-                updateProps.updates = package.updates
-
-                local oldProps = installedPackages[package.label]
-
-                if (updateProps.files) then
-                    glue.extend(oldProps.files, updateProps.files)
-                end
-
-                -- Remove updates property from the final package properties
-                updateProps.updates = nil
-                installedPackages[package.label] = glue.update(oldProps, updateProps)
-            else
-                installedPackages[package.label] = package:getProperties()
-            end
-            -- Update current environment packages data with the new one
-            if not config.packages(installedPackages) then
-                return false, errors.updatingPackagesIndex
-            end
-            return true
+            dprint("Done, file succesfully installed.")
+            ::continue::
         end
     end
-    cprint("Error, " .. mercPath .. " does not exist.")
-    return false, errors.mercFileDoesNotExist
+
+    -- Apply updates to files if available
+    if package.updates then
+        cprint("Updating files from game folders... ")
+        for fileIndex, file in pairs(package.updates) do
+            cprint("Updating \"" .. file.path .. "\"... ", true)
+            -- File update from mercury unpack path
+            local diffFilePath = gpath(unpackPath, "/", file.diffPath)
+            -- Normalized final insert output file path
+            local sourceFilePath = file.outputPath
+
+            -- File path for temp updated file
+            dprint("sourceFilePath: " .. sourceFilePath)
+            dprint("diffFilePath: " .. diffFilePath)
+            local updatedFilePath = sourceFilePath .. ".updated"
+            dprint("updatedFilePath: " .. updatedFilePath)
+
+            if file.type == "binary" or file.type == "text" then
+                -- Update file using xdelta3
+                local xd3CmdLine = constants.xd3CmdLine
+                local xd3Cmd = xd3CmdLine:format(sourceFilePath, diffFilePath, updatedFilePath)
+                dprint("xd3Cmd: " .. xd3Cmd)
+
+                local isFileUpdated = run(xd3Cmd)
+                if not (isFileUpdated and exists(updatedFilePath)) then
+                    cprint("Error, at updating \"" .. file.path .. "\"")
+                    return false, errors.updateError
+                end
+
+                -- TODO Move this to the end of the process so we can move updated files to
+                -- source file path and delete old files if all other files were updated succesfully
+
+                -- Prepare a temp file name to replace it with the updated one
+                local oldFilePath = sourceFilePath .. ".old"
+                -- Move updated file to source file path
+                if not (move(sourceFilePath, oldFilePath) and move(updatedFilePath, sourceFilePath) and
+                    delete(oldFilePath)) then
+                    cprint("Error removing old files")
+                    return false, errors.eraseFileError
+                end
+                cprint("done.")
+            end
+        end
+    end
+
+    -- Get current instance packages
+    local installedPackages = config.packages() or {}
+    -- Substract required package properties and store them
+    if package.updates then
+        -- TODO Check out this, there are probably better ways to do it
+        local updateProps = package:getProperties()
+        updateProps.updates = package.updates
+
+        local oldProps = installedPackages[package.label]
+
+        if updateProps.files then
+            glue.extend(oldProps.files, updateProps.files)
+        end
+
+        -- Remove updates property from the final package properties
+        updateProps.updates = nil
+        installedPackages[package.label] = glue.update(oldProps, updateProps)
+    else
+        installedPackages[package.label] = package:getProperties()
+    end
+    -- Update current environment packages data with the new one
+    if not config.packages(installedPackages) then
+        return false, errors.updatingPackagesIndex
+    end
+    return true
 end
 
 return insert

@@ -43,12 +43,12 @@ local function get(url)
 end
 
 ---@param packageLabel string
----@param packageVersion string
+---@param packageVersion? string
 ---@return packageMetadata?
 function api.getPackage(packageLabel, packageVersion)
     --cprint("Searching for \"" .. packageLabel .. "\" in our repository... ", true)
     local packageUrl = vulcanoUrl() .. "/package/" .. packageLabel
-    if (packageVersion) then
+    if packageVersion then
         packageUrl = packageUrl .. "/" .. packageVersion
     end
     dprint(packageUrl)

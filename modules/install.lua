@@ -35,7 +35,7 @@ end
 
 --- Attempt to install a package with the requrired operations
 ---@param packageLabel string Label of the package to install
----@param packageVersion string Version of the package to install
+---@param packageVersion? string Version of the package to install
 ---@param forced? boolean Forced mode installation
 ---@param skipOptionals? boolean Ignore optional files at installation
 ---@param skipDependencies? boolean Ignore dependencies at installation
@@ -45,27 +45,33 @@ function install.package(packageLabel,
                          forced,
                          skipOptionals,
                          skipDependencies)
-    if (search(packageLabel)) then
-        if (forced) then
+    -- Create local variables before implementation, it can be used to avoid too much else if
+    local status
+    local meta = api.getPackage(packageLabel, packageVersion)
+    if not meta then
+        cprint("Error package \"" .. packageLabel ..
+                   (packageVersion and "-" .. packageVersion or "") .. "\" not found in repository.")
+        return false
+    end
+
+    -- Check if package is already installed
+    if search(packageLabel) then
+        if forced then
             remove(packageLabel, true, true)
         else
             cprint("Warning package \"" .. packageLabel .. "\" is already installed.")
             return false
         end
     end
-    -- Create local variables before implementation, it can be used to avoid too much else if
-    local result
-    local meta = api.getPackage(packageLabel, packageVersion)
-    if meta and meta.mirrors then
+
+    if meta.mirrors then
         cprint("Downloading " .. packageLabel .. "-" .. meta.version .. "...")
         local packagePath
         status, packagePath = download.package(meta)
         if status == 200 then
-            result, status = insert(packagePath, forced, skipOptionals)
-            if result then
-                cprint("Done package " .. packageLabel .. " has been installed.")
-                return true
-            end
+            local isInserted
+            isInserted, status = insert(packagePath, forced, skipOptionals)
+            return isInserted
         end
     end
     return getError(status)
@@ -88,8 +94,9 @@ function install.update(packageLabel, silent)
             result, status = insert(updatePath)
             if result then
                 if not install.update(packageLabel, true) then
-                    cprint("Done package " .. packageLabel .. " updated to version " ..
-                               meta.version .. ".")
+                    cprint(
+                        "Done package " .. packageLabel .. " updated to version " .. meta.version ..
+                            ".")
                 end
                 return true
             end

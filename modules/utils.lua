@@ -30,13 +30,15 @@ local keywordsWithColor = {
     ["Searching"] = terminalColor.blue,
     ["Error"] = terminalColor.red,
     ["Warning"] = terminalColor.yellow,
-    ["Unpacking"] = terminalColor.magenta,
     ["Packing"] = terminalColor.magenta,
     -- ["Copying"] = terminalColor.magenta,
     ["Backup"] = terminalColor.cyan,
     ["Removing"] = terminalColor.red,
     ["Symlinking"] = terminalColor.green,
-    ["CONF"] = terminalColor.cyan
+    ["CONF"] = terminalColor.cyan,
+    ["Upgrading"] = terminalColor.yellow,
+    ["Getting"] = terminalColor.cyan,
+    ["Installing"] = terminalColor.magenta
 }
 
 ---Overloaded color printing function
@@ -126,10 +128,8 @@ end
 
 function createFolder(folderPath)
     if not exists(folderPath) then
-        dprint("Creating folder: " .. folderPath)
         return fs.mkdir(folderPath, true)
     end
-    dprint("Warning folder " .. folderPath .. " already exists.")
     return false
 end
 
@@ -361,7 +361,7 @@ end
 ---@return boolean?
 function run(command)
     -- Binaries should be isolated on Windows, use binaries from executable folder
-    if (isHostWindows()) then
+    if isHostWindows() then
         local exedir = fs.exedir()
         if exedir:find("mingw") then
             return os.execute(command)
@@ -379,8 +379,7 @@ function isHostWindows()
 end
 
 --- Verify assertion and exit if assertion is false
----@param assertion boolean
----@param message string
+---@param assertion boolean | number | table | string
 ---@return boolean?
 function verify(assertion, message)
     if not assertion then
@@ -441,4 +440,25 @@ end
 ---@return string
 function exedir()
     return fs.exedir()
+end
+
+-- Define chars to use for the tree
+local treeChars = {trunk = "│", branch = "├─", leaf = "└─"}
+
+-- Function that prints tree based on keys from a table
+-- Use proper tree char if next key does not have sub levels
+function printTree(tree, indent)
+    indent = indent or ""
+    for key, value in pairs(tree) do
+        if type(value) == "table" then
+            if next(value) then
+                print(indent .. treeChars.branch .. key)
+                printTree(value, indent .. treeChars.trunk .. " ")
+            else
+                print(indent .. treeChars.leaf .. key)
+            end
+        else
+            print(indent .. treeChars.leaf .. tostring(value))
+        end
+    end
 end

@@ -35,6 +35,8 @@ function merc.unzip(filepath, unpackDir)
 end
 
 function merc.unpack(filepath, unpackDir)
+    dprint("Unpacking " .. filepath .. "...")
+    cprint("Unpacking zip...")
     local packageZip = zip.open(filepath, "r")
     if packageZip then
         if exists(unpackDir) or createFolder(unpackDir) then
@@ -42,10 +44,10 @@ function merc.unpack(filepath, unpackDir)
             packageZip:close()
             return true
         end
-        cprint("Error, there was a problem at creating unpack folder \"" .. unpackDir .. "\".")
+        cprint("Error at creating unpack folder \"" .. unpackDir .. "\".")
         return false
     end
-    cprint("Error, there was a problem at unpacking \"" .. filepath .. "\".")
+    cprint("Error at unpacking \"" .. filepath .. "\".")
     return false
 end
 

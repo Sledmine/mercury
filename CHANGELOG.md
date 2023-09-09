@@ -3,6 +3,12 @@
 # 3.5.1
 - Fixed an issue with some constant nil paths when no specific game paths are defined
 - Added prototype flag `-r --reload` to `luabundle` command, allowing for hot reloading chimera scripts
+- Refactored package insertion and downloading more stable and simpler
+- Added dependency tree output for required dependencies when installing packages
+- Simplified messages output
+- Downloaded packages will be kept in the Mercury temp cache folder when installation fails, this will allow to retry installation without downloading the package again
+- Added package image preview to UI
+- Packages installed by force will not remove previous package if target is not found in the Mercury packages repository
 
 # 3.5.0
 - Added `--manifest` flag to `pack` command, allows to retrieve manifest from a package

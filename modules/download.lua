@@ -3,8 +3,6 @@
 -- Sledmine
 -- Download any package file
 ------------------------------------------------------------------------------
-local glue = require "glue"
-
 local download = {}
 
 local fdownload = require "modules.fdownload"
@@ -13,11 +11,15 @@ local paths = config.paths()
 ---@param packageMeta packageMetadata
 function download.package(packageMeta)
     for index, packageUrl in pairs(packageMeta.mirrors) do
-        local urlSplit = glue.string.split(packageUrl, "/")
+        local urlSplit = packageUrl:split "/"
         local packageFileName = urlSplit[#urlSplit]
         local outputPath = gpath(paths.mercuryDownloads, "/", packageFileName)
-        local result, code, headers, status = fdownload.get(packageUrl, outputPath)
-        return code, outputPath
+        -- Check if file was already downloaded, helps with crash recovery and cache
+        if not exists(outputPath) then
+            local result, code, headers, status = fdownload.get(packageUrl, outputPath)
+            return code, outputPath
+        end
+        return 200, outputPath
     end
     return false
 end

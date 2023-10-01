@@ -6,6 +6,7 @@
 local fs = require "fs"
 local path = require "path"
 local glue = require "glue"
+local md5 = require "md5"
 local uv
 if pcall(require, "luv") then
     uv = require "luv"
@@ -38,7 +39,8 @@ local keywordsWithColor = {
     ["CONF"] = terminalColor.cyan,
     ["Upgrading"] = terminalColor.yellow,
     ["Getting"] = terminalColor.cyan,
-    ["Installing"] = terminalColor.magenta
+    ["Installing"] = terminalColor.magenta,
+    ["Compiling"] = terminalColor.cyan
 }
 
 ---Overloaded color printing function
@@ -97,9 +99,8 @@ end
 --- Return elements from a file or folder path
 ---@return string? folder, string? fileName, string extension 
 function splitPath(inputPath)
-    local inputPath = gpath(inputPath)
-    dprint("Splitting path: " .. inputPath)
-    if (inputPath) then
+    local inputPath = gpath(inputPath)    
+    if inputPath then
         local folder = path.dir(inputPath)
         local fileName
         if isHostWindows() then
@@ -110,9 +111,6 @@ function splitPath(inputPath)
         end
         fileName = fileName or path.file(inputPath)
         local extension = path.ext(inputPath)
-        dprint("directory:  " .. tostring(folder))
-        dprint("fileName:  " .. tostring(fileName))
-        dprint("extension:  " .. tostring(extension))
         if (fileName and fileName ~= "" and extension) then
             fileName = string.gsub(fileName, "." .. extension, "")
         else
@@ -159,7 +157,7 @@ function copyFileWindows(sourcePath, destinationPath)
             local destination = assert(uv.fs_open(destinationPath, "w", 438))
             reason = errorMessage
             if (destination) then
-                local bytesToRead = 64 * 1024
+                local bytesToRead = 1024 * 1024 -- 1MB
                 while true do
                     local bytes = uv.fs_read(source, bytesToRead)
                     if bytes == "" then
@@ -356,20 +354,49 @@ function SHA256(filePath)
     end
 end
 
+---Get MD5 checksum of a file
+---@param filePath string
+---@return string?
+function MD5(filePath)
+    local stream = assert(io.open(filePath, "rb"))
+    local digest = md5.digest()
+    while true do
+        local block = stream:read(1024 * 1024)
+        if not block then
+            break
+        end
+        digest(block)
+    end
+    if stream then
+        return digest():tohex()
+    end
+end
+
 --- Execute command line based on OS platform
 ---@param command string
----@return boolean?
-function run(command)
+---@param mute? boolean
+---@return boolean?, number?
+function run(command, mute)
     -- Binaries should be isolated on Windows, use binaries from executable folder
     if isHostWindows() then
+        if mute then
+            command = command .. " 1>nul"
+        end
         local exedir = fs.exedir()
         if exedir:find("mingw") then
-            return os.execute(command)
+            
+            local success, exitcode, code = os.execute(command)
+            return success, code
         else
-            return os.execute("set PATH=" .. exedir .. ";%PATH% && " .. command)
+            local success, exitcode, code = os.execute("set PATH=" .. exedir .. ";%PATH% && " .. command)
+            return success, code
         end
     end
-    return os.execute(command)
+    if mute then
+        command = command .. " 1>/dev/null"
+    end
+    local success, exitcode, code = os.execute(command)
+    return success, code
 end
 
 --- Return true if the host is Windows
@@ -383,7 +410,7 @@ end
 ---@return boolean?
 function verify(assertion, message)
     if not assertion then
-        cprint("Error, " .. message .. ".")
+        cprint("Error " .. message .. ".")
         config.clean()
         os.exit(1)
     end

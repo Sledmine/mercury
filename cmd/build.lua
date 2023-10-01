@@ -30,6 +30,13 @@ local function flag(name, value)
     buildMapCmd = buildMapCmd .. "--" .. name .. " " .. value .. " "
 end
 
+--- Build a project using a buildspec.yml file
+---@param yamlFilePath string
+---@param command string
+---@param verbose boolean
+---@param isRelease boolean
+---@param outputPath string
+---@param scenarios? string[]
 local function build(yamlFilePath, command, verbose, isRelease, outputPath, scenarios)
     local yamlFile = readFile(yamlFilePath) or readFile("buildspec.yml") or
                          readFile("buildspec.yaml")
@@ -91,17 +98,22 @@ local function build(yamlFilePath, command, verbose, isRelease, outputPath, scen
         flag("with-index", buildspec.with_index)
     end
     flag("game-engine", buildspec.game_engine or "gbx-custom")
+
+    -- Validate provided scenarios exist in the buildspec
+    if scenarios then
+        buildspec.scenarios = table.filter(buildspec.scenarios, function(scenario)
+            local scenarioName = path.file(scenario)
+            local found = table.find(scenarios, function(scenarioToCompile)
+                return scenarioToCompile == scenarioName
+            end)
+            return found ~= nil
+        end)
+        verify(#buildspec.scenarios > 0, "No scenarios found to compile")
+    end
+
     -- Compile every scenario in the spec file
     local projectBuildMapCmd = buildMapCmd
-    for _, scenarioPath in ipairs(buildspec.scenarios) do
-        if scenarios then
-            dprint(scenarios)
-            local scenarioName = path.file(scenarioPath)
-            dprint(scenarioName)
-            if not table.indexof(scenarios, scenarioName) then
-                goto continue
-            end
-        end
+    for _, scenarioPath in pairs(buildspec.scenarios) do
         buildMapCmd = projectBuildMapCmd
         if isRelease and ends(scenarioPath, "_dev") then
             local scenarioName = path.file(scenarioPath)
@@ -114,13 +126,13 @@ local function build(yamlFilePath, command, verbose, isRelease, outputPath, scen
         dprint(buildCommand)
         if not IsDebugModeEnabled then
             if not os.execute(buildCommand) then
-                cprint("Error, at building scenario: " .. scenarioPath)
+                cprint("Error building scenario: " .. scenarioPath)
                 return false
             end
         end
         ::continue::
     end
-    cprint("Success, project built.")
+    cprint("Success project built.")
     return true
 end
 

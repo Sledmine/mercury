@@ -6,7 +6,6 @@
 package.path = package.path .. ";Mercury/?.lua"
 -- Luapower modules
 local argparse = require "argparse"
-local glue = require "glue"
 inspect = require "inspect"
 local json = require "cjson"
 

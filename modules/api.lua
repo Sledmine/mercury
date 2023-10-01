@@ -24,6 +24,8 @@ api.version = "v1"
 ---@field conflicts string[]
 ---@field mirrors string[]
 ---@field nextVersion string
+---@field image? string
+---@field checksum string
 
 --- Generate an URL using api definitions
 local function vulcanoUrl()

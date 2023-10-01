@@ -1,5 +1,10 @@
 # Changelog
 
+# 3.5.2
+- Fixed issues with package unpacking, backend now uses 7zip instead of minizip (7z packages will be supported in the future)
+- Fixed an issue with package cache not taking checksum into account
+- Changed default downloads path to user Downloads folder on Windows, helps with cache and gives more control to the user
+
 # 3.5.1
 - Fixed an issue with some constant nil paths when no specific game paths are defined
 - Added prototype flag `-r --reload` to `luabundle` command, allowing for hot reloading chimera scripts

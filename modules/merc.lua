@@ -18,25 +18,29 @@ local paths = config.paths()
 
 local constants = require "modules.constants"
 
---- Unzip a Mercury package
+--- Extract a Mercury package using 7z command
 ---@param filepath string Package path that will be unziped
 ---@param unpackDir string Directory path to place output files
-function merc.unzip(filepath, unpackDir)
+---@param action "extract" | "compress" Action to perform
+local function sevenZip(filepath, unpackDir, action)
     if exists(filepath) then
-        local unzipCmd = constants.unzipCmdLine:format(filepath, unpackDir)
-        if IsDebugModeEnabled then
-            unzipCmd = constants.unzipCmdDebugLine:format(filepath, unpackDir)
+        local commandToUse = constants.sevenZipExtractCmdLine
+        if action == "compress" then
+            commandToUse = constants.sevenZipCompressCmdLine
         end
-        local result = run(unzipCmd)
+        local sevenZipCmd = commandToUse:format(filepath, unpackDir)
+        dprint("sevenZipCmd: " .. sevenZipCmd)
+        local result = run(sevenZipCmd, true)
         return result
     end
-    cprint("Error, there was a problem at unpacking \"" .. filepath .. "\".")
     return false
 end
 
-function merc.unpack(filepath, unpackDir)
-    dprint("Unpacking " .. filepath .. "...")
-    cprint("Unpacking zip...")
+--- Extract a Mercury package using minizip library
+---@param filepath string Package path that will be unziped
+---@param unpackDir string Directory path to place output files
+---@param action "extract" | "compress" Action to perform
+local function minizip(filepath, unpackDir, action)
     local packageZip = zip.open(filepath, "r")
     if packageZip then
         if exists(unpackDir) or createFolder(unpackDir) then
@@ -47,69 +51,103 @@ function merc.unpack(filepath, unpackDir)
         cprint("Error at creating unpack folder \"" .. unpackDir .. "\".")
         return false
     end
-    cprint("Error at unpacking \"" .. filepath .. "\".")
     return false
+end
+
+local backends = {minizip = minizip, ["7z"] = sevenZip}
+
+--- Unpack a Mercury package
+---@param filepath string Package path that will be unpacked
+---@param unpackDir string Directory path to place output files
+---@param backend? "minizip" | "unzip" | "7z" Backend to use for unpacking
+function merc.unpack(filepath, unpackDir, backend)
+    dprint("Unpacking " .. filepath .. "...")
+    cprint("Unpacking zip...")
+    local backend = backend or "minizip"
+
+    local implementation = backends[backend]
+    if not implementation then
+        cprint("Error invalid backend \"" .. backend .. "\".")
+        return false
+    end
+
+    local result = implementation(filepath, unpackDir, "extract")
+    if result then
+        return true
+    end
+
+    return false
+end
+
+--- Determine if a file is optional
+---@param extension string
+local function isFileOptional(extension)
+    return extension == "json" or extension == "ini" or extension == "yml" or extension == "txt"
 end
 
 --- Pack a folder into a Mercury package
 ---@param packDir string
 ---@param mercPath string
-function merc.pack(packDir, mercPath, breaking, feature, fix)
-    if packDir and mercPath and exists(packDir .. "/manifest.json") then
-        -- Read base manifest file
-        local manifest = json.decode(readFile(packDir .. "/manifest.json"))
-        if (manifest) then
-            cprint("Automatically indexing manifest files from package folder... ", true)
-            local packageFiles = filesIn(packDir, true)
-            for _, filePath in ipairs(packageFiles) do
-                if (not ends(filePath, "manifest.json") and not starts(path.file(filePath), ".")) then
-                    local fileType = "binary"
-                    local fileExtension = path.ext(filePath)
-                    if (fileExtension == "json" or fileExtension == "ini" or fileExtension == "yml" or
-                        fileExtension == "txt") then
-                        fileType = "optional"
-                    end
-                    -- local relativePath = filePath:gsub(packDir, "")
-                    local relativePath = path.rel(filePath, packDir)
-                    glue.append(manifest.files,
-                                {path = relativePath, type = fileType, outputPath = relativePath})
-                end
-            end
+---@param backend? "minizip" | "unzip" | "7z" Backend to use for packing
+function merc.pack(packDir, mercPath, backend)
+    local backend = backend or "minizip"
 
-            -- TODO Add manifest base files extension
-            local finalManifestPath = paths.mercuryTemp .. "/manifest.json"
-            writeFile(finalManifestPath, json.encode(manifest))
-            cprint("done.")
+    if not exists(packDir .. "/manifest.json") then
+        cprint("Error, creating package from specified folder, verify manifest.json and paths.")
+        return false
+    end
 
-            -- Start package zip creation
-            cprint("Packing given directory... ")
-            local packageZip = zip.open(
-                                   mercPath .. "/" .. manifest.label .. "-" .. manifest.version ..
-                                       ".zip", "w")
-            if (packageZip) then
-                -- Allow sym links, append manifest file
-                packageZip.store_links = false
-                packageZip.follow_links = true
-                packageZip:add_file(finalManifestPath)
-
-                -- Add files from manifest
-                for _, file in ipairs(manifest.files) do
-                    -- Use print instead of cprint due to weird bug with stdout using zip open
-                    print("-> " .. file.outputPath)
-                    local filePath = packDir .. "/" .. file.outputPath
-                    packageZip:add_file(filePath, file.outputPath)
-                end
-                packageZip:close()
-
-                cprint("Success, package has been created succesfully.")
-                return true
-            end
-            cprint("Error, at creating Mercury package.")
-        end
+    -- Read base manifest file
+    local manifest = json.decode(readFile(packDir .. "/manifest.json"))
+    if not manifest then
         cprint("Error, at trying to open manifest.json.")
     end
-    cprint("Error, creating package from specified folder, verify manifest.json and paths.")
-    return false
+
+    cprint("Automatically indexing manifest files from package folder... ", true)
+    local packageFiles = filesIn(packDir, true)
+    
+    for _, fpath in ipairs(packageFiles) do
+        if not fpath:endswith "manifest.json" and not path.file(fpath):startswith "." then
+            local type = "binary"
+            local extension = path.ext(fpath)
+            if isFileOptional(extension) then
+                type = "optional"
+            end
+            local relativePath = path.rel(fpath, packDir)
+            table.insert(manifest.files,
+                         {path = relativePath, type = type, outputPath = relativePath})
+        end
+    end
+
+    -- TODO Add manifest base files extension
+    local finalManifestPath = gpath(paths.mercuryTemp, "/manifest.json")
+    writeFile(finalManifestPath, json.encode(manifest))
+    cprint("done.")
+
+    -- Start package zip creation
+    cprint("Packing given directory... ")
+    local packageZip = zip.open(mercPath .. "/" .. manifest.label .. "-" .. manifest.version ..
+                                    ".zip", "w")
+    if not packageZip then
+        cprint("Error, at creating Mercury package.")
+    end
+    -- Allow sym links, append manifest file
+    packageZip.store_links = false
+    packageZip.follow_links = true
+    packageZip:add_file(finalManifestPath)
+
+    -- Add files from manifest
+    for _, file in ipairs(manifest.files) do
+        -- Use print instead of cprint due to weird bug with stdout using zip open
+        print("-> " .. file.outputPath)
+        local filePath = packDir .. "/" .. file.outputPath
+        packageZip:add_file(filePath, file.outputPath)
+    end
+    packageZip:close()
+
+    cprint("Success, package has been created succesfully.")
+    return true
+
 end
 
 --- Attempt to create a template package folder

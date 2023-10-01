@@ -43,8 +43,8 @@ local function insert(mercPath, forced, skipOptionals)
     if not exists(unpackPath) then
         createFolder(unpackPath)
     end
-    if not merc.unpack(mercPath, unpackPath) then
-        cprint("Error, at unpacking " .. mercFilename .. " zip.")
+    if not merc.unpack(mercPath, unpackPath, "7z") then
+        cprint("Error at unpacking " .. mercFilename .. " zip.")
         return false, errors.unpackingMercFile
     end
 

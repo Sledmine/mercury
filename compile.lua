@@ -8,6 +8,7 @@ local glue = require "glue"
 local fs = require "fs"
 ------------ Bundle configuration ------------
 local v = require "semver"
+local utils = require "modules.utils"
 local constants = require "modules.constants"
 local version = v(constants.mercuryVersion)
 

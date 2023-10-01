@@ -83,6 +83,7 @@ function config.paths()
         local data = getenv "HALO_CE_DATA_PATH" or config.get "game.data.path" or getGameDataPath()
 
         local mercuryTemp = gpath((getenv "TEMP" or "/tmp") .. "/mercury")
+        -- TODO Use ~/.mercury/downloads for linux
         local mercuryDownloads = getDownloadsPaths() or gpath(mercuryTemp, "/downloads")
         local mercuryUnpacked = gpath(mercuryTemp, "/unpacked")
         createFolder(mercuryDownloads)

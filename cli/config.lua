@@ -23,7 +23,7 @@ local cfg = {
 
 -- Windows required registry keys
 local registryEntries = {
-    documents = [[HKEY_CURRENT_USER\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\Shell Folders]],
+    shellFolders = [[HKEY_CURRENT_USER\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\Shell Folders]],
     haloce32 = [[HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Microsoft Games\Halo CE]],
     haloce64 = [[HKEY_LOCAL_MACHINE\SOFTWARE\WOW6432Node\Microsoft\Microsoft Games\Halo CE]]
 }
@@ -31,15 +31,16 @@ local registryEntries = {
 local function getGamePath()
     local gamePath
     if isHostWindows() then
+        local property = "EXE Path"
         local query
         local arch = os.getenv("PROCESSOR_ARCHITECTURE")
-        if (arch == "x86") then
+        if arch == "x86" then
             query = registry.getkey(registryEntries.haloce32)
         else
             query = registry.getkey(registryEntries.haloce64)
         end
-        if (query and query.values["EXE Path"]) then
-            gamePath = query.values["EXE Path"]["value"]
+        if query and query.values[property] then
+            gamePath = query.values[property].value
         end
     end
     return gamePath
@@ -48,12 +49,25 @@ end
 local function getGameDataPath()
     local documentsPath
     if isHostWindows() then
-        local query = registry.getkey(registryEntries.documents)
-        if (query and query.values["Personal"]) then
-            documentsPath = query.values["Personal"]["value"] .. "\\My Games\\Halo CE"
+        local property = "Personal"
+        local query = registry.getkey(registryEntries.shellFolders)
+        if query and query.values[property] then
+            documentsPath = query.values[property].value .. "\\My Games\\Halo CE"
         end
     end
     return documentsPath
+end
+
+local function getDownloadsPaths()
+    local downloadsPath
+    if isHostWindows() then
+        local property = "{374DE290-123F-4565-9164-39C4925E467B}"
+        local query = registry.getkey(registryEntries.shellFolders)
+        if query and query.values[property] then
+            downloadsPath = query.values[property].value
+        end
+    end
+    return downloadsPath
 end
 
 --- Setup environment to work, environment variables, configuration folder, etc
@@ -69,7 +83,7 @@ function config.paths()
         local data = getenv "HALO_CE_DATA_PATH" or config.get "game.data.path" or getGameDataPath()
 
         local mercuryTemp = gpath((getenv "TEMP" or "/tmp") .. "/mercury")
-        local mercuryDownloads = gpath(mercuryTemp, "/downloads")
+        local mercuryDownloads = getDownloadsPaths() or gpath(mercuryTemp, "/downloads")
         local mercuryUnpacked = gpath(mercuryTemp, "/unpacked")
         createFolder(mercuryDownloads)
         createFolder(mercuryUnpacked)
@@ -122,8 +136,8 @@ end
 ---@param newPackages? packageMercury[]
 ---@return packageMercury[]? packages
 function config.packages(newPackages)
-    if (not newPackages) then
-        if (exists(paths.mercuryIndex)) then
+    if not newPackages then
+        if exists(paths.mercuryIndex) then
             local installedPackages = json.decode(readFile(paths.mercuryIndex))
             if (installedPackages and #table.keys(installedPackages) > 0) then
                 return installedPackages
@@ -139,7 +153,7 @@ end
 
 --- Clean temp data, temp folders, trash files...
 function config.clean()
-    if (not IsDebugModeEnabled) then
+    if not IsDebugModeEnabled then
         dprint("Cleaning " .. paths.mercuryTemp .. "...")
         delete(paths.mercuryTemp, true)
     else

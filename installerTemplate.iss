@@ -71,6 +71,9 @@ Name: "{userdesktop}\Mercury UI"; Filename: "{app}\mercury-ui-win_x64.exe"; Work
 ;[Tasks]
 ;Name: envPath; Description: {cm:AddToPath}
 
+[Run]
+Filename: "{app}\mercury-ui-win_x64.exe"; Description: "Run Mercury UI"; Flags: nowait postinstall skipifsilent;
+
 ;if (CurStep = ssPostInstall) and (WizardIsTaskSelected('envPath')) then
 [Code]
 procedure CurStepChanged(CurStep: TSetupStep);

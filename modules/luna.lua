@@ -1,4 +1,4 @@
-local luna = {_VERSION = "1.3.0"}
+local luna = {_VERSION = "1.4.1"}
 
 luna.string = {}
 
@@ -171,6 +171,8 @@ luna.string.escapep = string.escapep
 luna.table = {}
 
 --- Return a deep copy of a table.
+---
+--- If the table contains other tables, they are copied as well, even metatables.
 ---@generic T
 ---@param t T
 ---@return T
@@ -201,11 +203,10 @@ function table.indexof(t, value)
     end
 end
 
--- TODO Check annotations, it seems like flipping a table key pairs with generics doesn't work.
 --- Return a table with all keys and values swapped.
 ---@generic K, V
 ---@param t table<K, V>
----@return table<V, K>
+---@return {[V]: K}
 ---@nodiscard
 function table.flip(t)
     assert(t ~= nil, "table.flip: t must not be nil")
@@ -235,7 +236,7 @@ function table.find(t, f)
     end
 end
 
---- Returns a list of all keys in `t`.
+--- Returns an array of all keys in `t`.
 ---@generic K, V
 ---@param t table<K, V>
 ---@return K[]
@@ -250,7 +251,7 @@ function table.keys(t)
     return keys
 end
 
---- Returns a list of all values in `t`.
+--- Returns an array of all values in `t`.
 ---@generic K, V
 ---@param t table<K, V>
 ---@return V[]
@@ -271,10 +272,10 @@ end
 ---@generic K, V
 ---@param t table<K, V>
 ---@param f fun(v: V, k: K): boolean
----@param newkeys? boolean If true, the new table will have new keys starting from 1.
----@return table<K, V>
+---@param array? boolean If true, return will be an array starting from 1 discarding original keys.
+---@return {[K]: V}
 ---@nodiscard
-function table.filter(t, f, newkeys)
+function table.filter(t, f, array)
     assert(t ~= nil, "table.filter: t must not be nil")
     assert(type(t) == "table", "table.filter: t must be a table")
     assert(f ~= nil, "table.filter: f must not be nil")
@@ -282,7 +283,7 @@ function table.filter(t, f, newkeys)
     local filtered = {}
     for k, v in pairs(t) do
         if f(v, k) then
-            if newkeys then
+            if array then
                 filtered[#filtered + 1] = v
             else
                 filtered[k] = v
@@ -292,13 +293,15 @@ function table.filter(t, f, newkeys)
     return filtered
 end
 
---- Returns a table with all elements of `t` mapped by the function `f`.
+--- Returns a table with all elements of `t` mapped by function `f`.
 ---
 --- **NOTE**: It keeps original keys in the new table.
----@generic K, V, R
+---@generic K, V
+---@generic R
 ---@param t table<K, V>
 ---@param f fun(v: V, k: K): R
----@return table<K, R>
+---@return {[K]: R}
+--@return R[]
 ---@nodiscard
 function table.map(t, f)
     assert(t ~= nil, "table.map: t must not be nil")
@@ -315,7 +318,7 @@ end
 --- Returns a table merged from all tables passed as arguments.
 ---@generic K, V
 ---@vararg table<K, V>
----@return table<K, V>
+---@return {[K]: V}
 ---@nodiscard
 function table.merge(...)
     local merged = {}
@@ -327,6 +330,65 @@ function table.merge(...)
     return merged
 end
 
+--- Returns a table with all elements in reversed order.
+---@generic T
+---@param t T
+---@return T
+---@nodiscard
+function table.reverse(t)
+    assert(t ~= nil, "table.reverse: t must not be nil")
+    assert(type(t) == "table", "table.reverse: t must be a table")
+    local reversed = {}
+    for i = #t, 1, -1 do
+        reversed[#reversed + 1] = t[i]
+    end
+    return reversed
+end
+
+--- Return a slice of a table, from `start` to `stop`
+---
+--- If `stop` is not provided, it will slice to the end of the table.
+---@generic K, V
+---@param t table<K, V>
+---@param start number Index to start slice from.
+---@param stop? number Index to stop slice at.
+---@return {[K]: V}
+---@nodiscard
+function table.slice(t, start, stop)
+    assert(t ~= nil, "table.slice: t must not be nil")
+    assert(type(t) == "table", "table.slice: t must be a table")
+    assert(start ~= nil, "table.slice: start must not be nil")
+    assert(type(start) == "number", "table.slice: start must be a number")
+    if stop then
+        assert(type(stop) == "number", "table.slice: stop must be a number")
+    end
+    local sliced = {}
+    for i = start, stop or #t do
+        sliced[#sliced + 1] = t[i]
+    end
+    return sliced
+end
+
+--- Return an array of chunks from a table, each chunk containing `size` elements.
+---
+--- If `t` is not evenly divisible by `size`, last chunk will contain the remaining elements.
+---@generic K, V
+---@param t table<K, V>
+---@param size number
+---@return {[K]: V[]}
+---@nodiscard
+function table.chunks(t, size)
+    assert(t ~= nil, "table.chunks: t must not be nil")
+    assert(type(t) == "table", "table.chunks: t must be a table")
+    assert(size ~= nil, "table.chunks: size must not be nil")
+    assert(type(size) == "number", "table.chunks: size must be a number")
+    local chunks = {}
+    for i = 1, #t, size do
+        chunks[#chunks + 1] = table.slice(t, i, i + size - 1)
+    end
+    return chunks
+end
+
 luna.table.copy = table.copy
 luna.table.indexof = table.indexof
 luna.table.flip = table.flip
@@ -336,10 +398,13 @@ luna.table.values = table.values
 luna.table.filter = table.filter
 luna.table.map = table.map
 luna.table.merge = table.merge
+luna.table.reverse = table.reverse
+luna.table.slice = table.slice
+luna.table.chunks = table.chunks
 
 luna.file = {}
 
---- Read a file as text and return its contents.
+--- Read a file into a string.
 ---@param path string
 ---@return string?
 ---@nodiscard
@@ -353,7 +418,7 @@ function luna.file.read(path)
     end
 end
 
---- Write text to a file.
+--- Write a file from a string.
 ---@param path string
 ---@param content string
 ---@return boolean
@@ -367,6 +432,82 @@ function luna.file.write(path, content)
         return true
     end
     return false
+end
+
+--- Append a string to a file.
+---@param path string
+---@param content string
+---@return boolean
+function luna.file.append(path, content)
+    assert(path ~= nil, "file.append: path must not be nil")
+    assert(content ~= nil, "file.append: content must not be nil")
+    local file = io.open(path, "a")
+    if file then
+        file:write(content)
+        file:close()
+        return true
+    end
+    return false
+end
+
+--- Return if a file exists.
+---@param path string
+---@return boolean
+---@nodiscard
+function luna.file.exists(path)
+    assert(path ~= nil, "file.exists: path must not be nil")
+    local file = io.open(path, "r")
+    if file then
+        file:close()
+        return true
+    end
+    return false
+end
+
+--- Attempt to remove a file.
+---@param path string
+---@return boolean
+function luna.file.remove(path)
+    assert(path ~= nil, "file.remove: path must not be nil")
+    return os.remove(path)
+end
+
+--- Write file from a byte array.
+---@param path string
+---@param bytes number[]
+---@return boolean
+function luna.file.frombytes(path, bytes)
+    assert(path ~= nil, "file.frombytes: path must not be nil")
+    assert(bytes ~= nil, "file.frombytes: bytes must not be nil")
+    local file = io.open(path, "wb")
+    if file then
+        file:write(string.char(table.unpack(bytes)))
+        file:close()
+        return true
+    end
+    return false
+end
+
+--- Return a byte array from a file.
+---@param path string
+---@return number[]?
+---@nodiscard
+function luna.file.tobytes(path)
+    assert(path ~= nil, "file.tobytes: path must not be nil")
+    local file = io.open(path, "rb")
+    if file then
+        local bytes = {string.byte(file:read "*a", 1, -1)}
+        file:close()
+        return bytes
+    end
+end
+
+--- Return a boolean from `v` if it is a boolean like value.
+---@param v any
+---@return boolean
+function luna.bool(v)
+    assert(v ~= nil, "bool: v must not be nil")
+    return v == true or v == "true" or v == 1 or v == "1"
 end
 
 return luna

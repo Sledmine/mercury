@@ -50,6 +50,7 @@ local packmanifest = require"modules.merc".manifest
 local map = require "cmd.map"
 local build = require"cmd.build".build
 local buildtemplate = require"cmd.build".template
+local serve = require "cmd.serve"
 
 local luabundler = require "modules.luabundle"
 local constants = require "modules.constants"
@@ -371,6 +372,19 @@ configCmd:action(function(args, name)
         return
     end
     print(output)
+end)
+
+local serveCmd = parser:command("serve", "Serve a Halo Custom Edition server.")
+serveCmd:argument("map", "Map to load on the server."):args("?")
+serveCmd:argument("gametype", "Gametype to load on the server."):args("?")
+serveCmd:option("-p --port", "Port to use for the server."):args("?")
+--serveCmd:option("-t --template", "Template server to use."):args("?")
+serveCmd:option("-s --scripts", "Scripts to load on the server."):args("*")
+serveCmd:flag("-n --new", "Create a new temporal server data profile path.")
+serveCmd:action(function(args, name)
+    flagsCheck(args)
+    serve(args.map, args.gametype, args.port, args.template, args.scripts, args.new)
+    config.clean()
 end)
 
 -- About command

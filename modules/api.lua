@@ -84,7 +84,9 @@ function api.getUpdate(packageLabel, packageVersion)
 end
 
 function api.fetch()
-    local response = requests.get(genesisIndexUrl())
+    local url = genesisIndexUrl()
+    dprint(url)
+    local response = requests.get(url)
     return response.status_code, response.text
 end
 

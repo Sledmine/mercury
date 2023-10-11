@@ -158,14 +158,14 @@ function config.clean()
         dprint("Cleaning " .. paths.mercuryTemp .. "...")
         delete(paths.mercuryTemp, true)
     else
-        cprint("Warning, environment will not be cleaned due to debug mode!")
+        cprint("Warning environment will not be cleaned due to debug mode!")
     end
 end
 
 --- Migrate deprecated or old files and paths
 function config.migrate()
     if exists(paths.mercuryOldIndex) then
-        cprint("Warning, migrating old packages index path to new index path!")
+        cprint("Warning migrating old packages index path to new index path!")
         move(paths.mercuryOldIndex, paths.mercuryIndex)
         delete(gpath(paths.gamePath, "/mercury"), true)
     end

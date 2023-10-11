@@ -1,6 +1,6 @@
 local constants = {}
 
-constants.mercuryVersion = "3.5.2"
+constants.mercuryVersion = "3.6.0"
 constants.latestReleaseApi = "https://api.github.com/repos/Sledmine/Mercury/releases/latest"
 constants.githubPass = "http://githubpass.shadowmods.net"
 constants.mercuryWeb = "https://mercury.shadowmods.net"

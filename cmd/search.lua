@@ -4,7 +4,7 @@ local json = require "cjson"
 ---@return packageMercury? package
 local function searchPackage(packageLabel)
     local installedPackages = config.packages()
-    if (installedPackages and installedPackages[packageLabel]) then
+    if installedPackages and installedPackages[packageLabel] then
         return installedPackages[packageLabel]
     end
 end

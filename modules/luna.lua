@@ -1,4 +1,4 @@
-local luna = {_VERSION = "1.4.1"}
+local luna = {_VERSION = "2.0.0"}
 
 luna.string = {}
 
@@ -267,15 +267,12 @@ function table.values(t)
 end
 
 --- Returns a table with all elements of `t` that satisfy the predicate `f`.
---- 
---- **NOTE**: It keeps original keys in the new table.
 ---@generic K, V
 ---@param t table<K, V>
 ---@param f fun(v: V, k: K): boolean
----@param array? boolean If true, return will be an array starting from 1 discarding original keys.
 ---@return {[K]: V}
 ---@nodiscard
-function table.filter(t, f, array)
+function table.filter(t, f)
     assert(t ~= nil, "table.filter: t must not be nil")
     assert(type(t) == "table", "table.filter: t must be a table")
     assert(f ~= nil, "table.filter: f must not be nil")
@@ -283,11 +280,29 @@ function table.filter(t, f, array)
     local filtered = {}
     for k, v in pairs(t) do
         if f(v, k) then
-            if array then
-                filtered[#filtered + 1] = v
-            else
-                filtered[k] = v
-            end
+            filtered[#filtered + 1] = v
+        end
+    end
+    return filtered
+end
+
+--- Returns a table with all elements of `t` that satisfy the predicate `f`.
+---
+--- **NOTE**: It keeps original keys in the new table.
+---@generic K, V
+---@param t table<K, V>
+---@param f fun(v: V, k: K): boolean
+---@return {[K]: V}
+---@nodiscard
+function table.kfilter(t, f)
+    assert(t ~= nil, "table.kfilter: t must not be nil")
+    assert(type(t) == "table", "table.kfilter: t must be a table")
+    assert(f ~= nil, "table.kfilter: f must not be nil")
+    assert(type(f) == "function", "table.kfilter: f must be a function")
+    local filtered = {}
+    for k, v in pairs(t) do
+        if f(v, k) then
+            filtered[k] = v
         end
     end
     return filtered

@@ -99,7 +99,7 @@ end
 --- Return elements from a file or folder path
 ---@return string? folder, string? fileName, string extension 
 function splitPath(inputPath)
-    local inputPath = gpath(inputPath)    
+    local inputPath = gpath(inputPath)
     if inputPath then
         local folder = path.dir(inputPath)
         local fileName
@@ -112,7 +112,7 @@ function splitPath(inputPath)
         fileName = fileName or path.file(inputPath)
         local extension = path.ext(inputPath)
         if (fileName and fileName ~= "" and extension) then
-            fileName = string.gsub(fileName, "." .. extension, "")
+            fileName = string.replace(fileName, "." .. extension, "")
         else
             fileName = nil
         end
@@ -318,7 +318,7 @@ end
 
 --- Return a list of files in a directory
 ---@param dir string
----@param recursive boolean
+---@param recursive? boolean
 ---@return string[]
 function filesIn(dir, recursive)
     local files = {}
@@ -384,11 +384,12 @@ function run(command, mute)
         end
         local exedir = fs.exedir()
         if exedir:find("mingw") then
-            
+
             local success, exitcode, code = os.execute(command)
             return success, code
         else
-            local success, exitcode, code = os.execute("set PATH=" .. exedir .. ";%PATH% && " .. command)
+            local success, exitcode, code = os.execute(
+                                                "set PATH=" .. exedir .. ";%PATH% && " .. command)
             return success, code
         end
     end

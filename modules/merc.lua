@@ -93,14 +93,14 @@ function merc.pack(packDir, mercPath, backend)
     local backend = backend or "minizip"
 
     if not exists(packDir .. "/manifest.json") then
-        cprint("Error, creating package from specified folder, verify manifest.json and paths.")
+        cprint("Error creating package from specified folder, verify manifest.json and paths.")
         return false
     end
 
     -- Read base manifest file
     local manifest = json.decode(readFile(packDir .. "/manifest.json"))
     if not manifest then
-        cprint("Error, at trying to open manifest.json.")
+        cprint("Error at trying to open manifest.json.")
     end
 
     cprint("Automatically indexing manifest files from package folder... ", true)
@@ -120,7 +120,7 @@ function merc.pack(packDir, mercPath, backend)
     end
 
     -- TODO Add manifest base files extension
-    local finalManifestPath = gpath(paths.mercuryTemp, "/manifest.json")
+    local finalManifestPath = gpath(paths.mercuryTemp .. "/manifest.json")
     writeFile(finalManifestPath, json.encode(manifest))
     cprint("done.")
 
@@ -129,7 +129,7 @@ function merc.pack(packDir, mercPath, backend)
     local packageZip = zip.open(mercPath .. "/" .. manifest.label .. "-" .. manifest.version ..
                                     ".zip", "w")
     if not packageZip then
-        cprint("Error, at creating Mercury package.")
+        cprint("Error at creating Mercury package.")
     end
     -- Allow sym links, append manifest file
     packageZip.store_links = false
@@ -139,13 +139,14 @@ function merc.pack(packDir, mercPath, backend)
     -- Add files from manifest
     for _, file in ipairs(manifest.files) do
         -- Use print instead of cprint due to weird bug with stdout using zip open
-        print("-> " .. file.outputPath)
-        local filePath = packDir .. "/" .. file.outputPath
-        packageZip:add_file(filePath, file.outputPath)
+        local filePath = gpath(packDir .. "/" .. file.outputPath)
+        local outputPath = upath(file.outputPath)
+        print("-> " .. outputPath)
+        packageZip:add_file(filePath, outputPath)
     end
     packageZip:close()
 
-    cprint("Success, package has been created succesfully.")
+    cprint("Success package has been created succesfully.")
     return true
 
 end

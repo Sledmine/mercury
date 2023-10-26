@@ -1,5 +1,14 @@
 # Changelog
 
+# 3.6.0
+- Fixed issue with path splitting causing issues with repetitive pattern paths
+- Fixed issue with `build` command not filtering properly specific scenarios to build
+- Fixed issue with `pack` command at creating packages on Windows resulting in packages not working on Linux
+- Added `serve` command to start a game server on demand, experimental
+- Added `--crc` flag to `build` command, allows to build a specific scenario or scenarios given a CRC32 hash
+- Added current tab navigation highlight to UI
+- Fixed images not appearing for installed packages in UI
+
 # 3.5.2
 - Fixed issues with package unpacking, backend now uses 7zip instead of minizip (7z packages will be supported in the future)
 - Fixed an issue with package cache not taking checksum into account

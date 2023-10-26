@@ -37,7 +37,8 @@ end
 ---@param isRelease boolean
 ---@param outputPath string
 ---@param scenarios? string[]
-local function build(yamlFilePath, command, verbose, isRelease, outputPath, scenarios)
+---@param forgeCrc string?
+local function build(yamlFilePath, command, verbose, isRelease, outputPath, scenarios, forgeCrc)
     local yamlFile = readFile(yamlFilePath) or readFile("buildspec.yml") or
                          readFile("buildspec.yaml")
     verify(yamlFile, "No buildspec.yml or buildspec.yaml file found")
@@ -98,6 +99,9 @@ local function build(yamlFilePath, command, verbose, isRelease, outputPath, scen
         flag("with-index", buildspec.with_index)
     end
     flag("game-engine", buildspec.game_engine or "gbx-custom")
+    if forgeCrc then
+        flag("forge-crc", forgeCrc)
+    end
 
     -- Validate provided scenarios exist in the buildspec
     if scenarios then

@@ -323,15 +323,17 @@ buildCmd:flag("--verbose", "Output more verbose messages to console.")
 buildCmd:flag("--release", "Flag this build as a release.")
 buildCmd:flag("--template", "Create a buildspec template file on current directory.")
 buildCmd:flag("-s --scenario", "Build specific scenarios."):args("+")
-buildCmd:option("--output", "Output path for the build result."):args("?")
+buildCmd:option("--output", "Output path for the build result.")
+buildCmd:option("--crc", "Forge crc to use for the build.")
 buildCmd:action(function(args, name)
     flagsCheck(args)
     if (args.template) then
         buildtemplate()
         return
     end
-    if build("buildspec.yaml", args.command, args.verbose, args.release, (args.output or {})[1],
-             args.scenario) then
+    dprint(args)
+    if build("buildspec.yaml", args.command, args.verbose, args.release, args.output,
+             args.scenario, args.crc) then
         os.exit(0)
     end
     os.exit(1)
@@ -378,7 +380,7 @@ local serveCmd = parser:command("serve", "Serve a Halo Custom Edition server.")
 serveCmd:argument("map", "Map to load on the server."):args("?")
 serveCmd:argument("gametype", "Gametype to load on the server."):args("?")
 serveCmd:option("-p --port", "Port to use for the server."):args("?")
---serveCmd:option("-t --template", "Template server to use."):args("?")
+-- serveCmd:option("-t --template", "Template server to use."):args("?")
 serveCmd:option("-s --scripts", "Scripts to load on the server."):args("*")
 serveCmd:flag("-n --new", "Create a new temporal server data profile path.")
 serveCmd:action(function(args, name)

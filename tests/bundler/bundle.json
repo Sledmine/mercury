@@ -1,0 +1,11 @@
+{
+    "include": [
+        "lua/",
+        "lua_modules/"
+    ],
+    "modules": [
+        "luna",
+        "blam",
+        "insurrection.core"
+    ]
+}

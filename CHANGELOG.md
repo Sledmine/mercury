@@ -8,6 +8,12 @@
 - Added `--crc` flag to `build` command, allows to build a specific scenario or scenarios given a CRC32 hash
 - Added current tab navigation highlight to UI
 - Fixed images not appearing for installed packages in UI
+- Fixed progress bars not appearing properly for some commands on Windows in UI
+- Added console view for `update` command in UI, helps to see progress of heavy commands
+- Added spinner status bar to UI, helps to see when a Mercury command is running
+- Added cancel command button color change depending if Mercury command executed successfully or not in UI
+- Changed minimum window size for UI to 800x510, default window size is 900x510
+- Fixed some buttons outline not dissapearing when clicking on other buttons in UI
 
 # 3.5.2
 - Fixed issues with package unpacking, backend now uses 7zip instead of minizip (7z packages will be supported in the future)

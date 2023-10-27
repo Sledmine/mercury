@@ -96,6 +96,7 @@ function stats(size)
         else
             -- close up
             io.stderr:write("\r", gauge(got, current - start), "\n")
+            io.stderr:flush()
         end
         return chunk
     end

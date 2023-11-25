@@ -100,6 +100,7 @@ local function flagsCheck(args, skipPathValidation)
         os.exit(1)
     end
     if args.debug then
+        dprint(args)
         IsDebugModeEnabled = true
         cprint("Warning Debug mode enabled.")
     end
@@ -332,8 +333,8 @@ buildCmd:action(function(args, name)
         return
     end
     dprint(args)
-    if build("buildspec.yaml", args.command, args.verbose, args.release, args.output,
-             args.scenario, args.crc) then
+    if build("buildspec.yaml", args.command, args.verbose, args.release, args.output, args.scenario,
+             args.crc) then
         os.exit(0)
     end
     os.exit(1)
@@ -376,6 +377,16 @@ configCmd:action(function(args, name)
     print(output)
 end)
 
+---Get option value from argparse table
+---@param v table
+---@return unknown
+local function option(v)
+    if v then
+        return v[1]
+    end
+    return nil
+end
+
 local serveCmd = parser:command("serve", "Serve a Halo Custom Edition server.")
 serveCmd:argument("map", "Map to load on the server."):args("?")
 serveCmd:argument("gametype", "Gametype to load on the server."):args("?")
@@ -383,9 +394,16 @@ serveCmd:option("-p --port", "Port to use for the server."):args("?")
 -- serveCmd:option("-t --template", "Template server to use."):args("?")
 serveCmd:option("-s --scripts", "Scripts to load on the server."):args("*")
 serveCmd:flag("-n --new", "Create a new temporal server data profile path.")
-serveCmd:action(function(args, name)
+serveCmd:flag("--server-side-projectiles", "Enable server side projectiles.")
+serveCmd:flag("-r --rcon", "Enable remote console on the server.")
+serveCmd:option("--rcon-password", "Remote console password to use for the server."):args("?")
+serveCmd:action(function(args)
     flagsCheck(args)
-    serve(args.map, args.gametype, args.port, args.template, args.scripts, args.new)
+    serve(args.map, args.gametype, option(args.port), args.template, args.scripts, args.new, {
+        server_side_projectiles = args.server_side_projectiles,
+        rcon = args.rcon,
+        rcon_password = option(args.rcon_password)
+    })
     config.clean()
 end)
 
@@ -402,14 +420,14 @@ aboutCmd:action(function(args, name)
 end)
 
 -- Show commands information if no args
-if (not arg[1]) then
+if not arg[1] then
     print(parser:get_help())
 end
 
 -- Override args array with parser ones
 local args = parser:parse()
 
-if (args.v) then
+if args.v then
     cprint(constants.mercuryVersion)
     os.exit(0)
 end

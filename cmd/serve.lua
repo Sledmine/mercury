@@ -75,33 +75,34 @@ end
 
 local loadFile = [[
 sv_public 0
-sv_name "%s"
-sv_rcon 1
-sv_rcon_password 1234
+sv_name {sv_name}
+sv_rcon {sv_rcon}
+sv_rcon_password {sv_rcon_password}
 sv_timelimit 0
 sv_maxplayers 16
-sv_map "%s" "%s"
+sv_map "{map}" "{gametype}"
+allow_client_side_weapon_projectiles {allow_client_side_weapon_projectiles}
 load
 ]]
 
 local init = {
     "lua 1",
     "antihalofp 1",
-    "antispam 2",
+    -- "antispam 2",
     "antilagspawn 0",
     "antiglitch 0",
     "no_lead 1",
     -- "save_scores 1",
-    "mtv 1",
+    -- "mtv 1",
     "disable_timer_offsets 1",
-    -- "msg_prefix \"Mercury: \"",
+    "msg_prefix \"Server: \"",
     -- "aimbot_ban 5000 1",
     "network_thread 0",
-    "auto_update 0",
-    "full_ipban 1"
+    "auto_update 0"
+    -- "full_ipban 1"
 }
 
-local function serve(map, gametype, port, template, scripts, isUsingNewDataPath)
+local function serve(map, gametype, port, template, scripts, isUsingNewDataPath, config)
     map = map or "bloodgulch"
     gametype = gametype or "slayer"
     port = port or 2302
@@ -109,6 +110,7 @@ local function serve(map, gametype, port, template, scripts, isUsingNewDataPath)
     for _, script in pairs(scripts) do
         table.insert(init, "lua_load " .. script)
     end
+    config = config or {}
 
     local serverDataPath = paths.myGamesPath
     if isUsingNewDataPath then
@@ -121,7 +123,15 @@ local function serve(map, gametype, port, template, scripts, isUsingNewDataPath)
     local loadFilePath = gpath(serverDataPath, "/load.txt")
     local initFilePath = gpath(serverDataPath, "/sapp/init.txt")
 
-    writeFile(loadFilePath, string.format(loadFile, map, map, gametype))
+    local load = loadFile:template{
+        map = map,
+        gametype = gametype,
+        sv_name = map,
+        sv_rcon = config.rcon and 1 or 0,
+        sv_rcon_password = config.rcon_password or "merc",
+        allow_client_side_weapon_projectiles = config.server_side_projectiles and 1 or 0
+    }
+    writeFile(loadFilePath, string.format(load, map, map, gametype))
     writeFile(initFilePath, table.concat(init, "\n"))
 
     -- Prepare the command to setup the server

@@ -1,7 +1,7 @@
 # Changelog
 
 # 3.6.0
-- Fixed issue with path splitting causing issues with repetitive pattern paths
+- Fixed issue with path splitting causing problems with repetitive pattern paths
 - Fixed issue with `build` command not filtering properly specific scenarios to build
 - Fixed issue with `pack` command at creating packages on Windows resulting in packages not working on Linux
 - Added `serve` command to start a game server on demand, experimental
@@ -10,10 +10,10 @@
 - Fixed images not appearing for installed packages in UI
 - Fixed progress bars not appearing properly for some commands on Windows in UI
 - Added console view for `update` command in UI, helps to see progress of heavy commands
-- Added spinner status bar to UI, helps to see when a Mercury command is running
+- Added spinner status bar to UI, helps to see when a Mercury command is still running
 - Added cancel command button color change depending if Mercury command executed successfully or not in UI
 - Changed minimum window size for UI to 800x510, default window size is 900x510
-- Fixed some buttons outline not dissapearing when clicking on other buttons in UI
+- Fixed some buttons outline not dissapearing when clicking in other buttons in UI
 
 # 3.5.2
 - Fixed issues with package unpacking, backend now uses 7zip instead of minizip (7z packages will be supported in the future)

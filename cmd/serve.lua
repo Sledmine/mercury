@@ -129,7 +129,7 @@ local function serve(map, gametype, port, template, scripts, isUsingNewDataPath,
         sv_name = map,
         sv_rcon = config.rcon and 1 or 0,
         sv_rcon_password = config.rcon_password or "merc",
-        allow_client_side_weapon_projectiles = config.server_side_projectiles and 1 or 0
+        allow_client_side_weapon_projectiles = config.server_side_projectiles and 0 or 1
     }
     writeFile(loadFilePath, string.format(load, map, map, gametype))
     writeFile(initFilePath, table.concat(init, "\n"))

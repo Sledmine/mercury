@@ -1,5 +1,10 @@
 # Changelog
 
+# 3.6.1
+- Fixed issue with flag `server_side_projectiles` being inverted in `serve` command
+- Added new insert button to UI, allows to insert a package from a local folder
+- Added update indicator to UI, helps to see when a new package update is available
+
 # 3.6.0
 - Fixed issue with path splitting causing problems with repetitive pattern paths
 - Fixed issue with `build` command not filtering properly specific scenarios to build

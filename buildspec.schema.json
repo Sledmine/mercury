@@ -55,6 +55,10 @@
         "commands": {
             "type": "object",
             "description": "Commands map that belong to this project buildspec."
+        },
+        "extra_tags": {
+            "type": "array",
+            "description": "List of extra tags to include in the build."
         }
     },
     "required": [

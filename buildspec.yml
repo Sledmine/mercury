@@ -6,6 +6,8 @@ version: 1
 #script_source: "data" # "tags" by default
 #auto_forge: false
 #stock-resource-bounds: true
+extra_tags: 
+  - extra/workarounds/tags_highres_hud_workarounds
 scenarios:
   - levels/a50/a50_coop_evolved_dev
   - levels/b30/b30_coop_evolved_dev

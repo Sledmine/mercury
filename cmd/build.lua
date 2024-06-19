@@ -16,6 +16,7 @@ local paths = config.paths()
 ---@field with_index string
 ---@field script_source "data" | "tags"
 ---@field commands table<string, string[]>
+---@field extra_tags string[]
 
 -- Provide a runner command for each invader command 
 local runner = replace((os.getenv("INVADER_RUNNER") or ""), "$PWD", fs.cd())
@@ -102,6 +103,11 @@ local function build(yamlFilePath, command, verbose, isRelease, outputPath, scen
     if forgeCrc then
         flag("forge-crc", forgeCrc)
     end
+    if buildspec.extra_tags then
+        for _, tag in ipairs(buildspec.extra_tags) do
+            flag("tags", tag)
+        end
+    end
 
     -- Validate provided scenarios exist in the buildspec
     if scenarios then
@@ -119,12 +125,15 @@ local function build(yamlFilePath, command, verbose, isRelease, outputPath, scen
     local projectBuildMapCmd = buildMapCmd
     for _, scenarioPath in pairs(buildspec.scenarios) do
         buildMapCmd = projectBuildMapCmd
-        if isRelease and ends(scenarioPath, "_dev") then
-            local scenarioName = path.file(scenarioPath)
+        local scenarioName = path.file(scenarioPath)
+        if isRelease and scenarioPath:endswith "_dev" then
             -- Remove the _dev suffix from the scenario name
-            scenarioName = scenarioName:sub(1, scenarioName:len() - 4)
-            flag("rename-scenario", scenarioName)
+            local releaseScenarioName = scenarioName:sub(1, scenarioName:len() - 4)
+            flag("rename-scenario", releaseScenarioName)
         end
+        local scenarioDir = path.dir(scenarioPath)
+        flag("tags", gpath("tags", "/", scenarioDir, "/custom_tags"))
+        flag("tags", "tags")
         local buildCommand = buildMapCmd .. "\"" .. scenarioPath .. "\""
         cprint("Compiling scenario: " .. scenarioPath)
         dprint(buildCommand)

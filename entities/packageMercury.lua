@@ -4,7 +4,6 @@
 -- Package entity for merc files
 ------------------------------------------------------------------------------
 local json = require "cjson"
-local glue = require "glue"
 local paths = config.paths()
 
 local class = require "middleclass"
@@ -40,9 +39,12 @@ local packageMercury = class "packageMercury"
 ---@field files mercFiles[]
 ---@field updates mercUpdates[]
 ---@field dependencies mercDependencies[]
+---@field deletes {path: string}[]
+---@field conflicts mercDependencies[]
 
 --- Replace and normalize file paths
 ---@param files mercFiles[]
+---@param manifestVersion string
 local function normalizePaths(files, manifestVersion)
     if (files and #files > 0) then
         local pathVariables = {
@@ -65,16 +67,15 @@ local function normalizePaths(files, manifestVersion)
             end
             local normalizedOutputPath = file.outputPath
             for variable, value in pairs(pathVariables) do
-                local plainVariable = variable:gsub('[%^%$%(%)%%%.%[%]%*%+%-%?]','%%%1')
-                normalizedOutputPath = normalizedOutputPath:gsub(plainVariable, value)
+                normalizedOutputPath = normalizedOutputPath:replace(variable, value)
             end
             file.path = gpath(file.path)
-            if (manifestVersion == "1.0") then
+            if manifestVersion == "1.0" then
                 file.outputPath = gpath(normalizedOutputPath .. file.path)
-            elseif (manifestVersion == "1.1.0") then
+            elseif manifestVersion == "1.1.0" then
                 file.outputPath = gpath(normalizedOutputPath)
             else
-                cprint("Error, uknown manifest version (" .. tostring(manifestVersion) .. ")")
+                cprint("Error uknown manifest version (" .. tostring(manifestVersion) .. ")")
                 error("Error at trying to read manifest.json version", 2)
             end
             paths[fileIndex] = file
@@ -87,6 +88,7 @@ end
 --- Entity constructor
 ---@param jsonStringOrTable string | packageMercury
 function packageMercury:initialize(jsonStringOrTable)
+    ---@type packageMercury
     local properties
     if (type(jsonStringOrTable) == "string") then
         properties = json.decode(jsonStringOrTable)
@@ -128,11 +130,14 @@ function packageMercury:initialize(jsonStringOrTable)
     ---@type mercUpdates[]
     self.updates = normalizePaths(properties.updates, self.manifestVersion)
 
+    ---@type {path: string}[]
+    self.deletes = normalizePaths(properties.deletes, self.manifestVersion)
+
     ---@type mercDependencies[]
     self.dependencies = properties.dependencies
 
     -- Update manifest
-    if (self.manifestVersion == "1.0") then
+    if self.manifestVersion == "1.0" then
         self.manifestVersion = "1.1.0"
     end
 end
@@ -155,7 +160,7 @@ function packageMercury:getProperties()
 end
 
 function packageMercury:getExpectedVersion()
-    return "1.1.0"
+    return "2.0.0"
 end
 
 return packageMercury

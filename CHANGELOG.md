@@ -1,4 +1,20 @@
 # Changelog
+All notable changes to this project will be documented in this file.
+
+The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
+and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+
+## [3.7.0] - 2024-06-18
+### Added
+- Flag `--difficulty` to `serve` command, allows to set the game server difficulty
+- Custom tags feature in builspec.yaml for `build` command, allows to set custom tags override for a specific scenario
+- Extra tags feature in buildspec.yaml for `build` command, allows to set global extra tags for all scenarios
+
+### Changed
+- Package diff in `packdiff` command now will now use the 7z binary to unpack diff packages, improves speed
+
+### Fixed
+- Fixed issue with `pack` and `packdiff` commands not properly normalizing paths in Windows
 
 # 3.6.1
 - Fixed issue with flag `server_side_projectiles` being inverted in `serve` command

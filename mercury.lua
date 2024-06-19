@@ -290,7 +290,7 @@ packdiffCmd:argument("diffPackagePath", "Path to diff package as the result."):a
 packdiffCmd:action(function(args, name)
     local code = 0
     flagsCheck(args, true)
-    if not packdiff(args.oldPackagePath, args.newPackagePath, args.diffPackagePath) then
+    if not packdiff(args.oldPackagePath, args.newPackagePath, args.diffPackagePath, "7z") then
         code = 1
     end
     config.clean()
@@ -397,12 +397,21 @@ serveCmd:flag("-n --new", "Create a new temporal server data profile path.")
 serveCmd:flag("--server-side-projectiles", "Enable server side projectiles.")
 serveCmd:flag("-r --rcon", "Enable remote console on the server.")
 serveCmd:option("--rcon-password", "Remote console password to use for the server."):args("?")
+serveCmd:option("--difficulty", "Difficulty to use for the server."):choices{
+    "easy",
+    "normal",
+    "hard",
+    "impossible"
+}:default "normal"
+--serveCmd:option("--mapcycle", "Mapcycle to use for the server."):args("*")
 serveCmd:action(function(args)
     flagsCheck(args)
     serve(args.map, args.gametype, option(args.port), args.template, args.scripts, args.new, {
         server_side_projectiles = args.server_side_projectiles,
         rcon = args.rcon,
-        rcon_password = option(args.rcon_password)
+        rcon_password = option(args.rcon_password),
+        difficulty = option(args.difficulty)
+        --mapcycle = args.mapcycle
     })
     config.clean()
 end)

@@ -122,6 +122,7 @@ local function serve(map, gametype, port, template, scripts, isUsingNewDataPath,
 
     local loadFilePath = gpath(serverDataPath, "/load.txt")
     local initFilePath = gpath(serverDataPath, "/sapp/init.txt")
+    --local mapcyclePath = gpath(serverDataPath, "/sapp/mapcycle.txt")
 
     local load = loadFile:template{
         map = map,
@@ -129,7 +130,8 @@ local function serve(map, gametype, port, template, scripts, isUsingNewDataPath,
         sv_name = map,
         sv_rcon = config.rcon and 1 or 0,
         sv_rcon_password = config.rcon_password or "merc",
-        allow_client_side_weapon_projectiles = config.server_side_projectiles and 0 or 1
+        allow_client_side_weapon_projectiles = config.server_side_projectiles and 0 or 1,
+        game_difficulty_set = config.difficulty
     }
     writeFile(loadFilePath, string.format(load, map, map, gametype))
     writeFile(initFilePath, table.concat(init, "\n"))

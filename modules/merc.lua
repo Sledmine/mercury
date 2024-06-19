@@ -105,7 +105,7 @@ function merc.pack(packDir, mercPath, backend)
 
     cprint("Automatically indexing manifest files from package folder... ", true)
     local packageFiles = filesIn(packDir, true)
-    
+
     for _, fpath in ipairs(packageFiles) do
         if not fpath:endswith "manifest.json" and not path.file(fpath):startswith "." then
             local type = "binary"
@@ -113,7 +113,8 @@ function merc.pack(packDir, mercPath, backend)
             if isFileOptional(extension) then
                 type = "optional"
             end
-            local relativePath = path.rel(fpath, packDir)
+            -- local relativePath = path.rel(fpath, packDir)
+            local relativePath = upath(path.rel(fpath, packDir))
             table.insert(manifest.files,
                          {path = relativePath, type = type, outputPath = relativePath})
         end
@@ -219,60 +220,74 @@ function merc.template()
     return false
 end
 
-function merc.diff(oldpackagePath, newPackagePath, diffPackagePath)
+--- Compare two Mercury packages and create a diff package
+---@param oldpackagePath string Path to the old package
+---@param newPackagePath string Path to the new package
+---@param diffPackagePath? string Path to the diff package
+---@param backend? "minizip" | "unzip" | "7z" Backend to use for packing
+---@return boolean
+function merc.diff(oldpackagePath, newPackagePath, diffPackagePath, backend)
     local diffPackagePath = (diffPackagePath or (path.dir(newPackagePath)) .. "/") ..
                                 path.nameext(newPackagePath) .. ".mercu"
-    local oldExtractionPath = paths.mercuryTemp .. "/old"
-    local newExtractionPath = paths.mercuryTemp .. "/new"
-    local diffExtractionPath = paths.mercuryTemp .. "/diff"
+    local oldExtractionPath = gpath(paths.mercuryTemp, "/", "old")
+    local newExtractionPath = gpath(paths.mercuryTemp, "/", "new")
+    local diffExtractionPath = gpath(paths.mercuryTemp, "/", "diff")
+
+    local backend = backend or "minizip"
+    dprint("Using backend: " .. backend)
+    local implementation = backends[backend]
+    if not implementation then
+        error("Error invalid backend \"" .. backend .. "\".")
+    end
 
     cprint("Extracting zip files... ", true)
-    local oldPackageZip = zip.open(oldpackagePath, "r")
-    if (oldPackageZip) then
-        createFolder(oldExtractionPath)
-        oldPackageZip:extract_all(oldExtractionPath)
-    else
+
+    local result = implementation(oldpackagePath, oldExtractionPath, "extract")
+    if not result then
         cprint("Error, at attempting to extract old package.")
         return false
     end
-    local newPackageZip = zip.open(newPackagePath, "r")
-    if (newPackageZip) then
-        createFolder(newExtractionPath)
-        newPackageZip:extract_all(newExtractionPath)
-    else
+
+    result = implementation(newPackagePath, newExtractionPath, "extract")
+    if not result then
         cprint("Error, at attempting to extract new package.")
+        return false
     end
+
     cprint("done.")
+
     ---@type packageMercury
     local oldManifest = json.decode(readFile(oldExtractionPath .. "/manifest.json"))
+
     ---@type packageMercury
     local newManifest = json.decode(readFile(newExtractionPath .. "/manifest.json"))
+
     if (oldManifest and newManifest and oldManifest.label == newManifest.label) then
         -- Create diff files
         for oldFileIndex, oldFile in pairs(oldManifest.files) do
             local isFileOnNewPackage
             for newFileIndex, newFile in pairs(newManifest.files) do
-                if (oldFile.path == newFile.path) then
+                local oldPath = gpath(oldFile.path)
+                local newPath = gpath(newFile.path)
+                if oldPath == newPath then
                     isFileOnNewPackage = true
                     -- File should be updated
-                    if (newFile.type == "binary") then
-                        local oldFilePath = upath(oldExtractionPath .. "/" .. oldFile.path)
-                        local newFilePath = upath(newExtractionPath .. "/" .. newFile.path)
-                        local diffFilePath = upath(
-                                                 diffExtractionPath .. "/" .. newFile.path .. ".xd3")
+                    if newFile.type == "binary" then
+                        local oldFilePath = gpath(oldExtractionPath, "/", oldFile.path)
+                        local newFilePath = gpath(newExtractionPath, "/", newFile.path)
+                        local diffFilePath = gpath(diffExtractionPath, "/", newFile.path, ".xd3")
 
                         cprint("Searching for differences in " .. oldFile.path)
                         -- dprint(SHA256(oldFilePath) .. " -> " .. SHA256(newFilePath))
-                        if (SHA256(oldFilePath) ~= SHA256(newFilePath)) then
-                            cprint("\tWarning " .. oldFile.path ..
+                        if SHA256(oldFilePath) ~= SHA256(newFilePath) then
+                            cprint("\tWarning " .. oldPath ..
                                        " has differences between packages, creating xd3 diff!")
 
                             local diffFileFolderPath = path.dir(diffFilePath)
-                            if (not exists(diffFileFolderPath)) then
-                                if (not createFolder(diffFileFolderPath)) then
-                                    cprint("Error, at trying to create output diff file folder: " ..
-                                               diffFileFolderPath)
-                                end
+                            if not exists(diffFileFolderPath) and
+                                not createFolder(diffFileFolderPath) then
+                                cprint("Error, at trying to create output diff file folder: " ..
+                                           diffFileFolderPath)
                             end
                             -- TODO: Add diff file creation verificaton
                             print("\tOld file: " .. oldFilePath)
@@ -284,38 +299,55 @@ function merc.diff(oldpackagePath, newPackagePath, diffPackagePath)
                                                                                  diffFilePath))
                             dprint("xd3Cmd: " .. xd3Cmd)
 
-                            local xd3Result = os.execute(xd3Cmd)
-                            if (xd3Result) then
-                                if (not newManifest.updates) then
+                            local xd3Result
+                            if IsDebugModeEnabled and exists(diffFilePath) then
+                                dprint("Diff file already exists, skipping diff creation.")
+                                xd3Result = true
+                            else
+                                xd3Result = run(xd3Cmd)
+                            end
+                            if xd3Result then
+                                if not newManifest.updates then
                                     newManifest.updates = {}
                                 end
                                 -- Add xd3 file to updates
-                                glue.append(newManifest.updates, {
+                                dprint("diffFilePath: " .. diffFilePath)
+                                dprint("diffExtractionPath: " .. diffExtractionPath)
+                                -- TODO Fix relative path, this adds drive to path for some reason
+                                -- local diffFilePath = path.rel(diffFilePath, diffExtractionPath)
+                                local relativeFilePath =
+                                    diffFilePath:replace(gpath(diffExtractionPath, "/"), "")
+                                dprint("relative diffFilePath: " .. relativeFilePath)
+                                table.insert(newManifest.updates, {
                                     path = upath(newFile.path),
-                                    diffPath = upath(
-                                        diffFilePath:gsub(diffExtractionPath .. "/", "")),
+                                    diffPath = upath(relativeFilePath),
                                     type = newFile.type,
                                     outputPath = upath(newFile.outputPath)
                                 })
                             end
                         end
                         -- File is an update so remove file from installation files
-                        -- newManifest.files[newFileIndex] = nil
                         table.remove(newManifest.files, newFileIndex)
-                    elseif (newFile.type == "optional") then
+                    elseif newFile.type == "optional" then
                         -- File is optional we need to remove it from installation files
-                        -- newManifest.files[newFileIndex] = nil
                         table.remove(newManifest.files, newFileIndex)
                     end
+                    break
                 end
             end
-            if (not isFileOnNewPackage) then
+            if not isFileOnNewPackage then
                 cprint("Warning file " .. oldFile.path .. " is not present on the new package.")
             end
         end
 
+        -- Make sure all files are using unix paths, just in case
+        -- It will fix previously created packages with windows paths!
+        newManifest.files = table.map(newManifest.files, function(file)
+            return {path = upath(file.path), type = file.type, outputPath = upath(file.outputPath)}
+        end)
+
         for fileIndex, file in pairs(newManifest.files) do
-            if (exists(newExtractionPath .. "/" .. file.path)) then
+            if exists(newExtractionPath .. "/" .. file.path) then
                 createFolder(diffExtractionPath .. "/" .. path.dir(file.path))
                 copyFile(newExtractionPath .. "/" .. file.path,
                          diffExtractionPath .. "/" .. file.path)
@@ -327,14 +359,14 @@ function merc.diff(oldpackagePath, newPackagePath, diffPackagePath)
         newManifest.targetVersion = oldManifest.version
         writeFile(diffExtractionPath .. "/manifest.json", json.encode(newManifest))
 
-        if (exists(diffPackagePath)) then
+        if exists(diffPackagePath) then
             delete(diffPackagePath)
         end
 
         -- Zip new package
         cprint("Packing update diff... ", true)
         local diffPackageZip = zip.open(diffPackagePath, "w")
-        if (diffPackageZip) then
+        if diffPackageZip then
             diffPackageZip:add_all(diffExtractionPath)
             diffPackageZip:close()
             cprint("done.")

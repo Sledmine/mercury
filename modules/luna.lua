@@ -1,4 +1,4 @@
-local luna = {_VERSION = "2.0.0"}
+local luna = {_VERSION = "2.1.1"}
 
 luna.string = {}
 
@@ -69,9 +69,8 @@ function string.replace(s, pattern, replacement)
     assert(s ~= nil, "string.replace: s must not be nil")
     assert(pattern ~= nil, "string.replace: pattern must not be nil")
     assert(replacement ~= nil, "string.replace: replacement must not be nil")
-    local pattern = pattern:gsub("%%", "%%%%"):gsub("%z", "%%z"):gsub("([%^%$%(%)%.%[%]%*%+%-%?])",
-                                                                      "%%%1")
-    local replaced, _ = s:gsub(pattern, replacement)
+    local pattern = pattern:escapep()
+    local replaced, _ = s:gsub(pattern, replacement:escapep())
     return replaced
 end
 
@@ -179,8 +178,9 @@ luna.table = {}
 ---@nodiscard
 function table.copy(t)
     assert(t ~= nil, "table.copy: t must not be nil")
-    assert(type(t) == "table", "table.copy: t must be a table")
+    assert(type(t) == "table" or type(t) == "userdata", "table.copy: t must be a table")
     local u = {}
+    ---@diagnostic disable-next-line: param-type-mismatch
     for k, v in pairs(t) do
         u[k] = type(v) == "table" and table.copy(v) or v
     end
@@ -195,7 +195,8 @@ end
 ---@nodiscard
 function table.indexof(t, value)
     assert(t ~= nil, "table.find: t must not be nil")
-    assert(type(t) == "table", "table.find: t must be a table")
+    assert(type(t) == "table" or type(t) == "userdata", "table.find: t must be a table")
+    ---@diagnostic disable-next-line: param-type-mismatch
     for i, v in ipairs(t) do
         if v == value then
             return i
@@ -210,8 +211,9 @@ end
 ---@nodiscard
 function table.flip(t)
     assert(t ~= nil, "table.flip: t must not be nil")
-    assert(type(t) == "table", "table.flip: t must be a table")
+    assert(type(t) == "table" or type(t) == "userdata", "table.flip: t must be a table")
     local u = {}
+    ---@diagnostic disable-next-line: param-type-mismatch
     for k, v in pairs(t) do
         u[v] = k
     end
@@ -226,9 +228,10 @@ end
 ---@nodiscard
 function table.find(t, f)
     assert(t ~= nil, "table.find: t must not be nil")
-    assert(type(t) == "table", "table.find: t must be a table")
+    assert(type(t) == "table" or type(t) == "userdata", "table.find: t must be a table")
     assert(f ~= nil, "table.find: f must not be nil")
     assert(type(f) == "function", "table.find: f must be a function")
+    ---@diagnostic disable-next-line: param-type-mismatch
     for k, v in pairs(t) do
         if f(v, k) then
             return v
@@ -243,8 +246,9 @@ end
 ---@nodiscard
 function table.keys(t)
     assert(t ~= nil, "table.keys: t must not be nil")
-    assert(type(t) == "table", "table.keys: t must be a table")
+    assert(type(t) == "table" or type(t) == "userdata", "table.keys: t must be a table")
     local keys = {}
+    ---@diagnostic disable-next-line: param-type-mismatch
     for k in pairs(t) do
         keys[#keys + 1] = k
     end
@@ -258,8 +262,9 @@ end
 ---@nodiscard
 function table.values(t)
     assert(t ~= nil, "table.values: t must not be nil")
-    assert(type(t) == "table", "table.values: t must be a table")
+    assert(type(t) == "table" or type(t) == "userdata", "table.values: t must be a table")
     local values = {}
+    ---@diagnostic disable-next-line: param-type-mismatch
     for _, v in pairs(t) do
         values[#values + 1] = v
     end
@@ -274,10 +279,11 @@ end
 ---@nodiscard
 function table.filter(t, f)
     assert(t ~= nil, "table.filter: t must not be nil")
-    assert(type(t) == "table", "table.filter: t must be a table")
+    assert(type(t) == "table" or type(t) == "userdata", "table.filter: t must be a table")
     assert(f ~= nil, "table.filter: f must not be nil")
     assert(type(f) == "function", "table.filter: f must be a function")
     local filtered = {}
+    ---@diagnostic disable-next-line: param-type-mismatch
     for k, v in pairs(t) do
         if f(v, k) then
             filtered[#filtered + 1] = v
@@ -296,10 +302,11 @@ end
 ---@nodiscard
 function table.kfilter(t, f)
     assert(t ~= nil, "table.kfilter: t must not be nil")
-    assert(type(t) == "table", "table.kfilter: t must be a table")
+    assert(type(t) == "table" or type(t) == "userdata", "table.kfilter: t must be a table")
     assert(f ~= nil, "table.kfilter: f must not be nil")
     assert(type(f) == "function", "table.kfilter: f must be a function")
     local filtered = {}
+    ---@diagnostic disable-next-line: param-type-mismatch
     for k, v in pairs(t) do
         if f(v, k) then
             filtered[k] = v
@@ -316,14 +323,15 @@ end
 ---@param t table<K, V>
 ---@param f fun(v: V, k: K): R
 ---@return {[K]: R}
---@return R[]
+-- @return R[]
 ---@nodiscard
 function table.map(t, f)
     assert(t ~= nil, "table.map: t must not be nil")
-    assert(type(t) == "table", "table.map: t must be a table")
+    assert(type(t) == "table" or type(t) == "userdata", "table.map: t must be a table")
     assert(f ~= nil, "table.map: f must not be nil")
     assert(type(f) == "function", "table.map: f must be a function")
     local mapped = {}
+    ---@diagnostic disable-next-line: param-type-mismatch
     for k, v in pairs(t) do
         mapped[k] = f(v, k)
     end
@@ -352,7 +360,7 @@ end
 ---@nodiscard
 function table.reverse(t)
     assert(t ~= nil, "table.reverse: t must not be nil")
-    assert(type(t) == "table", "table.reverse: t must be a table")
+    assert(type(t) == "table" or type(t) == "userdata", "table.reverse: t must be a table")
     local reversed = {}
     for i = #t, 1, -1 do
         reversed[#reversed + 1] = t[i]
@@ -371,7 +379,7 @@ end
 ---@nodiscard
 function table.slice(t, start, stop)
     assert(t ~= nil, "table.slice: t must not be nil")
-    assert(type(t) == "table", "table.slice: t must be a table")
+    assert(type(t) == "table" or type(t) == "userdata", "table.slice: t must be a table")
     assert(start ~= nil, "table.slice: start must not be nil")
     assert(type(start) == "number", "table.slice: start must be a number")
     if stop then
@@ -394,11 +402,12 @@ end
 ---@nodiscard
 function table.chunks(t, size)
     assert(t ~= nil, "table.chunks: t must not be nil")
-    assert(type(t) == "table", "table.chunks: t must be a table")
+    assert(type(t) == "table" or type(t) == "userdata", "table.chunks: t must be a table")
     assert(size ~= nil, "table.chunks: size must not be nil")
     assert(type(size) == "number", "table.chunks: size must be a number")
     local chunks = {}
     for i = 1, #t, size do
+        ---@diagnostic disable-next-line: param-type-mismatch
         chunks[#chunks + 1] = table.slice(t, i, i + size - 1)
     end
     return chunks
@@ -517,12 +526,55 @@ function luna.file.tobytes(path)
     end
 end
 
+luna.binary = {}
+
+--- Read a binary file into a string.
+---@param path string
+---@return string?
+---@nodiscard
+function luna.binary.read(path)
+    assert(path ~= nil, "binary.read: path must not be nil")
+    local file = io.open(path, "rb")
+    if file then
+        local content = file:read "*a"
+        file:close()
+        return content
+    end
+end
+
+--- Write a binary file from a string.
+---@param path string
+---@param content string
+---@return boolean
+function luna.binary.write(path, content)
+    assert(path ~= nil, "binary.write: path must not be nil")
+    assert(content ~= nil, "binary.write: content must not be nil")
+    local file = io.open(path, "wb")
+    if file then
+        file:write(content)
+        file:close()
+        return true
+    end
+    return false
+end
+
 --- Return a boolean from `v` if it is a boolean like value.
----@param v any
+---@param v string | boolean | number
 ---@return boolean
 function luna.bool(v)
     assert(v ~= nil, "bool: v must not be nil")
     return v == true or v == "true" or v == 1 or v == "1"
 end
+
+--- Return an integer from `v` if possible.
+---
+--- If `v` is not a number, it will return `fail`.
+---@param v string
+---@return integer
+function tointeger(v)
+    assert(v ~= nil, "int: v must not be nil")
+    return tonumber(v, 10)
+end
+luna.int = tointeger
 
 return luna

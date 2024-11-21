@@ -26,6 +26,15 @@ local packageMercury = class "packageMercury"
 ---@field type string
 ---@field outputPath string
 
+---@class mercDeletes
+---@field path string
+---@field required? boolean
+
+---@class mercMoves
+---@field fromPath string
+---@field toPath string
+---@field required? boolean
+
 ---@class packageMercury
 ---@field name string
 ---@field label string
@@ -39,107 +48,145 @@ local packageMercury = class "packageMercury"
 ---@field files mercFiles[]
 ---@field updates mercUpdates[]
 ---@field dependencies mercDependencies[]
----@field deletes {path: string}[]
----@field conflicts mercDependencies[]
+---@field deletes mercDeletes[]
+---@field moves mercMoves[]
+---@field removes mercDependencies[]
+
+local invalidCharacters = {":", "*", "?", "<", ">", "|", ";", "="}
+
+--- Check if a path is valid
+---@param path string
+---@return boolean
+local function validatePath(path)
+    for _, character in pairs(invalidCharacters) do
+        if path:includes(character) then
+            return false
+        end
+    end
+    return true
+end
+
+local pathVariables = {
+    ["$haloce"] = paths.gamePath,
+    ["game-root"] = paths.gamePath,
+    ["$mygames"] = paths.myGamesPath,
+    ["my-games-data-path"] = paths.myGamesPath,
+    ["lua-global"] = paths.luaScriptsGlobal,
+    ["lua-map"] = paths.luaScriptsMap,
+    ["lua-sapp"] = paths.luaScriptsSAPP,
+    ["lua-data-global"] = paths.luaDataGlobal,
+    ["lua-data-map"] = paths.luaDataMap,
+    ["game-maps"] = paths.gameMaps,
+    ["game-mods"] = paths.gameDLLMods
+}
+
+--- Replace path variables
+---@param path string
+local function replacePathVariables(path)
+    for variable, value in pairs(pathVariables) do
+        path = path:replace(variable, value)
+    end
+    return path
+end
+
+--- Update manifest version
+---@param manifestVersion string
+---@return string
+local function updateManifestVersion(manifestVersion)
+    if manifestVersion == "1.0" then
+        return "1.1.0"
+    end
+    return manifestVersion
+end
 
 --- Replace and normalize file paths
 ---@param files mercFiles[]
 ---@param manifestVersion string
-local function normalizePaths(files, manifestVersion)
-    if (files and #files > 0) then
-        local pathVariables = {
-            ["$haloce"] = paths.gamePath,
-            ["game-root"] = paths.gamePath,
-            ["$mygames"] = paths.myGamesPath,
-            ["my-games-data-path"] = paths.myGamesPath,
-            ["lua-global"] = paths.luaScriptsGlobal,
-            ["lua-map"] = paths.luaScriptsMap,
-            ["lua-sapp"] = paths.luaScriptsSAPP,
-            ["lua-data-global"] = paths.luaDataGlobal,
-            ["lua-data-map"] = paths.luaDataMap,
-            ["game-maps"] = paths.gameMaps,
-            ["game-mods"] = paths.gameDLLMods,
-        }
-        local paths
-        for fileIndex, file in pairs(files) do
-            if (not paths) then
-                paths = {}
-            end
-            local normalizedOutputPath = file.outputPath
-            for variable, value in pairs(pathVariables) do
-                normalizedOutputPath = normalizedOutputPath:replace(variable, value)
-            end
-            file.path = gpath(file.path)
-            if manifestVersion == "1.0" then
-                file.outputPath = gpath(normalizedOutputPath .. file.path)
-            elseif manifestVersion == "1.1.0" then
-                file.outputPath = gpath(normalizedOutputPath)
-            else
-                cprint("Error uknown manifest version (" .. tostring(manifestVersion) .. ")")
-                error("Error at trying to read manifest.json version", 2)
-            end
-            paths[fileIndex] = file
+---@return mercFiles[]
+local function normalizeMercFiles(files, manifestVersion)
+    return table.map(files, function(file)
+        if not validatePath(file.path) and not validatePath(file.outputPath) then
+            error("Invalid path specified in package file: " .. tostring(file.path))
         end
-        return paths
-    end
-    return nil
+
+        file.path = gpath(file.path)
+        file.outputPath = replacePathVariables(gpath(file.outputPath))
+
+        -- Upgrade manifest version properties to latest
+        if manifestVersion == "1.0" then
+            file.outputPath = gpath(file.outputPath .. file.path)
+            -- TODO Add validation for upcoming manifest versions, not just hardcoded ones
+        elseif manifestVersion == "1.1.0" or manifestVersion == "2.0.0" then
+            file.outputPath = gpath(file.outputPath)
+        else
+            error("Error uknown manifest package version (" .. tostring(manifestVersion) .. ")")
+        end
+
+        return file
+    end)
+end
+
+--- Normalize package deletes
+---@param deletes mercDeletes[]
+---@return mercDeletes[]
+local function normalizeMercDeletes(deletes)
+    return table.map(deletes, function(delete)
+        if not validatePath(delete.path) then
+            error("Invalid path specified in package delete: " .. tostring(delete.path))
+        end
+
+        delete.path = replacePathVariables(gpath(delete.path))
+
+        return delete
+    end)
+end
+
+--- Normalize package moves
+---@param moves mercMoves[]
+---@return mercMoves[]
+local function normalizeMercMoves(moves)
+    return table.map(moves, function(move)
+        if not validatePath(move.fromPath) and not validatePath(move.toPath) then
+            error("Invalid path specified in package move: " .. tostring(move.fromPath))
+        end
+
+        move.fromPath = replacePathVariables(gpath(move.fromPath))
+        move.toPath = replacePathVariables(gpath(move.toPath))
+
+        return move
+    end)
 end
 
 --- Entity constructor
----@param jsonStringOrTable string | packageMercury
-function packageMercury:initialize(jsonStringOrTable)
+---@param data string | packageMercury
+function packageMercury:initialize(data)
     ---@type packageMercury
     local properties
-    if (type(jsonStringOrTable) == "string") then
-        properties = json.decode(jsonStringOrTable)
-    elseif (type(jsonStringOrTable) == "table") then
-        properties = jsonStringOrTable
+    if type(data) == "string" then
+        properties = json.decode(data)
+    elseif type(data) == "table" then
+        properties = data
     else
-        error("Specified package constructor parameter is not valid", 2)
+        error("Specified package constructor parameter is not valid")
     end
-    ---@type string
     self.label = properties.label
-    
-    ---@type string
     self.name = properties.name
-
-    ---@type string
     self.description = properties.description
-
-    ---@type string
     self.author = properties.author
-
-    ---@type string
     self.version = properties.version
-
-    ---@type string
     self.targetVersion = properties.targetVersion
-
-    ---@type string
     self.internalVersion = properties.internalVersion
-
-    ---@type string
     self.manifestVersion = properties.manifestVersion
-
-    ---@type string
     self.category = properties.category
-
-    ---@type mercFiles[]
-    self.files = normalizePaths(properties.files, self.manifestVersion)
-
-    ---@type mercUpdates[]
-    self.updates = normalizePaths(properties.updates, self.manifestVersion)
-
-    ---@type {path: string}[]
-    self.deletes = normalizePaths(properties.deletes, self.manifestVersion)
-
-    ---@type mercDependencies[]
+    self.files = normalizeMercFiles(properties.files or {}, self.manifestVersion)
+    self.updates = normalizeMercFiles(properties.updates or {} , self.manifestVersion)
+    self.deletes = normalizeMercDeletes(properties.deletes or {})
+    self.moves = normalizeMercMoves(properties.moves or {})
     self.dependencies = properties.dependencies
+    self.removes = properties.removes
 
     -- Update manifest
-    if self.manifestVersion == "1.0" then
-        self.manifestVersion = "1.1.0"
-    end
+    self.manifestVersion = updateManifestVersion(self.manifestVersion)
 end
 
 --- Return the public/raw properties of the package
@@ -164,4 +211,3 @@ function packageMercury:getExpectedVersion()
 end
 
 return packageMercury
-

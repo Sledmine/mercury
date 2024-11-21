@@ -3,7 +3,6 @@
 -- Sledmine
 -- Insert all the files from a Mercury Package into the game
 ------------------------------------------------------------------------------
-local json = require "cjson"
 local glue = require "glue"
 local v = require "semver"
 
@@ -25,7 +24,8 @@ local errors = {
     mercFileDoesNotExist = "mercury local package does not exist",
     noManifest = "at trying to read manifest.json from the package",
     updatingPackagesIndex = "at trying to update the packages index",
-    unpackingMercFile = "at trying to unpack mercury package"
+    unpackingMercFile = "at trying to unpack mercury package",
+    moveError = "at trying to move a file",
 }
 
 -- Install any mercury package
@@ -215,8 +215,36 @@ local function insert(mercPath, forced, skipOptionals)
         end
     end
 
+    if package.moves then
+        cprint("Moving files from game folders... ")
+        for _, file in pairs(package.moves) do
+            cprint("Moving \"" .. file.fromPath .. "\" to \"" .. file.toPath .. "\"... ", true)
+            if not move(file.fromPath, file.toPath) then
+                cprint("Error moving \"" .. file.fromPath .. "\" to \"" .. file.toPath)
+                return false, errors.moveError
+            end
+            cprint("done.")
+        end
+    end
+
+    if package.deletes then
+        cprint("Deleting non-required files from game folders... ")
+        for _, file in pairs(package.deletes) do
+            cprint("Deleting \"" .. file.path .. "\"... ", true)
+            if not delete(file.path) then
+                if file.required then
+                    cprint("Error deleting required file \"" .. file.path .. "\"")
+                    return false, errors.eraseFileError
+                end
+                cprint("Warning deleting non-required file \"" .. file.path .. "\"")
+            end
+            cprint("done.")
+        end
+    end
+
     -- Get current instance packages
     local installedPackages = config.packages() or {}
+
     -- Substract required package properties and store them
     if package.updates then
         -- TODO Check out this, there are probably better ways to do it

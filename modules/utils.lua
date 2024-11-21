@@ -150,7 +150,9 @@ function delete(fileOrFolderPath, recursive)
     return fs.remove(fileOrFolderPath)
 end
 
-local bytesToRead = 1024 * 1024 -- 1MB
+-- Define bytes to read for file copy (64KB)
+-- This is a good balance between performance and memory usage
+local bytesToRead = 64 * 1024
 
 --- Copy file to specific destination
 ---@param sourcePath string

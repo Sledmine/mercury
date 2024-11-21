@@ -131,33 +131,45 @@ function createFolder(folderPath)
     return false
 end
 
+--- Move file to specific destination
+--- @param sourceFile string
+--- @param destinationFile string
+--- @return boolean
 function move(sourceFile, destinationFile)
     return fs.move(sourceFile, destinationFile)
 end
 
+--- Delete file or folder
+---@param fileOrFolderPath string
+---@param recursive? boolean
+---@return boolean
 function delete(fileOrFolderPath, recursive)
-    if (recursive) then
+    if recursive then
         return fs.remove(fileOrFolderPath, true)
     end
     return fs.remove(fileOrFolderPath)
 end
 
+local bytesToRead = 1024 * 1024 -- 1MB
+
 --- Copy file to specific destination
+---@param sourcePath string
+---@param destinationPath string
+---@return boolean success, string? reason
 function copyFileWindows(sourcePath, destinationPath)
     local reason
-    if (sourcePath and destinationPath) then
-        if (not exists(sourcePath)) then
+    if sourcePath and destinationPath then
+        if not exists(sourcePath) then
             dprint("Error, specified source file does not exist!")
             dprint(sourcePath)
             return false
         end
         local isSourceReadable = glue.canopen(sourcePath)
-        if (isSourceReadable) then
+        if isSourceReadable then
             local source = assert(uv.fs_open(sourcePath, "r", 438))
             local destination = assert(uv.fs_open(destinationPath, "w", 438))
             reason = errorMessage
-            if (destination) then
-                local bytesToRead = 1024 * 1024 -- 1MB
+            if destination then
                 while true do
                     local bytes = uv.fs_read(source, bytesToRead)
                     if bytes == "" then
@@ -180,19 +192,21 @@ function copyFileWindows(sourcePath, destinationPath)
 end
 
 --- Copy file to specific destination
+---@param sourcePath string
+---@param destinationPath string
+---@return boolean
 function copyFileLinux(sourcePath, destinationPath)
-    if (sourcePath and destinationPath) then
-        if (not exists(sourcePath)) then
+    if sourcePath and destinationPath then
+        if not exists(sourcePath) then
             dprint("Error, specified source file does not exist!")
             dprint(sourcePath)
             return false
         end
         local isSourceReadable = glue.canopen(sourcePath)
-        if (isSourceReadable) then
+        if isSourceReadable then
             local source = assert(io.open(sourcePath, "rb"))
             local destination = io.open(destinationPath, "wb")
-            if (destination) then
-                local bytesToRead = 64 * 1024
+            if destination then
                 while true do
                     local bytes = source:read(bytesToRead)
                     if not bytes then
@@ -205,10 +219,10 @@ function copyFileLinux(sourcePath, destinationPath)
                 destination:close()
                 return true
             else
-                dprint("Error, " .. destinationPath .. " destination can not be open.")
+                dprint("Error " .. destinationPath .. " destination can not be open.")
             end
         else
-            dprint("Error, " .. sourcePath .. " source can not be open.")
+            dprint("Error " .. sourcePath .. " source can not be open.")
         end
     end
     return false
@@ -226,13 +240,13 @@ end
 ---@param destinationPath string
 ---@return boolean
 function moveFile(sourcePath, destinationPath)
-    if (sourcePath and destinationPath) then
-        if (not exists(sourcePath)) then
+    if sourcePath and destinationPath then
+        if not exists(sourcePath) then
             dprint("Error, specified source file does not exist!")
             dprint(sourcePath)
             return false
         end
-        if (exists(destinationPath)) then
+        if exists(destinationPath) then
             delete(destinationPath)
         end
         return fs.move(sourcePath, destinationPath)
@@ -442,16 +456,18 @@ end
 --- Create a symlink
 ---@param symlink string
 ---@param path string
----@param isDirectory boolean
+---@param isDirectory boolean?
 ---@return boolean, string?
 function createSymlink(symlink, path, isDirectory)
     cprint("Symlinking " .. symlink .. " -> " .. path)
     if isHostWindows() then
         if isDirectory then
-            local result = os.execute("mklink /D " .. symlink .. " " .. path)
+            --local result = os.execute("mklink /D " .. symlink .. " " .. path)
+            local result = os.execute(('mklink /D "%s" "%s"'):format(symlink, path))
             return result or false, "command_failed"
         end
-        local result = os.execute("mklink " .. symlink .. " " .. path)
+        --local result = os.execute("mklink " .. symlink .. " " .. path)
+        local result = os.execute(('mklink "%s" "%s"'):format(symlink, path))
         return result or false, "command_failed"
     end
     -- return os.execute("ln -s " .. path .. " " .. symlink)

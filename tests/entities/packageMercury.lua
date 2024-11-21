@@ -6,6 +6,7 @@
 package.path = package.path .. ";.\\Mercury\\?.lua"
 
 local lu = require "luaunit"
+require "modules.luna"
 local glue = require "glue"
 inspect = require "inspect"
 
@@ -23,7 +24,6 @@ local PackageMercury = require "entities.packageMercury"
 testUtils = {}
 
 function testUtils:setUp()
-    ---@language JSON
     self.testPackage1 = [[{
         "label": "test",
         "name": "Mercury Test Package",
@@ -61,12 +61,12 @@ function testUtils:setUp()
         files = {
             {
                 path = "test.txt",
-                outputPath = gpath(paths.gamePath, "/test/"),
+                outputPath = gpath(paths.gamePath, "/test/") .. "test.txt",
                 type = "text"
             },
             {
                 path = "test2.txt",
-                outputPath = gpath(paths.gamePath, "/test/"),
+                outputPath = gpath(paths.gamePath, "/test/") .. "test2.txt",
                 type = "text"
             }
         },
@@ -74,7 +74,6 @@ function testUtils:setUp()
             {label = "test2", version = "1.0.0"}
         }
     }
-    ---@language JSON
     self.testPackage2 = [[{
         "label": "test",
         "name": "Mercury Test Package",

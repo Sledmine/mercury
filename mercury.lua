@@ -51,6 +51,7 @@ local map = require "cmd.map"
 local build = require"cmd.build".build
 local buildtemplate = require"cmd.build".template
 local serve = require "cmd.serve"
+local link = require "cmd.link"
 
 local luabundler = require "modules.luabundle"
 local constants = require "modules.constants"
@@ -413,6 +414,14 @@ serveCmd:action(function(args)
         difficulty = option(args.difficulty)
         --mapcycle = args.mapcycle
     })
+    config.clean()
+end)
+
+local linkCmd = parser:command("link", "Link a Lua plugin project to the game files.")
+linkCmd:argument("pluginPath", "Path to the plugin project."):args("?")
+linkCmd:action(function(args)
+    flagsCheck(args)
+    link(args.pluginPath or pwd())
     config.clean()
 end)
 

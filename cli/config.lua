@@ -105,12 +105,14 @@ function config.paths()
         local luaScriptsSAPP
         local luaDataGlobal
         local luaDataMap
+        local balltzePlugins
         if data then
             luaScriptsGlobal = gpath(data, "/chimera/lua/scripts/global")
             luaScriptsMap = gpath(data, "/chimera/lua/scripts/map")
             luaScriptsSAPP = gpath(data, "/sapp/lua")
             luaDataGlobal = gpath(data, "/chimera/lua/data/global")
             luaDataMap = gpath(data, "/chimera/lua/data/map")
+            balltzePlugins = gpath(data, "/balltze/plugins")
         end
 
         paths = {
@@ -127,7 +129,8 @@ function config.paths()
             luaDataGlobal = luaDataGlobal,
             luaDataMap = luaDataMap,
             gameMaps = maps,
-            gameDLLMods = mods
+            gameDLLMods = mods,
+            balltzePlugins = balltzePlugins
         }
     end
     return paths or {}

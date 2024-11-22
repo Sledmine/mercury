@@ -52,7 +52,7 @@ local packageMercury = class "packageMercury"
 ---@field dependencies mercDependencies[]
 ---@field deletes mercDeletes[]
 ---@field moves mercMoves[]
----@field conflicts mercDependencies[] | mercDependenciesString[]
+---@field removes mercDependencies[] | mercDependenciesString[]
 
 local invalidCharacters = {":", "*", "?", "<", ">", "|", ";", "="}
 
@@ -155,6 +155,7 @@ local function normalizeMercMoves(moves)
 
         move.fromPath = replacePathVariables(gpath(move.fromPath))
         move.toPath = replacePathVariables(gpath(move.toPath))
+        move.required = move.required or true
 
         return move
     end)
@@ -194,7 +195,7 @@ function packageMercury:initialize(data)
         self.moves = normalizeMercMoves(properties.moves)
     end
     self.dependencies = properties.dependencies
-    self.conflicts = properties.conflicts
+    self.removes = properties.removes
     -- Update manifest
     self.manifestVersion = updateManifestVersion(self.manifestVersion)
 end

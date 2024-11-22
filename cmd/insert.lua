@@ -25,7 +25,7 @@ local errors = {
     noManifest = "at trying to read manifest.json from the package",
     updatingPackagesIndex = "at trying to update the packages index",
     unpackingMercFile = "at trying to unpack mercury package",
-    moveError = "at trying to move a file",
+    moveError = "at trying to move a file"
 }
 
 -- Install any mercury package
@@ -242,25 +242,29 @@ local function insert(mercPath, forced, skipOptionals)
         end
     end
 
-    if package.conflicts then
+    -- Get current instance packages
+    local installedPackages = config.packages() or {}
+
+    if package.removes then
         cprint("Attempting to remove conflicting packages... ")
-        for _, dependency in pairs(package.conflicts) do
-            if type(dependency) == "string" then
-                if not remove(dependency, true, false, false, false, true) then
-                    cprint("Error removing \"" .. dependency .. "\"")
-                    return false, errors.depedencyError
-                end
+        for _, package in pairs(package.removes) do
+            local packageLabel
+            if type(package) == "string" then
+                packageLabel = package
             else
-                if not remove(dependency.label, true, false, false, false, true) then
-                    cprint("Error removing \"" .. dependency.label .. "\"")
+                packageLabel = package.label
+            end
+            if installedPackages[packageLabel] then
+                if not remove(packageLabel, true, false, false, false, true) then
+                    cprint("Error removing \"" .. package .. "\"")
                     return false, errors.depedencyError
                 end
             end
         end
     end
 
-    -- Get current instance packages
-    local installedPackages = config.packages() or {}
+    -- Refresh installed packages data
+    installedPackages = config.packages() or installedPackages
 
     -- Substract required package properties and store them
     if package.updates then

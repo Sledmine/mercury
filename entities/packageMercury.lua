@@ -79,7 +79,8 @@ local pathVariables = {
     ["lua-data-global"] = paths.luaDataGlobal,
     ["lua-data-map"] = paths.luaDataMap,
     ["game-maps"] = paths.gameMaps,
-    ["game-mods"] = paths.gameDLLMods
+    ["game-mods"] = paths.gameDLLMods,
+    ["balltze-plugins"] = paths.balltzePlugins
 }
 
 --- Replace path variables

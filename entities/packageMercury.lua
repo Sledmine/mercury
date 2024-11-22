@@ -182,7 +182,7 @@ function packageMercury:initialize(data)
         self.files = normalizeMercFiles(properties.files, self.manifestVersion)
     end
     if properties.updates then
-        self.updates = normalizeMercFiles(properties.updates, self.manifestVersion)
+        self.updates = normalizeMercFiles(properties.updates, self.manifestVersion) --[[@as mercUpdates[]]
     end
     if properties.deletes then
         self.deletes = normalizeMercDeletes(properties.deletes)

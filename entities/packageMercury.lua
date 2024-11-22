@@ -178,13 +178,20 @@ function packageMercury:initialize(data)
     self.internalVersion = properties.internalVersion
     self.manifestVersion = properties.manifestVersion
     self.category = properties.category
-    self.files = normalizeMercFiles(properties.files or {}, self.manifestVersion)
-    self.updates = normalizeMercFiles(properties.updates or {} , self.manifestVersion)
-    self.deletes = normalizeMercDeletes(properties.deletes or {})
-    self.moves = normalizeMercMoves(properties.moves or {})
+    if properties.files then
+        self.files = normalizeMercFiles(properties.files, self.manifestVersion)
+    end
+    if properties.updates then
+        self.updates = normalizeMercFiles(properties.updates, self.manifestVersion)
+    end
+    if properties.deletes then
+        self.deletes = normalizeMercDeletes(properties.deletes)
+    end
+    if properties.moves then
+        self.moves = normalizeMercMoves(properties.moves)
+    end
     self.dependencies = properties.dependencies
     self.removes = properties.removes
-
     -- Update manifest
     self.manifestVersion = updateManifestVersion(self.manifestVersion)
 end

@@ -72,8 +72,8 @@ end
 
 --- Debug print for testing purposes only
 function dprint(value)
-    if (IsDebugModeEnabled and value) then
-        if (type(value) == "table") then
+    if IsDebugModeEnabled and value then
+        if type(value) == "table" then
             print(inspect(value))
         else
             cprint(tostring(value))

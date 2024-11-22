@@ -216,9 +216,9 @@ insertCmd:action(function(args, name)
     local code = 0
     flagsCheck(args)
     if insert(args.mercPath, args.force, args.skipOptionals) then
-        cprint("Done, files have been inserted.")
+        cprint("Done files have been inserted.")
     else
-        cprint("Error, at inserting merc.")
+        cprint("Error at inserting merc.")
         code = 1
     end
     config.clean()

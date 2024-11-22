@@ -242,6 +242,23 @@ local function insert(mercPath, forced, skipOptionals)
         end
     end
 
+    if package.conflicts then
+        cprint("Attempting to remove conflicting packages... ")
+        for _, dependency in pairs(package.conflicts) do
+            if type(dependency) == "string" then
+                if not remove(dependency, true, false, false, false, true) then
+                    cprint("Error removing \"" .. dependency .. "\"")
+                    return false, errors.depedencyError
+                end
+            else
+                if not remove(dependency.label, true, false, false, false, true) then
+                    cprint("Error removing \"" .. dependency.label .. "\"")
+                    return false, errors.depedencyError
+                end
+            end
+        end
+    end
+
     -- Get current instance packages
     local installedPackages = config.packages() or {}
 

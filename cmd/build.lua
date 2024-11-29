@@ -46,22 +46,32 @@ local function build(yamlFilePath, command, verbose, isRelease, outputPath, scen
 
     -- Build project using yml definition
     ---@type buildfile
-    local buildspec = yaml.parse(yamlFile)
-    verify(buildspec.version, "Spec version must be defined")
-    verify(buildspec.version == 1, "Spec version must be equal to 1")
+    local spec = yaml.parse(yamlFile)
+    verify(spec.version, "Spec version must be defined")
+    verify(spec.version == 1, "Spec version must be equal to 1")
     -- verify(buildspec.game_engine, "Game engine must be defined")
     -- verify(buildspec.game_engine == "gbx-custom", "Game engine must be gbx-custom")
     if command then
-        verify(buildspec.commands[command], "Command is not defined")
-        for _, cmd in ipairs(buildspec.commands[command]) do
+        verify(spec.commands[command], "Command is not defined")
+        for _, cmd in ipairs(spec.commands[command]) do
             if not os.execute(cmd) then
-                cprint("Error, at executing command: " .. cmd)
+                cprint("Error at executing command: " .. cmd)
                 return false
             end
         end
         return true
     end
-    verify(buildspec.scenarios and #buildspec.scenarios > 0, "List of scenarios must be defined")
+    if not spec.scenarios and not spec.commands then
+        cprint("Error No scenarios or commands found in the buildspec file, nothing to build!")
+        return false
+    end
+    if not spec.commands then
+        verify(spec.scenarios and #spec.scenarios > 0, "List of scenarios must be defined")
+    end
+    if not command and not spec.scenarios then
+        cprint("Error No scenarios found in the buildspec file")
+        return false
+    end
     if not verbose then
         flag("hide-pedantic-warnings")
     end
@@ -79,51 +89,51 @@ local function build(yamlFilePath, command, verbose, isRelease, outputPath, scen
             flag("maps", "\"" .. paths.gameMaps .. "\"")
         end
     end
-    if not buildspec.script_source then
+    if not spec.script_source then
         flag("script-source", "tags")
     else
-        flag("script-source", buildspec.script_source)
+        flag("script-source", spec.script_source)
     end
-    if buildspec.auto_forge then
+    if spec.auto_forge then
         flag("auto-forge")
     end
-    if buildspec.extend_limits then
+    if spec.extend_limits then
         flag("extend-file-limits")
     end
-    if buildspec.tag_space then
-        flag("tag-space", buildspec.tag_space)
+    if spec.tag_space then
+        flag("tag-space", spec.tag_space)
     end
-    if buildspec.resource_usage then
-        flag("resource-usage", buildspec.resource_usage)
+    if spec.resource_usage then
+        flag("resource-usage", spec.resource_usage)
     end
-    if buildspec.with_index then
-        flag("with-index", buildspec.with_index)
+    if spec.with_index then
+        flag("with-index", spec.with_index)
     end
-    flag("game-engine", buildspec.game_engine or "gbx-custom")
+    flag("game-engine", spec.game_engine or "gbx-custom")
     if forgeCrc then
         flag("forge-crc", forgeCrc)
     end
-    if buildspec.extra_tags then
-        for _, tag in ipairs(buildspec.extra_tags) do
+    if spec.extra_tags then
+        for _, tag in ipairs(spec.extra_tags) do
             flag("tags", tag)
         end
     end
 
     -- Validate provided scenarios exist in the buildspec
     if scenarios then
-        buildspec.scenarios = table.filter(buildspec.scenarios, function(scenario)
+        spec.scenarios = table.filter(spec.scenarios, function(scenario)
             local scenarioName = path.file(scenario)
             local found = table.find(scenarios, function(scenarioToCompile)
                 return scenarioToCompile == scenarioName
             end)
             return found ~= nil
         end)
-        verify(#buildspec.scenarios > 0, "No scenarios found to compile")
+        verify(#spec.scenarios > 0, "No scenarios found to compile")
     end
 
     -- Compile every scenario in the spec file
     local projectBuildMapCmd = buildMapCmd
-    for _, scenarioPath in pairs(buildspec.scenarios) do
+    for _, scenarioPath in pairs(spec.scenarios) do
         buildMapCmd = projectBuildMapCmd
         local scenarioName = path.file(scenarioPath)
         if isRelease and scenarioPath:endswith "_dev" then

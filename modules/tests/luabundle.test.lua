@@ -27,13 +27,13 @@ function testBundler:testAnalyseDependencies()
     local bundlerPath = "Mercury/tests/bundler/"
 
     local dependencies = assert(analyzeDependencies(bundlerPath .. "main.lua"))
-    lu.assertEquals(dependencies, {"json", "luna", "single", "subfolder.another"})
+    lu.assertEquals(dependencies, {"single", "subfolder.another", "subfolder.common"})
 
-    local modulePath = getModulePath("subfolder.another", {bundlerPath .. "modules/"})
+    local modulePath = getModulePath("subfolder.another", {bundlerPath .. "modules"})
     lu.assertEquals(modulePath, bundlerPath .. "modules/subfolder/another.lua")
 
     for _, dependency in pairs(dependencies) do
-        local modulePath = assert(getModulePath(dependency, {"Mercury/tests/bundler/modules/"}))
+        local modulePath = assert(getModulePath(dependency, {"Mercury/tests/bundler/modules"}))
         if exists(modulePath) then
             print("Module exists with path: ", modulePath)
             local moduleDependencies = analyzeDependencies(modulePath)

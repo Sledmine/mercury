@@ -1,11 +1,9 @@
 {
     "include": [
-        "lua/",
-        "lua_modules/"
+        "modules/"
     ],
     "modules": [
-        "luna",
-        "blam",
-        "insurrection.core"
-    ]
+        "static"
+    ],
+    "output": "dist/bundle.lua"
 }

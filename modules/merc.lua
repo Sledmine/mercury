@@ -141,6 +141,13 @@ function merc.pack(packDir, mercPath, backend)
     for _, file in ipairs(manifest.files) do
         -- Use print instead of cprint due to weird bug with stdout using zip open
         local filePath = gpath(packDir .. "/" .. file.outputPath)
+        -- Try to resolve symlinks on Linux systems
+        -- This prevents a weird bug at extracting files that were once symlinks
+        if not isHostWindows() then
+            local readlink = io.popen("readlink -f -n " .. filePath)
+            assert(readlink)
+            filePath = readlink:read("*a"):trim()
+        end
         local outputPath = upath(file.outputPath)
         print("-> " .. outputPath)
         packageZip:add_file(filePath, outputPath)

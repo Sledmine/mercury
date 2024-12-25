@@ -4,13 +4,14 @@ local paths = config.paths()
 ---@param projectPath string
 local function link(projectPath, projectName)
     local split = upath(projectPath):split("/")
-    local projectName = split[#split]
+    local projectName = split[#split]:replace(" ", "_"):replace("-", "_")
     local luaFilesPath = gpath(projectPath, "/lua")
 
     for _, path in pairs(filesIn(luaFilesPath)) do
         local _, name, extension = splitPath(path)
         if extension == "lua" then
             local fileName = name .. "." .. extension
+            fileName = fileName:replace(" ", "_"):replace("-", "_")
             if not createSymlink(gpath(paths.balltzePlugins, "/", fileName), path) then
                 cprint("Error linking file: " .. fileName)
                 return false

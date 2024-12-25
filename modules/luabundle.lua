@@ -202,13 +202,14 @@ end
 --- Attempt to create a bundle file template
 function luabundler.template()
     if not exists("bundle.json") then
+        createFolder("lua/modules")
         local template = {
-            name = "Template",
+            name = "Name Project Here",
             target = "lua53",
-            include = {"modules/"},
+            include = {"lua", "lua/modules"},
             modules = {},
-            main = "main",
-            output = "dist/.lua"
+            main = "lua/main",
+            output = "dist/output.lua"
         }
         local jsonFile = pjson.stringify(template, nil, 4)
         jsonFile = jsonFile:replace("\\", "")

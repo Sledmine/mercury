@@ -218,27 +218,33 @@ local function insert(mercPath, forced, skipOptionals)
     if package.moves then
         cprint("Moving files from game folders... ")
         for _, file in pairs(package.moves) do
-            cprint("Moving \"" .. file.fromPath .. "\" to \"" .. file.toPath .. "\"... ", true)
-            if not move(file.fromPath, file.toPath) then
-                cprint("Error moving \"" .. file.fromPath .. "\" to \"" .. file.toPath)
-                return false, errors.moveError
+            if exists(file.fromPath) then
+                local directory = splitPath(file.toPath)
+                dprint("directory: " .. directory)
+                assert(directory, "Error getting directory from path: " .. file.toPath)
+                createFolder(directory)
+                cprint("Moving \"" .. file.fromPath .. "\" to \"" .. file.toPath .. "\"... ")
+                if not move(file.fromPath, file.toPath) then
+                    if file.required then
+                        cprint("Error moving \"" .. file.fromPath .. "\" to \"" .. file.toPath)
+                        return false, errors.moveError
+                    else
+                        cprint("Warning file \"" .. file.fromPath .. "\" was not moved")
+                    end
+                end
             end
-            cprint("done.")
         end
     end
 
     if package.deletes then
         cprint("Deleting non-required files from game folders... ")
         for _, file in pairs(package.deletes) do
-            cprint("Deleting \"" .. file.path .. "\"... ", true)
             if not delete(file.path) then
                 if file.required then
                     cprint("Error deleting required file \"" .. file.path .. "\"")
                     return false, errors.eraseFileError
                 end
-                cprint("Warning deleting non-required file \"" .. file.path .. "\"")
             end
-            cprint("done.")
         end
     end
 

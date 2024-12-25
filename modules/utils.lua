@@ -302,13 +302,19 @@ function isFile(filePath)
 end
 
 --- Return a Unix like path from a Windows path
+---@param windowspath string
+---@return string
 function upath(windowspath)
-    return windowspath:gsub("\\", "/")
+    local path = windowspath:gsub("\\", "/")
+    return path
 end
 
 --- Return a Windows path from a Unix path
+---@param unixpath string
+---@return string
 function wpath(unixpath)
-    return unixpath:gsub("/", "\\")
+    local path = unixpath:gsub("/", "\\")
+    return path
 end
 
 --- Generate a path from a list of strings

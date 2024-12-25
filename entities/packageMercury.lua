@@ -133,12 +133,33 @@ end
 ---@param deletes mercDeletes[]
 ---@return mercDeletes[]
 local function normalizeMercDeletes(deletes)
+    if type(deletes) == "table" and #deletes > 0 then
+        local guess = deletes[1]
+        if type(guess) == "string" then
+            deletes = table.map(deletes, function(delete)
+                return {path = delete}
+            end)
+        end
+    end
     return table.map(deletes, function(delete)
         if not validatePath(delete.path) then
             error("Invalid path specified in package delete: " .. tostring(delete.path))
         end
 
         delete.path = replacePathVariables(gpath(delete.path))
+
+        local safeToDeletePaths = {paths.gamePath, paths.myGamesPath, paths.gameMaps}
+
+        local isPathSafe = false
+        for _, safePath in pairs(safeToDeletePaths) do
+            if delete.path:startswith(safePath) then
+                isPathSafe = true
+                break
+            end
+        end
+        if not isPathSafe then
+            error("Path specified in package delete is not safe: " .. tostring(delete.path))
+        end
 
         return delete
     end)
@@ -155,7 +176,7 @@ local function normalizeMercMoves(moves)
 
         move.fromPath = replacePathVariables(gpath(move.fromPath))
         move.toPath = replacePathVariables(gpath(move.toPath))
-        move.required = move.required or true
+        move.required = move.required == nil and true or move.required
 
         return move
     end)

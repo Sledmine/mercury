@@ -4,6 +4,19 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.8.0] - 2024-12-24
+### Added
+- Deletes, moves and removes operations for packages, supporting Balltze plugins
+- New `link` command to create symbolic links for Balltze plugins development
+- Automatic static lua module resolution for `luabundle` command
+
+### Changed
+- In memory bytes to copy files, improves performance
+- Spec files can now have empty or no `scenarios` property
+
+### Fixed
+- Malformed packages in Linux that packed files that were once symlinks
+
 ## [3.7.0] - 2024-06-18
 ### Added
 - Flag `--difficulty` to `serve` command, allows to set the game server difficulty

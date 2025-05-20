@@ -7,6 +7,7 @@ local merc = {}
 
 local zip = require "minizip2"
 local glue = require "glue"
+local packageMercury = require "entities.packageMercury"
 local starts = glue.string.starts
 local ends = glue.string.ends
 local json = require "cjson"
@@ -211,7 +212,7 @@ function merc.template()
         end
 
         manifest.files = {}
-        manifest.manifestVersion = "1.1.0"
+        manifest.manifestVersion = packageMercury:getExpectedVersion()
         createFolder("game-root")
         createFolder("game-maps")
         createFolder("game-mods")

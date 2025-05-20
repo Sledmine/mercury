@@ -24,6 +24,8 @@ function download.package(meta)
     return false
 end
 
+---@param url string
+---@param outputPath string
 function download.url(url, outputPath)
     local result, code, headers, status = fdownload.get(url, outputPath)
     return code

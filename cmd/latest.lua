@@ -63,6 +63,7 @@ local download = require "modules.download"
 -- Get latest Mercury version available
 local function latest()
     -- cprint("Checking for a newer Mercury version... ", true)
+    dprint(constants.latestReleaseApi)
     local response = requests.get(constants.latestReleaseApi)
     if response and response.status_code == 200 then
         dprint(response)
@@ -72,7 +73,7 @@ local function latest()
             local tagName = release.tag_name
             local version = tagName:gsub("v", "")
             -- Current version is an older version than the latest release
-            if v(constants.mercuryVersion) < v(version) then
+            if v(constants.mercuryVersion) < v(version) or IsDebugModeEnabled then
                 local findOS = "ubuntu"
                 local findArch = jit.arch
                 if isHostWindows() then
@@ -81,35 +82,49 @@ local function latest()
                 dprint(findOS)
                 dprint(findArch)
                 for _, asset in pairs(release.assets) do
-                    if asset.name:find(findOS) and asset.name:find(findArch) then
+                    dprint(asset.name)
+                    if asset.name:includes(findOS) and
+                        (findOS == "ubuntu" or asset.name:includes(findArch)) then
                         local outputPath = gpath(paths.mercuryDownloads, "/", asset.name)
                         dprint(outputPath)
-                        local url = asset.browser_download_url:gsub("https://github.com",
-                                                                    constants.githubPass)
+                        local url = asset.browser_download_url
+                        url = url:replace("https://github.com", constants.githubPass)
+                        url = luna.url.decode(url)
                         dprint(url)
                         cprint("Downloading new Mercury version " .. version)
                         local code = download.url(url, outputPath)
-                        if code == 200 then
-                            if isHostWindows() then
-                                os.execute(("explorer \"%s\""):format(outputPath))
-                                -- os.execute(("explorer \"%s\""):format(url))
-                            else
-                                cprint("Installing binary in system using sudo...")
-                                if not IsDebugModeEnabled then
-                                    os.execute(([[sudo install "%s" /usr/bin/mercury]]):format(
-                                                   outputPath))
-                                end
-                                -- GNOME only!
-                                -- os.execute(("gio open \"%s\" &"):format(outputPath))
-                                -- os.execute(("sensible-browser \"%s\""):format(url))
-                            end
-                            cprint("Success, " .. release.name ..
-                                       " has been downloaded succesfully.")
+                        dprint(code)
+                        if not code == 200 then
+                            cprint("Error Downloading new Mercury version.")
                             return false
                         end
+                        -- Validate file size
+                        local bytes = luna.file.tobytes(outputPath)
+                        dprint("Downloaded file size: " .. #bytes)
+                        dprint("Expected file size: " .. asset.size)
+                        if #bytes ~= asset.size then
+                            cprint("Error Downloading new Mercury version, file size mismatch.")
+                            return false
+                        end
+                        if isHostWindows() then
+                            os.execute(("explorer \"%s\""):format(outputPath))
+                            -- Let default browser handle the download
+                            --os.execute(("explorer \"%s\""):format(url))
+                        else
+                            cprint("Installing binary in system using sudo...")
+                            if not IsDebugModeEnabled then
+                                os.execute(([[sudo install "%s" /usr/bin/mercury]]):format(
+                                               outputPath))
+                            end
+                            -- Let default browser handle download, GNOME only!
+                            -- os.execute(("gio open \"%s\" &"):format(outputPath))
+                            -- os.execute(("sensible-browser \"%s\""):format(url))
+                        end
+                        cprint("Success " .. release.name .. " has been downloaded succesfully.")
+                        return false
                     end
                 end
-                cprint("Error, at downloading new Mercury version.")
+                cprint("Error Downloading new Mercury version, no suitable asset found.")
                 return false
             end
         end

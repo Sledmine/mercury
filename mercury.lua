@@ -434,6 +434,9 @@ aboutCmd:action(function(args, name)
     local dataPath = paths.myGamesPath or "Not found"
     cprint("CONF Game path: \"" .. gamePath .. "\"")
     cprint("CONF Data path: \"" .. dataPath .. "\"\n")
+    if args.debug then
+        print(inspect(paths))
+    end
     print(cliDescription)
 end)
 

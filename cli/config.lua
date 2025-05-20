@@ -4,13 +4,22 @@
 -- Create and provide environment stuff to use over the code
 ------------------------------------------------------------------------------
 local config = {}
-local glue = require "glue"
 local json = require "cjson"
 local registry = require "registry"
 
 -- Paths table instance
 local paths
 local cfgPath = gpath(exedir(), "/mercuryconf.json")
+-- cfgPath = gpath(os.getenv("APPDATA"), "/mercuryconf.json")
+if not isHostWindows() then
+    local home = os.getenv("HOME")
+    assert(home, "Home directory not found")
+    local path = home .. "/.mercury"
+    if not exists(path) then
+        createFolder(path)
+    end
+    cfgPath = gpath(path, "/mercuryconf.json")
+end
 
 ---@class configCLI
 local cfg = {
@@ -83,6 +92,28 @@ function config.paths()
         local data = getenv "HALO_CE_DATA_PATH" or config.get "game.data.path" or getGameDataPath()
 
         local mercuryTemp = gpath((getenv "TEMP" or "/tmp") .. "/mercury")
+
+        -- Check if mercuryTemp is a short weird Windows path
+        if isHostWindows() and mercuryTemp:includes("~") then
+            -- Get the long path using PowerShell
+            -- TODO Use a more portable way to get the long path
+            -- As this might not work on all Windows versions (do we even support those?)
+            local handle = io.popen("powershell -Command \"(Get-Item \\\"" .. os.getenv("TEMP") ..
+                                        "\\\").FullName\"")
+            assert(handle, "Failed to get long path")
+            local longPath = handle:read("*a")
+            handle:close()
+
+            longPath = longPath:trim()
+            mercuryTemp = longPath .. "\\mercury"
+            dprint("CONF Using long path for TEMP: " .. mercuryTemp)
+
+            --mercuryTemp = os.getenv("USERPROFILE") .. "\\AppData\\Local\\Temp"
+            --if not exists(mercuryTemp) then
+            --    createFolder(mercuryTemp)
+            --end
+        end
+
         -- TODO Use ~/.mercury/downloads for linux
         local mercuryDownloads = getDownloadsPaths() or gpath(mercuryTemp, "/downloads")
         local mercuryUnpacked = gpath(mercuryTemp, "/unpacked")
@@ -234,6 +265,7 @@ function config.set(key, value)
         else
             cfg[key] = value
         end
+
         if writeFile(cfgPath, json.encode(cfg)) then
             return true
         end

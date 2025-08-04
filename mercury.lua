@@ -20,6 +20,14 @@ function require(modname)
 end
 
 luna = require "modules.luna"
+curl = require "modules.curl"
+-- Provided our own command execute to use our custom binaries
+curl.execute = function(command, ...)
+    if isHostWindows() then
+        command = command:replace("'", "\"")
+    end
+    return run(command, ...)
+end
 -- Global data and utils for different operations
 utils = require "modules.utils"
 if isHostWindows() then
@@ -103,6 +111,7 @@ local function flagsCheck(args, skipPathValidation)
     if args.debug then
         dprint(args)
         IsDebugModeEnabled = true
+        curl.debug = IsDebugModeEnabled
         cprint("Warning Debug mode enabled.")
     end
     if args.test then
@@ -135,6 +144,7 @@ installCmd:argument("package", "Package or packages to install."):args("+")
 installCmd:flag("-f --force",
                 "Force installation by removing packages, deleting conflicting files and preventing backup creation.")
 installCmd:flag("-o --skipOptionals", "Ignore optional files at installation.")
+installCmd:flag("-s --skipDependencies", "Ignore dependencies at installation.")
 installCmd:option("--repository", "Specify a custom repository to use.")
 installCmd:action(function(args, name)
     flagsCheck(args)
@@ -249,7 +259,8 @@ local latestCmd = parser:command("latest", "Get latest Mercury version from GitH
 latestCmd:description("Download latest Mercury version if available.")
 latestCmd:action(function(args, name)
     flagsCheck(args, true)
-    if not latest() then
+    local fromCommand = true
+    if not latest(fromCommand) then
         os.exit(1)
     end
     os.exit(0)
@@ -404,7 +415,7 @@ serveCmd:option("--difficulty", "Difficulty to use for the server."):choices{
     "hard",
     "impossible"
 }:default "normal"
---serveCmd:option("--mapcycle", "Mapcycle to use for the server."):args("*")
+-- serveCmd:option("--mapcycle", "Mapcycle to use for the server."):args("*")
 serveCmd:action(function(args)
     flagsCheck(args)
     serve(args.map, args.gametype, option(args.port), args.template, args.scripts, args.new, {
@@ -412,7 +423,7 @@ serveCmd:action(function(args)
         rcon = args.rcon,
         rcon_password = option(args.rcon_password),
         difficulty = option(args.difficulty)
-        --mapcycle = args.mapcycle
+        -- mapcycle = args.mapcycle
     })
     config.clean()
 end)

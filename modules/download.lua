@@ -5,7 +5,6 @@
 ------------------------------------------------------------------------------
 local download = {}
 
-local fdownload = require "modules.fdownload"
 local paths = config.paths()
 
 ---@param meta packageMetadata
@@ -18,8 +17,10 @@ function download.package(meta)
         if exists(outputPath) and meta.checksum == MD5(outputPath) then
             return 200, outputPath
         end
-        local result, code, headers, status = fdownload.get(packageUrl, outputPath)
-        return code, outputPath
+        dprint("Download path: " .. outputPath)
+
+        local request = curl.download(packageUrl, outputPath)
+        return request.statusCode, outputPath
     end
     return false
 end
@@ -27,8 +28,8 @@ end
 ---@param url string
 ---@param outputPath string
 function download.url(url, outputPath)
-    local result, code, headers, status = fdownload.get(url, outputPath)
-    return code
+    local request = curl.download(url, outputPath)
+    return request.statusCode
 end
 
 return download

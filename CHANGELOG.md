@@ -4,6 +4,19 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.8.1] - 2025-08-04
+### Added
+-  File downloading backend now uses "curl" for better performance and reliability, fixes most problems with downloading packages (error closed message, etc.)
+-  Flag `-s --skipDependencies` to `insert` and `install` commands, allows skipping dependencies during installation
+
+### Changed
+- mercuryconf.json path is now under "~/.mercury" on Linux
+
+### Fixed
+- `latest` command edge case when running from UI, now properly retrieves the latest version available
+- `latest` now does a more safe file size validation when downloading the latest Mercury version, prevents malformed downloads
+- Expected package version asserting when installing packages
+
 ## [3.8.0] - 2024-12-24
 ### Added
 - Deletes, moves and removes operations for packages, supporting Balltze plugins

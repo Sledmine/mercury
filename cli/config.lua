@@ -93,27 +93,6 @@ function config.paths()
 
         local mercuryTemp = gpath((getenv "TEMP" or "/tmp") .. "/mercury")
 
-        -- Check if mercuryTemp is a short weird Windows path
-        if isHostWindows() and mercuryTemp:includes("~") then
-            -- Get the long path using PowerShell
-            -- TODO Use a more portable way to get the long path
-            -- As this might not work on all Windows versions (do we even support those?)
-            local handle = io.popen("powershell -Command \"(Get-Item \\\"" .. os.getenv("TEMP") ..
-                                        "\\\").FullName\"")
-            assert(handle, "Failed to get long path")
-            local longPath = handle:read("*a")
-            handle:close()
-
-            longPath = longPath:trim()
-            mercuryTemp = longPath .. "\\mercury"
-            dprint("CONF Using long path for TEMP: " .. mercuryTemp)
-
-            --mercuryTemp = os.getenv("USERPROFILE") .. "\\AppData\\Local\\Temp"
-            --if not exists(mercuryTemp) then
-            --    createFolder(mercuryTemp)
-            --end
-        end
-
         -- TODO Use ~/.mercury/downloads for linux
         local mercuryDownloads = getDownloadsPaths() or gpath(mercuryTemp, "/downloads")
         local mercuryUnpacked = gpath(mercuryTemp, "/unpacked")

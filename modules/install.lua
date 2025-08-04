@@ -68,9 +68,9 @@ function install.package(packageLabel,
         cprint("Downloading " .. packageLabel .. "-" .. meta.version .. "...")
         local packagePath
         status, packagePath = download.package(meta)
-        if status == 200 then
+        if status == 200 and packagePath then
             local isInserted
-            isInserted, status = insert(packagePath, forced, skipOptionals)
+            isInserted, status = insert(packagePath, forced, skipOptionals, skipDependencies)
             return isInserted
         end
     end

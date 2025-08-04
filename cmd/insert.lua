@@ -32,7 +32,8 @@ local errors = {
 ---@param mercPath string Path to mercury package
 ---@param forced? boolean Force installation
 ---@param skipOptionals? boolean Skip optional files
-local function insert(mercPath, forced, skipOptionals)
+---@param skipDependencies? boolean Skip dependencies
+local function insert(mercPath, forced, skipOptionals, skipDependencies)
     if not exists(mercPath) then
         cprint("Error, " .. mercPath .. " does not exist.")
         return false, errors.mercFileDoesNotExist
@@ -60,50 +61,52 @@ local function insert(mercPath, forced, skipOptionals)
     dprint("Package:")
     dprint(package)
 
-    local dependenciesToGet = package.dependencies or {}
-    -- Get other package dependencies
-    dependenciesToGet = table.filter(dependenciesToGet, function(dependency)
-        return not search(dependency.label)
-    end)
-    local dependencyTree = table.map(dependenciesToGet, function(dependency)
-        return dependency.label .. (dependency.version and ("-" .. dependency.version) or "")
-    end)
-    if #dependenciesToGet > 0 then
-        cprint("Getting " .. package.label .. " dependencies:")
-        printTree(dependencyTree)
-    end
-
-    -- Use another ref for dependencies to avoid replacing metadata from package
-    local dependencies = package.dependencies or {}
-    for dependencyIndex, dependency in pairs(dependencies) do
-        local existingDependency = search(dependency.label)
-        -- Check if we have this package dependency already installed
-        if not existingDependency then
-            -- Dependency is not installed, go and get it
-            if not install.package(dependency.label, dependency.version, false, false) then
-                return false, errors.depedencyError
-            end
-            goto continue
+    if not skipDependencies then
+        local dependenciesToGet = package.dependencies or {}
+        -- Get other package dependencies
+        dependenciesToGet = table.filter(dependenciesToGet, function(dependency)
+            return not search(dependency.label)
+        end)
+        local dependencyTree = table.map(dependenciesToGet, function(dependency)
+            return dependency.label .. (dependency.version and ("-" .. dependency.version) or "")
+        end)
+        if #dependenciesToGet > 0 then
+            cprint("Getting " .. package.label .. " dependencies:")
+            printTree(dependencyTree)
         end
-        -- Specific version was specified
-        if existingDependency and dependency.version then
-            local vExisting = v(existingDependency.version)
-            local vRequired = v(dependency.version)
-            -- Specific dependency was specified, check semantic version
-            local isDependencyRequired = (vExisting < vRequired) or dependency.forced
-            if isDependencyRequired then
-                cprint("Upgrading " .. dependency.label .. " " .. existingDependency.version ..
-                           " -> " .. dependency.version)
-                if not remove(dependency.label, true, false, false, false, true) then
-                    -- Try to remove dependency by force/index
-                    remove(dependency.label, false, false, false, true)
-                end
-                if not install.package(dependency.label, dependency.version, false, true) then
+
+        -- Use another ref for dependencies to avoid replacing metadata from package
+        local dependencies = package.dependencies or {}
+        for dependencyIndex, dependency in pairs(dependencies) do
+            local existingDependency = search(dependency.label)
+            -- Check if we have this package dependency already installed
+            if not existingDependency then
+                -- Dependency is not installed, go and get it
+                if not install.package(dependency.label, dependency.version, false, false) then
                     return false, errors.depedencyError
                 end
+                goto continue
             end
+            -- Specific version was specified
+            if existingDependency and dependency.version then
+                local vExisting = v(existingDependency.version)
+                local vRequired = v(dependency.version)
+                -- Specific dependency was specified, check semantic version
+                local isDependencyRequired = (vExisting < vRequired) or dependency.forced
+                if isDependencyRequired then
+                    cprint("Upgrading " .. dependency.label .. " " .. existingDependency.version ..
+                               " -> " .. dependency.version)
+                    if not remove(dependency.label, true, false, false, false, true) then
+                        -- Try to remove dependency by force/index
+                        remove(dependency.label, false, false, false, true)
+                    end
+                    if not install.package(dependency.label, dependency.version, false, true) then
+                        return false, errors.depedencyError
+                    end
+                end
+            end
+            ::continue::
         end
-        ::continue::
     end
 
     -- Insert new files into the game

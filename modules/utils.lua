@@ -327,8 +327,8 @@ function gpath(...)
         if #args > 0 then
             stringPath = ""
         end
-        for _, currentPath in pairs(args) do
-            if (isHostWindows()) then
+        for _, currentPath in ipairs(args) do
+            if isHostWindows() then
                 stringPath = stringPath .. wpath(currentPath)
             else
                 stringPath = stringPath .. upath(currentPath)

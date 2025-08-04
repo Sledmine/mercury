@@ -61,7 +61,7 @@ local download = require "modules.download"
 ---@field body string
 
 -- Get latest Mercury version available
-local function latest()
+local function latest(fromCommand)
     -- cprint("Checking for a newer Mercury version... ", true)
     dprint(constants.latestReleaseApi)
     local response = requests.get(constants.latestReleaseApi)
@@ -73,7 +73,7 @@ local function latest()
             local tagName = release.tag_name
             local version = tagName:gsub("v", "")
             -- Current version is an older version than the latest release
-            if v(constants.mercuryVersion) < v(version) or IsDebugModeEnabled then
+            if v(constants.mercuryVersion) < v(version) or (IsDebugModeEnabled and fromCommand) then
                 local findOS = "ubuntu"
                 local findArch = jit.arch
                 if isHostWindows() then

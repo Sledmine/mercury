@@ -158,7 +158,7 @@ installCmd:action(function(args, name)
             local packageLabel = package:split("-")[1]
             local packageSplit = package:split(packageLabel .. "-")
             local packageVersion = packageSplit[2]
-            if not install.package(packageLabel, packageVersion, args.force, args.skipOptionals) then
+            if not install.package(packageLabel, packageVersion, args.force, args.skipOptionals, args.skipDependencies) then
                 code = 1
             else
                 config.clean()

@@ -1,4 +1,4 @@
-local luna = {_VERSION = "2.7.1"}
+local luna = {_VERSION = "2.9.0"}
 
 luna.string = {}
 
@@ -578,7 +578,26 @@ function math.round(n, p)
     return floor(n / p + .5) * p
 end
 
+--- Return the remainder of `n` divided by `m`.
+--- It will always return a positive number, even if `n` is negative.
+---@param n number
+---@param m number
+---@return number
+---@nodiscard
+function math.mod(n, m)
+    assert(n ~= nil, "math.mod: n must not be nil")
+    assert(type(n) == "number", "math.mod: n must be a number")
+    assert(m ~= nil, "math.mod: m must not be nil")
+    assert(type(m) == "number", "math.mod: m must be a number")
+    local r = n - math.floor(n / m) * m
+    if (m > 0 and r < 0) or (m < 0 and r > 0) then
+        r = r + m
+    end
+    return r
+end
+
 luna.math.round = math.round
+luna.math.mod = math.mod
 
 luna.file = {}
 
@@ -732,6 +751,19 @@ function luna.url.params(url)
         query[key] = value
     end
     return query
+end
+
+--- Return a query string given a params table.
+---@param params {[string]: string}
+---@return string
+---@nodiscard
+function luna.url.query(params)
+    assert(params ~= nil, "url.query: params must not be nil")
+    local query = {}
+    for key, value in pairs(params) do
+        table.insert(query, key .. "=" .. value)
+    end
+    return table.concat(query, "&")
 end
 
 --- Return a URL string with all characters encoded to be an RFC compatible URL.

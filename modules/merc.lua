@@ -63,7 +63,7 @@ local backends = {minizip = minizip, ["7z"] = sevenZip}
 ---@param backend? "minizip" | "unzip" | "7z" Backend to use for unpacking
 function merc.unpack(filepath, unpackDir, backend)
     dprint("Unpacking " .. filepath .. "...")
-    cprint("Unpacking zip...")
+    --cprint("Unpacking zip...")
     local backend = backend or "minizip"
 
     local implementation = backends[backend]

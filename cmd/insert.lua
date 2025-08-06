@@ -219,7 +219,16 @@ local function insert(mercPath, forced, skipOptionals, skipDependencies)
     end
 
     if package.moves then
-        cprint("Moving files from game folders... ")
+        local filesToMoveExist = false
+        for _, file in pairs(package.moves) do
+            if exists(file.fromPath) then
+                filesToMoveExist = true
+                break
+            end
+        end
+        if filesToMoveExist then
+            cprint("Moving files from game folders... ")
+        end
         for _, file in pairs(package.moves) do
             if exists(file.fromPath) then
                 local directory = splitPath(file.toPath)
@@ -240,9 +249,18 @@ local function insert(mercPath, forced, skipOptionals, skipDependencies)
     end
 
     if package.deletes then
-        cprint("Deleting non-required files from game folders... ")
+        local filesToDeleteExist = false
         for _, file in pairs(package.deletes) do
-            if not delete(file.path) then
+            if exists(file.path) then
+                filesToDeleteExist = true
+                break
+            end
+        end
+        if filesToDeleteExist then
+            cprint("Deleting non-required files from game folders... ")
+        end
+        for _, file in pairs(package.deletes) do
+            if exists(file.path) and not delete(file.path) then
                 if file.required then
                     cprint("Error deleting required file \"" .. file.path .. "\"")
                     return false, errors.eraseFileError
@@ -255,17 +273,33 @@ local function insert(mercPath, forced, skipOptionals, skipDependencies)
     local installedPackages = config.packages() or {}
 
     if package.removes then
-        cprint("Attempting to remove conflicting packages... ")
-        for _, package in pairs(package.removes) do
+        local conflictingPackagesExist = false
+        for _, pkg in pairs(package.removes) do
             local packageLabel
-            if type(package) == "string" then
-                packageLabel = package
+            if type(pkg) == "string" then
+                packageLabel = pkg
             else
-                packageLabel = package.label
+                packageLabel = pkg.label
+            end
+            if installedPackages[packageLabel] then
+                conflictingPackagesExist = true
+                break
+            end
+        end
+        if conflictingPackagesExist then
+            cprint("WARNING Package \"" .. package.label ..
+                       "\" has some conflicting packages that will be removed...")
+        end
+        for _, pkg in pairs(package.removes) do
+            local packageLabel
+            if type(pkg) == "string" then
+                packageLabel = pkg
+            else
+                packageLabel = pkg.label
             end
             if installedPackages[packageLabel] then
                 if not remove(packageLabel, true, false, false, false, true) then
-                    cprint("Error removing \"" .. package .. "\"")
+                    cprint("Error removing \"" .. packageLabel .. "\"")
                     return false, errors.depedencyError
                 end
             end

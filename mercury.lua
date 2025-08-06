@@ -67,7 +67,7 @@ local constants = require "modules.constants"
 -- Create argument parser with Mercury info
 local cliDescription = ([[Mercury Webpage: %s
 Join us on Discord: https://discord.shadowmods.net/
-Support Mercury on GitHub: https://github.com/Sledmine/Mercury"
+Support Mercury on GitHub: https://github.com/Sledmine/Mercury
 ]]):format(constants.mercuryWeb)
 local parser = argparse("mercury", "Package Manager for Halo Custom Edition.", cliDescription)
 -- Disable command required message                        
@@ -162,7 +162,7 @@ installCmd:action(function(args, name)
                 code = 1
             else
                 config.clean()
-                cprint("Done package " .. packageLabel .. " has been installed.")
+                cprint("Done Package " .. packageLabel .. " has been installed.")
             end
         end
     end

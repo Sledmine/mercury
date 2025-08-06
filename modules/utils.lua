@@ -24,7 +24,7 @@ local terminalColor = {
     ["reset"] = "[0m"
 }
 
-local keywordsWithColor = {
+local coloredKeywords = {
     ["Done"] = terminalColor.green,
     ["Downloading"] = terminalColor.blue,
     ["Success"] = terminalColor.green,
@@ -47,15 +47,15 @@ local keywordsWithColor = {
 ---@param message string | table | any
 ---@param noNewLine? boolean
 function cprint(message, noNewLine)
-    if (type(message) == "table" or not message) then
+    if type(message) == "table" or not message then
         print(inspect(message))
     else
         local newMessage = message
-        for _, keyword in pairs(glue.keys(keywordsWithColor)) do
-            if (string.find(message, keyword, 1, true)) then
+        for _, keyword in pairs(table.keys(coloredKeywords)) do
+            if message:lower():startswith(keyword:lower()) then
                 local newKeyword = "[" .. keyword:upper() .. "]"
                 if not getenv("MERCURY_NO_COLOR") or getenv("MERCURY_NO_COLOR") == "0" then
-                    newMessage = string.gsub(message, keyword, keywordsWithColor[keyword] ..
+                    newMessage = string.gsub(message, keyword, coloredKeywords[keyword] ..
                                                  newKeyword .. terminalColor.reset)
                 else
                     newMessage = string.gsub(message, keyword, newKeyword)
@@ -470,12 +470,10 @@ function createSymlink(symlink, path, isDirectory)
     cprint("Symlinking " .. symlink .. " -> " .. path)
     if isHostWindows() then
         if isDirectory then
-            --local result = os.execute("mklink /D " .. symlink .. " " .. path)
-            local result = os.execute(('mklink /D "%s" "%s"'):format(symlink, path))
+            local result = os.execute(("mklink /D \"%s\" \"%s\""):format(symlink, path))
             return result or false, "command_failed"
         end
-        --local result = os.execute("mklink " .. symlink .. " " .. path)
-        local result = os.execute(('mklink "%s" "%s"'):format(symlink, path))
+        local result = os.execute(("mklink \"%s\" \"%s\""):format(symlink, path))
         return result or false, "command_failed"
     end
     -- return os.execute("ln -s " .. path .. " " .. symlink)

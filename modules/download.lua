@@ -4,6 +4,7 @@
 -- Download any package file
 ------------------------------------------------------------------------------
 local download = {}
+local constants = require "modules.constants"
 
 local paths = config.paths()
 
@@ -19,7 +20,14 @@ function download.package(meta)
         end
         dprint("Download path: " .. outputPath)
 
-        local request = curl.download(packageUrl, outputPath)
+        local request = curl.download {
+            url = packageUrl,
+            output = outputPath,
+            allowRedirects = true,
+            headers = {
+                ["User-Agent"] = "Mercury/" .. constants.mercuryVersion,
+            }
+        }
         return request.statusCode, outputPath
     end
     return false
@@ -28,7 +36,14 @@ end
 ---@param url string
 ---@param outputPath string
 function download.url(url, outputPath)
-    local request = curl.download(url, outputPath)
+    local request = curl.download {
+        url = url,
+        output = outputPath,
+        allowRedirects = true,
+        headers = {
+            ["User-Agent"] = "Mercury/" .. constants.mercuryVersion,
+        }
+    }
     return request.statusCode
 end
 

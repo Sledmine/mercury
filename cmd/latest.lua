@@ -88,7 +88,6 @@ local function latest(fromCommand)
                         local outputPath = gpath(paths.mercuryDownloads, "/", asset.name)
                         dprint(outputPath)
                         local url = asset.browser_download_url
-                        url = url:replace("https://github.com", constants.githubPass)
                         url = luna.url.decode(url)
                         dprint(url)
                         cprint("Downloading new Mercury version " .. version)

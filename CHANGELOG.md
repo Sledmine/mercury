@@ -4,6 +4,13 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.8.2] - 2025-08-06
+### Changed
+-  Improved package insertion function to check for existing files before moving or deleting, enhancing reliability and logging for package insertion
+
+### Fixed
+- Issue when downloading files from GitHub releases, now properly handles redirects to avoid download failures
+
 ## [3.8.1] - 2025-08-04
 ### Added
 -  File downloading backend now uses "curl" for better performance and reliability, fixes most problems with downloading packages (error closed message, etc.)

@@ -267,8 +267,8 @@ latestCmd:action(function(args, name)
 end)
 
 -- Pack command
-local packCmd = parser:command("pack", "Pack a given directory into a mercury package.")
-packCmd:description("Create a Mercury package from a specific directory.")
+local packCmd = parser:command("pack")
+packCmd:description("Create a package from a specific directory.")
 packCmd:argument("packDir", "Path to the directory to pack.")
 packCmd:argument("mercPath", "Output path for the resultant package."):args("?")
 packCmd:flag("-t --template", "Create a package folder template.")

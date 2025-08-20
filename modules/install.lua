@@ -11,7 +11,7 @@ local insert = require "cmd.insert"
 local download = require "modules.download"
 
 local errors = {
-    ["404"] = "file, package or update not found for download",
+    ["404"] = "File not found for download",
     ["403"] = "access denied, you do not have required permissions",
     ["connection refused"] = "no connection to repository",
     ["download error"] = "an error occurred while downloading",

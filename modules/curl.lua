@@ -1,7 +1,7 @@
 local isJsonModuleAvailable, json = pcall(require, "json")
 
 local curl = {
-    _VERSION = "0.0.6",
+    _VERSION = "0.0.7",
     -- JSON backend module, you can replace it with any other JSON module
     ---@type {encode: fun(t: table): string; decode: fun(s: string): table} | nil
     json = isJsonModuleAvailable and json or nil,
@@ -238,7 +238,7 @@ local function prepareCurlCommand(args, method)
         not isDownload and "-s" or "", -- Silent mode, do not show progress meter or error messages
         "-S", -- Show error messages
         includeHeaders and "-i" or "", -- Include response headers if requested
-        "-X " .. method, -- Set the request method
+        method == "HEAD" and "-I" or "-X " .. method, -- HTTP method to use
         string.format("'%s'", args.url), -- URL to request
         table.unpack(curlArgs), -- Additional curl arguments
     }

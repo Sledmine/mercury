@@ -1,11 +1,12 @@
 local isJsonModuleAvailable, json = pcall(require, "json")
 
 local curl = {
-    _VERSION = "0.0.7",
+    _VERSION = "0.0.8",
     -- JSON backend module, you can replace it with any other JSON module
     ---@type {encode: fun(t: table): string; decode: fun(s: string): table} | nil
     json = isJsonModuleAvailable and json or nil,
-    execute = os.execute
+    execute = os.execute,
+    popen = io.popen
 }
 
 local HTTP_PROTOCOL_VERSION_PATTERN = "^HTTP/[0-9]+.*[0-9]* (%d+)"
@@ -280,7 +281,7 @@ local function request(method, args)
             url = args.url
         }
     end
-    local process = assert(io.popen(cmd, "r"))
+    local process = assert(curl.popen(cmd, "r"))
     local response = parseCurlOutput(process)
     process:close()
     return response

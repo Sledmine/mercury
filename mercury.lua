@@ -28,6 +28,12 @@ curl.execute = function(command, ...)
     end
     return run(command, ...)
 end
+curl.popen = function(command, mode)
+    if isHostWindows() then
+        command = command:replace("'", "\"")
+    end
+    return io.popen(command, mode)
+end
 -- Global data and utils for different operations
 utils = require "modules.utils"
 if isHostWindows() then

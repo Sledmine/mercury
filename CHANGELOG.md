@@ -4,6 +4,14 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.8.5] - 2025-12-16
+### Added
+- Better validation for packages index retrieval, now checks for malformed or corrupted index files before proceeding with package operations
+
+### Fixed
+-  Flag `-s --skipDependencies` not working in `install` command, now properly skips dependencies when flag is used
+-  Issue with download headers causing connections to be closed unexpectedly, testing new set of headers to improve stability
+
 ## [3.8.4] - 2025-08-19
 ### Fixed
 - Issue with curl not working properly on Windows systems when performing mirror URL checks

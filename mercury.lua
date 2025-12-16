@@ -228,10 +228,11 @@ insertCmd:description("Attempts to insert the files from a Mercury package.")
 insertCmd:argument("mercPath", "Path of the merc file to insert")
 insertCmd:flag("-f --force", "Remove any conflicting files without creating a backup.")
 insertCmd:flag("-o --skipOptionals", "Ignore optional files at installation.")
+insertCmd:flag("-s --skipDependencies", "Ignore dependencies at installation.")
 insertCmd:action(function(args, name)
     local code = 0
     flagsCheck(args)
-    if insert(args.mercPath, args.force, args.skipOptionals) then
+    if insert(args.mercPath, args.force, args.skipOptionals, args.skipDependencies) then
         cprint("Done files have been inserted.")
     else
         cprint("Error at inserting merc.")

@@ -41,6 +41,7 @@ curl.CURL_ERROR_PATTERN = CURL_ERROR_PATTERN
 ---@field cert? string
 ---@field output? string -- File path for download
 ---@field download? boolean -- If true, the response will be saved to a file specified in `output`
+---@field http11? boolean -- Use HTTP/1.1 instead of HTTP/2
 
 ---@class requestArgs : requestArgsOptional
 ---@field url string
@@ -222,6 +223,9 @@ local function prepareCurlCommand(args, method)
     end
     if args.cert then
         table.insert(curlArgs, string.format("--cert %s", args.cert))
+    end
+    if args.http11 then
+        table.insert(curlArgs, "--http1.1")
     end
     local isDownload = args.download or args.output
     if args.download or args.output then

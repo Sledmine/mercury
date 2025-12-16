@@ -152,13 +152,24 @@ end
 function config.packages(newPackages)
     if not newPackages then
         if exists(paths.mercuryIndex) then
-            local installedPackages = json.decode(readFile(paths.mercuryIndex))
-            if (installedPackages and #table.keys(installedPackages) > 0) then
+            local jsonFile = readFile(paths.mercuryIndex)
+            if not jsonFile or jsonFile:trim() == "" then
+                dprint("Warning mercury index file is empty, returning no packages!")
+                return {}
+            end
+            local decoded, installedPackages = pcall(json.decode, jsonFile)
+            if decoded and installedPackages then
                 return installedPackages
             end
+            cprint("Warning mercury index file is corrupted, returning no packages!")
+            cprint("Error " .. tostring(installedPackages))
         end
     else
-        local installedPackagesJson = json.encode(newPackages)
+        local encoded, installedPackagesJson = pcall(json.encode, newPackages or {})
+        if not encoded or not installedPackagesJson then
+            cprint("Error encoding installed packages to json!")
+            return
+        end
         if writeFile(paths.mercuryIndex, installedPackagesJson) then
             return installedPackagesJson
         end

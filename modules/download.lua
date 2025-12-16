@@ -8,6 +8,18 @@ local constants = require "modules.constants"
 
 local paths = config.paths()
 
+local headers = {
+     ["User-Agent"] = "Mercury/" .. constants.mercuryVersion,
+    --["User-Agent"] = "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.36",
+    -- Add common headers to properly download files
+    --["Accept"] = "*/*",
+    --["Accept-Encoding"] = "gzip, deflate, br, zstd",
+    --["Connection"] = "keep-alive",
+    --["Pragma"] = "no-cache",
+    --["Cache-Control"] = "no-cache",
+    --["Keep-Alive"] = "timeout=5, max=1000"
+}
+
 ---@param meta packageMetadata
 function download.package(meta)
     local code = 404
@@ -26,9 +38,7 @@ function download.package(meta)
         local request = curl.head {
             url = packageUrl,
             allowRedirects = true,
-            headers = {
-                ["User-Agent"] = "Mercury/" .. constants.mercuryVersion,
-            }
+            headers = headers
         }
         if not request.ok then
             cprint("Warning " .. packageUrl .. " failed, trying next mirror...")
@@ -39,9 +49,7 @@ function download.package(meta)
             url = packageUrl,
             output = outputPath,
             allowRedirects = true,
-            headers = {
-                ["User-Agent"] = "Mercury/" .. constants.mercuryVersion,
-            }
+            headers = headers
         }
         if request.ok then
             code = request.statusCode
@@ -60,9 +68,7 @@ function download.url(url, outputPath)
         url = url,
         output = outputPath,
         allowRedirects = true,
-        headers = {
-            ["User-Agent"] = "Mercury/" .. constants.mercuryVersion,
-        }
+        headers = headers
     }
     return request.statusCode
 end

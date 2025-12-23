@@ -38,6 +38,7 @@ function download.package(meta)
         local request = curl.head {
             url = packageUrl,
             allowRedirects = true,
+            verify = false,
             headers = headers
         }
         if not request.ok then
@@ -49,6 +50,7 @@ function download.package(meta)
             url = packageUrl,
             output = outputPath,
             allowRedirects = true,
+            verify = false,
             headers = headers
         }
         if request.ok then
@@ -68,6 +70,7 @@ function download.url(url, outputPath)
         url = url,
         output = outputPath,
         allowRedirects = true,
+        verify = false,
         headers = headers
     }
     return request.statusCode

@@ -73,17 +73,17 @@ local function cacheMaps()
     dprint("Cached " .. #mapsCache .. " maps in " .. os.clock() - time .. " seconds")
 end
 
-local loadFile = [[
-sv_public 0
-sv_name {sv_name}
-sv_rcon {sv_rcon}
-sv_rcon_password {sv_rcon_password}
-sv_timelimit 0
-sv_maxplayers 16
-sv_map "{map}" "{gametype}"
-allow_client_side_weapon_projectiles {allow_client_side_weapon_projectiles}
-load
-]]
+local loadFile = {
+    "sv_public 0",
+    "sv_name {sv_name}",
+    "sv_rcon {sv_rcon}",
+    "sv_rcon_password {sv_rcon_password}",
+    "sv_timelimit 0",
+    "sv_maxplayers 16",
+    "sv_map \"{map}\" \"{gametype}\"",
+    "allow_client_side_weapon_projectiles {allow_client_side_weapon_projectiles}",
+    "load"
+}
 
 local init = {
     "lua 1",
@@ -122,9 +122,28 @@ local function serve(map, gametype, port, template, scripts, isUsingNewDataPath,
 
     local loadFilePath = gpath(serverDataPath, "/load.txt")
     local initFilePath = gpath(serverDataPath, "/sapp/init.txt")
-    --local mapcyclePath = gpath(serverDataPath, "/sapp/mapcycle.txt")
+    local mapcyclePath = gpath(serverDataPath, "/sapp/mapcycle.txt")
 
-    local load = loadFile:template{
+    -- TODO This uses the SAPP mapcycle implementation, use native sv_mapcycle later on
+    if config.mapcycle then
+        local predefinedMapCyclePath = gpath(serverDataPath, "/sapp/mapcycles/",
+        config.mapcycle .. ".txt")
+        if exists(predefinedMapCyclePath) then
+            local mapcycleContent = readFile(predefinedMapCyclePath)
+            writeFile(mapcyclePath, mapcycleContent)
+            table.insert(init, "sapp_mapcycle 1")
+            table.insert(init, "map_next")
+            -- Remove sv_map line from load.txt as sapp_mapcycle will handle map loading
+            loadFile = table.filter(loadFile, function(line)
+                return not line:startswith("sv_map ")
+            end)
+        else
+            cprint("Error Predefined mapcycle for \"" .. config.mapcycle .. "\" does not exist.")
+            os.exit(1)
+        end
+    end
+
+    local load = table.concat(loadFile, "\n"):template{
         map = map,
         gametype = gametype,
         sv_name = map,
@@ -133,11 +152,16 @@ local function serve(map, gametype, port, template, scripts, isUsingNewDataPath,
         allow_client_side_weapon_projectiles = config.server_side_projectiles and 0 or 1,
         game_difficulty_set = config.difficulty
     }
+
     writeFile(loadFilePath, string.format(load, map, map, gametype))
     writeFile(initFilePath, table.concat(init, "\n"))
 
     -- Prepare the command to setup the server
-    local setup = "cd \"" .. paths.gamePath .. "\"" .. " && wine "
+    local wineCmd = "wine "
+    if config.wineconsole then
+        wineCmd = "wineconsole "
+    end
+    local setup = "cd \"" .. paths.gamePath .. "\"" .. " && " .. wineCmd
     if isHostWindows() then
         setup = "cd /D \"" .. paths.gamePath .. "\"" .. " && "
     end

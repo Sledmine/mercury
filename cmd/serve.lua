@@ -73,7 +73,7 @@ local function cacheMaps()
     dprint("Cached " .. #mapsCache .. " maps in " .. os.clock() - time .. " seconds")
 end
 
-local loadFile = {
+local loadLines = {
     "sv_public 0",
     "sv_name {sv_name}",
     "sv_rcon {sv_rcon}",
@@ -85,7 +85,7 @@ local loadFile = {
     "load"
 }
 
-local init = {
+local initLines = {
     "lua 1",
     "antihalofp 1",
     -- "antispam 2",
@@ -108,7 +108,7 @@ local function serve(map, gametype, port, template, scripts, isUsingNewDataPath,
     port = port or 2302
     scripts = scripts or {}
     for _, script in pairs(scripts) do
-        table.insert(init, "lua_load " .. script)
+        table.insert(initLines, "lua_load " .. script)
     end
     config = config or {}
 
@@ -122,28 +122,37 @@ local function serve(map, gametype, port, template, scripts, isUsingNewDataPath,
 
     local loadFilePath = gpath(serverDataPath, "/load.txt")
     local initFilePath = gpath(serverDataPath, "/sapp/init.txt")
-    local mapcyclePath = gpath(serverDataPath, "/sapp/mapcycle.txt")
+    local sappMapcyclePath = gpath(serverDataPath, "/sapp/mapcycle.txt")
 
-    -- TODO This uses the SAPP mapcycle implementation, use native sv_mapcycle later on
     if config.mapcycle then
-        local predefinedMapCyclePath = gpath(serverDataPath, "/sapp/mapcycles/",
-        config.mapcycle .. ".txt")
-        if exists(predefinedMapCyclePath) then
-            local mapcycleContent = readFile(predefinedMapCyclePath)
-            writeFile(mapcyclePath, mapcycleContent)
-            table.insert(init, "sapp_mapcycle 1")
-            table.insert(init, "map_next")
-            -- Remove sv_map line from load.txt as sapp_mapcycle will handle map loading
-            loadFile = table.filter(loadFile, function(line)
+        -- Remove any existing SAPP mapcycle file
+        delete(sappMapcyclePath)
+        local mapCyclePath = gpath(serverDataPath, "/mapcycles/", config.mapcycle .. ".txt")
+        if exists(mapCyclePath) then
+            local mapcycleContent = readFile(mapCyclePath)
+            local loadFileLines = mapcycleContent:split("\n")
+            for _, line in pairs(loadFileLines) do
+                local data = line:trim():split(":")
+                if #data ~= 2 then
+                    cprint("Error Invalid line in predefined mapcycle: " .. line)
+                    os.exit(1)
+                end
+                local map, gametype = data[1], data[2]
+                table.insert(loadLines, "sv_mapcycle_add \"" .. map .. "\" \"" .. gametype .. "\"")
+            end
+
+            loadLines = table.filter(loadLines, function(line)
                 return not line:startswith("sv_map ")
             end)
+
+            table.insert(loadLines, "sv_mapcycle_begin")
         else
             cprint("Error Predefined mapcycle for \"" .. config.mapcycle .. "\" does not exist.")
             os.exit(1)
         end
     end
 
-    local load = table.concat(loadFile, "\n"):template{
+    local load = table.concat(loadLines, "\n"):template{
         map = map,
         gametype = gametype,
         sv_name = map,
@@ -154,7 +163,7 @@ local function serve(map, gametype, port, template, scripts, isUsingNewDataPath,
     }
 
     writeFile(loadFilePath, string.format(load, map, map, gametype))
-    writeFile(initFilePath, table.concat(init, "\n"))
+    writeFile(initFilePath, table.concat(initLines, "\n"))
 
     -- Prepare the command to setup the server
     local wineCmd = "wine "

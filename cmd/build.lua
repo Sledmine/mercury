@@ -142,7 +142,11 @@ local function build(yamlFilePath, command, verbose, isRelease, outputPath, scen
             flag("rename-scenario", releaseScenarioName)
         end
         local scenarioDir = path.dir(scenarioPath)
+        -- Add custom tags per scenario
         flag("tags", gpath("tags", "/", scenarioDir, "/custom_tags"))
+        -- Add custom globals tag path
+        flag("tags", gpath("tags", "/custom_tags"))
+        -- Finally project tags path
         flag("tags", "tags")
         local buildCommand = buildMapCmd .. "\"" .. scenarioPath .. "\""
         cprint("Compiling scenario: " .. scenarioPath)

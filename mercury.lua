@@ -422,15 +422,17 @@ serveCmd:option("--difficulty", "Difficulty to use for the server."):choices{
     "hard",
     "impossible"
 }:default "normal"
--- serveCmd:option("--mapcycle", "Mapcycle to use for the server."):args("*")
+serveCmd:option("--mapcycle", "Mapcycle to use for the server.")
+serveCmd:flag("-w --wineconsole", "Use wineconsole to launch the server on Linux.")
 serveCmd:action(function(args)
     flagsCheck(args)
     serve(args.map, args.gametype, option(args.port), args.template, args.scripts, args.new, {
         server_side_projectiles = args.server_side_projectiles,
         rcon = args.rcon,
         rcon_password = option(args.rcon_password),
-        difficulty = option(args.difficulty)
-        -- mapcycle = args.mapcycle
+        difficulty = option(args.difficulty),
+        wineconsole = args.wineconsole,
+        mapcycle = args.mapcycle
     })
     config.clean()
 end)

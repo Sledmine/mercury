@@ -4,6 +4,19 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.8.7] - 2026-04-03
+### Fixed
+- Issue with package bundling always including root folder in the include paths, now bundling will respect paths from the bundle file only
+
+### Added
+- New `--mapcycle` flag for `serve` command, allows to set a custom map cycle file for the game server, this looks for files in the mapcycles folder from the game data path, example usage:
+```cmd
+mercury serve --mapcycle custom
+```
+This will make the game server use the `custom_mapcycle.txt` from example `My Games/Halo CE/mapcycles/custom.txt` as the map cycle file.
+- Flag `--wineconsole` for `serve` command, allows to start the game server with the Wine console on Linux, this will help to interact with the game server console on Linux when using Wine
+- Passive feature for `build` command will now look for tag overrides inside the `custom_tags` folder relative to the current scenario being built, this will allow to have custom tags for specific scenarios without the need to modify the buildspec.yaml file, this also applies to `custom_tags` by default inside the root of the tags folder
+
 ## [3.8.6] - 2025-12-23
 ### Fixed
 - SSL verification disabled for download requests to improve stability on systems with outdated or missing root certificates

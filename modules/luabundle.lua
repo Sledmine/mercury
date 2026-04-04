@@ -55,13 +55,11 @@ end
 ---@return string?
 local function getFirstFileFromInclude(modulePath, includePaths)
     local modulePath = modulePath .. ".lua"
-    if exists(modulePath) then
-        return modulePath
-    end
     for _, includePath in pairs(includePaths) do
         local path = gpath(includePath, "/", modulePath)
-        --print("Checking: ", path)
+        --dprint("Attempting to get module at path: " .. path)
         if exists(path) then
+            dprint("Resolved module path: " .. path)
             return path
         end
     end
@@ -73,7 +71,7 @@ end
 ---@param includePaths string[]
 ---@return string?
 function luabundler.getModulePath(moduleName, includePaths)
-    --print("Getting module path for: ", moduleName)
+    --dprint("Finding module path for: " .. moduleName)
     moduleName = moduleName:replace(".", "/")
     return getFirstFileFromInclude(moduleName, includePaths)
 end
@@ -118,8 +116,10 @@ function luabundler.bundle(bundleName, compileBundle, hotReload, projectPath)
 
     project.main = project.main or "main"
 
-    local mainPath = assert(getFirstFileFromInclude(project.main, project.include),
-                            "Main file not found!")
+    -- TODO We might not want to look for main in the include paths
+    -- This can lead to picking the wrong file if there are multiple files with the same name
+    local mainPath = getFirstFileFromInclude(project.main, project.include) or project.main .. ".lua"
+    assert(exists(mainPath), "Main file not found in include paths")
     local requiredModules = {}
     local pathsAnalyzed = {}
     local function gatherDependencies(filePath)
@@ -155,11 +155,18 @@ function luabundler.bundle(bundleName, compileBundle, hotReload, projectPath)
     print("Required modules: ")
     for _, module in pairs(project.modules) do
         print("-", module)
+        -- Match module name with module path and print
+        local modulePath = luabundler.getModulePath(module, project.include)
+        if modulePath then
+            dprint("-", modulePath)
+        else
+            cprint("WARNING " .. module .. " (not found in include paths)")
+        end
     end
 
     cprint("--------------------------------------")
     cprint("Bundling project " .. (project.name or "unnamed") .. "... ")
-    local error = codeBundler({
+    local error = codeBundler {
         main = project.main,
         include = project.include or {},
         modules = table.map(project.modules, function(modulePath)
@@ -167,7 +174,7 @@ function luabundler.bundle(bundleName, compileBundle, hotReload, projectPath)
             return modulePath:replace("/", ".")
         end),
         output = project.output
-    })
+    }
     if error then
         cprint("Error, " .. error)
         return false

@@ -50,7 +50,6 @@ function helpers.find_in_includes(includes, modulename)
         return false
     end
     local path = string.gsub(modulename, "%.", '/')
-    table.insert(includes, 1, '.')
     for _, include in pairs(includes) do
         local abs_path = include .. '/' .. path .. '.lua'
         if check_path(abs_path) then

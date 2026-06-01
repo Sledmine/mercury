@@ -227,7 +227,86 @@ function merc.template()
     return false
 end
 
---- Compare two Mercury packages and create a diff package
+--- Run multiple shell commands in parallel and wait for all to complete.
+--- On Linux/macOS uses shell background jobs and the built-in `wait` builtin.
+--- On Windows launches each command via `start /B` inside a temp batch file and
+--- polls per-job completion marker files so the main process blocks until all
+--- jobs finish or the optional timeout is reached.
+---@param commands string[] List of shell commands to execute in parallel
+---@param timeout? number Maximum seconds to wait on Windows (default 600)
+---@return boolean success True when every command completed, false on timeout
+local function runParallel(commands, timeout)
+    if #commands == 0 then
+        return true
+    end
+    if #commands == 1 then
+        return run(commands[1]) ~= nil
+    end
+
+    if isHostWindows() then
+        timeout = timeout or 600
+        -- Build a batch file that starts every command in the background.
+        -- Each job appends a line to a unique marker file on completion so we
+        -- can poll for it without needing external utilities.
+        local markers = {}
+        local batLines = {"@echo off"}
+        for i, cmd in ipairs(commands) do
+            local marker = gpath(paths.mercuryTemp, "/pardone_" .. i .. ".tmp")
+            table.insert(markers, marker)
+            if exists(marker) then
+                delete(marker)
+            end
+            -- `type nul >` creates/truncates the marker file (cmd built-in, no extra exe)
+            table.insert(batLines,
+                         'start /B "" cmd /C "' .. cmd .. ' && type nul > "' .. marker .. '""')
+        end
+        local batPath = gpath(paths.mercuryTemp, "/parallel_run.bat")
+        writeFile(batPath, table.concat(batLines, "\r\n"))
+        os.execute('"' .. batPath .. '"')
+
+        -- Poll until every marker file is present or timeout is reached.
+        -- `ping -n 2 127.0.0.1` sleeps ~1 second without needing extra tools.
+        local elapsed = 0
+        local allDone = false
+        while elapsed < timeout do
+            allDone = true
+            for _, marker in ipairs(markers) do
+                if not exists(marker) then
+                    allDone = false
+                    break
+                end
+            end
+            if allDone then
+                break
+            end
+            os.execute("ping -n 2 127.0.0.1 > nul")
+            elapsed = elapsed + 1
+        end
+
+        -- Cleanup temp files regardless of outcome
+        for _, marker in ipairs(markers) do
+            if exists(marker) then
+                delete(marker)
+            end
+        end
+        delete(batPath)
+        return allDone
+    else
+        -- Linux/macOS: wrap every command in a subshell, fork all with `&`,
+        -- then use the shell built-in `wait` to block until every job exits.
+        local parts = {}
+        for _, cmd in ipairs(commands) do
+            table.insert(parts, "(" .. cmd .. ")")
+        end
+        local compound = table.concat(parts, " & ") .. "; wait"
+        local result = os.execute("sh -c " .. string.format("%q", compound))
+        return result and true or false
+    end
+end
+
+--- Compare two Mercury packages and create a diff package.
+--- xdelta3 diff generation for all changed binary files is performed in
+--- parallel to reduce wall-clock time on packages with many files.
 ---@param oldpackagePath string Path to the old package
 ---@param newPackagePath string Path to the new package
 ---@param diffPackagePath? string Path to the diff package
@@ -269,117 +348,149 @@ function merc.diff(oldpackagePath, newPackagePath, diffPackagePath, backend)
     ---@type packageMercury
     local newManifest = json.decode(readFile(newExtractionPath .. "/manifest.json"))
 
-    if (oldManifest and newManifest and oldManifest.label == newManifest.label) then
-        -- Create diff files
-        for oldFileIndex, oldFile in pairs(oldManifest.files) do
-            local isFileOnNewPackage
-            for newFileIndex, newFile in pairs(newManifest.files) do
-                local oldPath = gpath(oldFile.path)
-                local newPath = gpath(newFile.path)
-                if oldPath == newPath then
-                    isFileOnNewPackage = true
-                    -- File should be updated
-                    if newFile.type == "binary" then
-                        local oldFilePath = gpath(oldExtractionPath, "/", oldFile.path)
-                        local newFilePath = gpath(newExtractionPath, "/", newFile.path)
-                        local diffFilePath = gpath(diffExtractionPath, "/", newFile.path, ".xd3")
+    if not (oldManifest and newManifest and oldManifest.label == newManifest.label) then
+        cprint("Error, at attempting to create diff package.")
+        return false
+    end
 
-                        cprint("Searching for differences in " .. oldFile.path)
-                        -- dprint(SHA256(oldFilePath) .. " -> " .. SHA256(newFilePath))
-                        if SHA256(oldFilePath) ~= SHA256(newFilePath) then
-                            cprint("\tWarning " .. oldPath ..
-                                       " has differences between packages, creating xd3 diff!")
+    -- Phase 1: compare files and collect xdelta3 tasks.
+    -- SHA256 comparisons are sequential (fast, I/O-light); we just build the
+    -- work list here so all xd3 processes can start together in Phase 2.
+    ---@class DiffTask
+    ---@field cmd string xdelta3 command to execute
+    ---@field newFile table File entry from the new manifest
+    ---@field diffFilePath string Absolute path to the expected .xd3 output
 
-                            local diffFileFolderPath = path.dir(diffFilePath)
-                            if not exists(diffFileFolderPath) and
-                                not createFolder(diffFileFolderPath) then
-                                cprint("Error, at trying to create output diff file folder: " ..
-                                           diffFileFolderPath)
-                            end
-                            -- TODO: Add diff file creation verificaton
-                            print("\tOld file: " .. oldFilePath)
-                            print("\tNew file : " .. newFilePath)
-                            print("\tDiff file: " .. diffFilePath)
+    ---@type DiffTask[]
+    local diffTasks = {}
 
-                            local xd3Cmd = upath(constants.xd3CmdDiffLine:format(oldFilePath,
-                                                                                 newFilePath,
-                                                                                 diffFilePath))
-                            dprint("xd3Cmd: " .. xd3Cmd)
+    for _, oldFile in pairs(oldManifest.files) do
+        local isFileOnNewPackage = false
+        for newFileIndex, newFile in pairs(newManifest.files) do
+            local oldPath = gpath(oldFile.path)
+            local newPath = gpath(newFile.path)
+            if oldPath == newPath then
+                isFileOnNewPackage = true
+                if newFile.type == "binary" then
+                    local oldFilePath = gpath(oldExtractionPath, "/", oldFile.path)
+                    local newFilePath = gpath(newExtractionPath, "/", newFile.path)
+                    local diffFilePath = gpath(diffExtractionPath, "/", newFile.path, ".xd3")
 
-                            local xd3Result
-                            if IsDebugModeEnabled and exists(diffFilePath) then
-                                dprint("Diff file already exists, skipping diff creation.")
-                                xd3Result = true
-                            else
-                                xd3Result = run(xd3Cmd)
-                            end
-                            if xd3Result then
-                                if not newManifest.updates then
-                                    newManifest.updates = {}
-                                end
-                                -- Add xd3 file to updates
-                                dprint("diffFilePath: " .. diffFilePath)
-                                dprint("diffExtractionPath: " .. diffExtractionPath)
-                                -- TODO Fix relative path, this adds drive to path for some reason
-                                -- local diffFilePath = path.rel(diffFilePath, diffExtractionPath)
-                                local relativeFilePath =
-                                    diffFilePath:replace(gpath(diffExtractionPath, "/"), "")
-                                dprint("relative diffFilePath: " .. relativeFilePath)
-                                table.insert(newManifest.updates, {
-                                    path = upath(newFile.path),
-                                    diffPath = upath(relativeFilePath),
-                                    type = newFile.type,
-                                    outputPath = upath(newFile.outputPath)
-                                })
-                            end
+                    cprint("Searching for differences in " .. oldFile.path)
+                    if SHA256(oldFilePath) ~= SHA256(newFilePath) then
+                        cprint("\tWarning " .. oldPath ..
+                                   " has differences between packages, queuing xd3 diff.")
+
+                        local diffFileFolderPath = path.dir(diffFilePath)
+                        if not exists(diffFileFolderPath) and
+                            not createFolder(diffFileFolderPath) then
+                            cprint("Error, at trying to create output diff file folder: " ..
+                                       diffFileFolderPath)
                         end
-                        -- File is an update so remove file from installation files
-                        table.remove(newManifest.files, newFileIndex)
-                    elseif newFile.type == "optional" then
-                        -- File is optional we need to remove it from installation files
-                        table.remove(newManifest.files, newFileIndex)
+
+                        print("\tOld file : " .. oldFilePath)
+                        print("\tNew file : " .. newFilePath)
+                        print("\tDiff file: " .. diffFilePath)
+
+                        if IsDebugModeEnabled and exists(diffFilePath) then
+                            dprint("Diff file already exists, skipping diff creation.")
+                        else
+                            local xd3Cmd = upath(constants.xd3CmdDiffLine:format(oldFilePath,
+                                                                                  newFilePath,
+                                                                                  diffFilePath))
+                            dprint("xd3Cmd: " .. xd3Cmd)
+                            table.insert(diffTasks, {
+                                cmd = xd3Cmd,
+                                newFile = newFile,
+                                diffFilePath = diffFilePath
+                            })
+                        end
                     end
-                    break
+                    -- Remove from install files; this file will be an update entry
+                    table.remove(newManifest.files, newFileIndex)
+                elseif newFile.type == "optional" then
+                    -- Optional files are skipped in diff packages
+                    table.remove(newManifest.files, newFileIndex)
                 end
-            end
-            if not isFileOnNewPackage then
-                cprint("Warning file " .. oldFile.path .. " is not present on the new package.")
+                break
             end
         end
-
-        -- Make sure all files are using unix paths, just in case
-        -- It will fix previously created packages with windows paths!
-        newManifest.files = table.map(newManifest.files, function(file)
-            return {path = upath(file.path), type = file.type, outputPath = upath(file.outputPath)}
-        end)
-
-        for fileIndex, file in pairs(newManifest.files) do
-            if exists(newExtractionPath .. "/" .. file.path) then
-                createFolder(diffExtractionPath .. "/" .. path.dir(file.path))
-                copyFile(newExtractionPath .. "/" .. file.path,
-                         diffExtractionPath .. "/" .. file.path)
-            else
-                cprint("Warning file \"" .. file.path .. "\" does not exist!")
-                table.remove(newManifest.files, fileIndex)
-            end
-        end
-        newManifest.targetVersion = oldManifest.version
-        writeFile(diffExtractionPath .. "/manifest.json", json.encode(newManifest))
-
-        if exists(diffPackagePath) then
-            delete(diffPackagePath)
-        end
-
-        -- Zip new package
-        cprint("Packing update diff... ", true)
-        local diffPackageZip = zip.open(diffPackagePath, "w")
-        if diffPackageZip then
-            diffPackageZip:add_all(diffExtractionPath)
-            diffPackageZip:close()
-            cprint("done.")
-            return true
+        if not isFileOnNewPackage then
+            cprint("Warning file " .. oldFile.path .. " is not present on the new package.")
         end
     end
+
+    -- Phase 2: run all collected xdelta3 diff commands in parallel.
+    if #diffTasks > 0 then
+        cprint("Running " .. #diffTasks .. " xdelta3 diff(s) in parallel... ", true)
+        local xd3Commands = {}
+        for _, task in ipairs(diffTasks) do
+            table.insert(xd3Commands, task.cmd)
+        end
+
+        local parallelResult = runParallel(xd3Commands)
+        if not parallelResult then
+            cprint("Error, at attempting to run xd3 diff processes.")
+            return false
+        end
+        cprint("done.")
+
+        -- Phase 3: collect results and populate manifest updates.
+        if not newManifest.updates then
+            newManifest.updates = {}
+        end
+        for _, task in ipairs(diffTasks) do
+            if exists(task.diffFilePath) then
+                dprint("diffFilePath: " .. task.diffFilePath)
+                dprint("diffExtractionPath: " .. diffExtractionPath)
+                local relativeFilePath =
+                    task.diffFilePath:replace(gpath(diffExtractionPath, "/"), "")
+                dprint("relative diffFilePath: " .. relativeFilePath)
+                table.insert(newManifest.updates, {
+                    path = upath(task.newFile.path),
+                    diffPath = upath(relativeFilePath),
+                    type = task.newFile.type,
+                    outputPath = upath(task.newFile.outputPath)
+                })
+            else
+                cprint("Warning, diff file was not created for: " .. task.newFile.path)
+            end
+        end
+    end
+
+    -- Make sure all remaining install files use unix paths
+    newManifest.files = table.map(newManifest.files, function(file)
+        return {path = upath(file.path), type = file.type, outputPath = upath(file.outputPath)}
+    end)
+
+    for fileIndex, file in pairs(newManifest.files) do
+        if exists(newExtractionPath .. "/" .. file.path) then
+            createFolder(diffExtractionPath .. "/" .. path.dir(file.path))
+            copyFile(newExtractionPath .. "/" .. file.path,
+                     diffExtractionPath .. "/" .. file.path)
+        else
+            cprint("Warning file \"" .. file.path .. "\" does not exist!")
+            table.remove(newManifest.files, fileIndex)
+        end
+    end
+
+    newManifest.targetVersion = oldManifest.version
+    writeFile(diffExtractionPath .. "/manifest.json", json.encode(newManifest))
+
+    if exists(diffPackagePath) then
+        delete(diffPackagePath)
+    end
+
+    -- Zip the assembled diff package
+    cprint("Packing update diff... ", true)
+    local diffPackageZip = zip.open(diffPackagePath, "w")
+    if diffPackageZip then
+        diffPackageZip:add_all(diffExtractionPath)
+        diffPackageZip:close()
+        cprint("done.")
+        return true
+    end
+
     cprint("Error, at attempting to create diff package.")
     return false
 end

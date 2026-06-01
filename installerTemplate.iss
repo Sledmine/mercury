@@ -52,12 +52,12 @@ Source: "bin\curl\$ARCH\curl.exe"; DestDir: "{app}"; Flags: ignoreversion
 Source: "build\mercury.exe"; DestDir: "{app}"; Flags: ignoreversion
 Source: "ui\dist\mercury-ui\mercury-ui-win_x64.exe"; DestDir: "{app}"; Flags: ignoreversion
 Source: "ui\dist\mercury-ui\resources.neu"; DestDir: "{app}"; Flags: ignoreversion
-Source: "ui\dist\mercury-ui\WebView2Loader.dll"; DestDir: "{app}"; Flags: ignoreversion
 Source: "mercury_admin.cmd"; DestDir: "{app}"; Flags: ignoreversion
 Source: "mercury_console.cmd"; DestDir: "{app}"; Flags: ignoreversion
 
 [InstallDelete]
 Type: files; Name: "{userdesktop}\Mercury Console (Admin).lnk"
+Type: files; Name: "{app}\WebView2Loader.dll"
 
 [UninstallDelete]
 Type: files; Name: "{app}\mercuryconf.json"

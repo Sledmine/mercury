@@ -73,6 +73,7 @@ local pathVariables = {
     ["game-root"] = paths.gamePath,
     ["$mygames"] = paths.myGamesPath,
     ["my-games-data-path"] = paths.myGamesPath,
+    ["game-data"] = paths.myGamesPath,
     ["lua-global"] = paths.luaScriptsGlobal,
     ["lua-map"] = paths.luaScriptsMap,
     ["lua-sapp"] = paths.luaScriptsSAPP,

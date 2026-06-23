@@ -512,3 +512,80 @@ function printTree(tree, indent)
         end
     end
 end
+
+--- Run multiple shell commands in parallel and wait for all to complete.
+--- On Linux/macOS uses shell background jobs and the built-in `wait` builtin.
+--- On Windows launches each command via `start /B` inside a temp batch file and
+--- polls per-job completion marker files so the main process blocks until all
+--- jobs finish or the optional timeout is reached.
+---@param commands string[] List of shell commands to execute in parallel
+---@param timeout? number Maximum seconds to wait on Windows (default 600)
+---@return boolean success True when every command completed, false on timeout
+function runParallel(commands, timeout)
+    if #commands == 0 then
+        return true
+    end
+    if #commands == 1 then
+        return run(commands[1]) ~= nil
+    end
+
+    if isHostWindows() then
+        timeout = timeout or 600
+        -- Build a batch file that starts every command in the background.
+        -- Each job appends a line to a unique marker file on completion so we
+        -- can poll for it without needing external utilities.
+        local markers = {}
+        local batLines = {"@echo off"}
+        for i, cmd in ipairs(commands) do
+            local marker = gpath(paths.mercuryTemp, "/pardone_" .. i .. ".tmp")
+            table.insert(markers, marker)
+            if exists(marker) then
+                delete(marker)
+            end
+            -- `type nul >` creates/truncates the marker file (cmd built-in, no extra exe)
+            table.insert(batLines,
+                         "start /B \"\" cmd /C \"" .. cmd .. " && type nul > \"" .. marker .. "\"\"")
+        end
+        local batPath = gpath(paths.mercuryTemp, "/parallel_run.bat")
+        writeFile(batPath, table.concat(batLines, "\r\n"))
+        os.execute("\"" .. batPath .. "\"")
+
+        -- Poll until every marker file is present or timeout is reached.
+        -- `ping -n 2 127.0.0.1` sleeps ~1 second without needing extra tools.
+        local elapsed = 0
+        local allDone = false
+        while elapsed < timeout do
+            allDone = true
+            for _, marker in ipairs(markers) do
+                if not exists(marker) then
+                    allDone = false
+                    break
+                end
+            end
+            if allDone then
+                break
+            end
+            os.execute("ping -n 2 127.0.0.1 > nul")
+            elapsed = elapsed + 1
+        end
+
+        -- Cleanup temp files regardless of outcome
+        for _, marker in ipairs(markers) do
+            if exists(marker) then
+                delete(marker)
+            end
+        end
+        delete(batPath)
+        return allDone
+    else
+        -- Linux/macOS: wrap every command in a subshell, fork all with `&`,
+        -- then use the shell built-in `wait` to block until every job exits.
+        local parts = {}
+        for _, cmd in ipairs(commands) do
+            table.insert(parts, "(" .. cmd .. ")")
+        end
+        local compound = table.concat(parts, " & ") .. "; wait"
+        local result = os.execute("sh -c " .. string.format("%q", compound))
+        return result and true or false
+    end
+end

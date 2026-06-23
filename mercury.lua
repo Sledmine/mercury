@@ -345,6 +345,7 @@ buildCmd:flag("--template", "Create a buildspec template file on current directo
 buildCmd:flag("-s --scenario", "Build specific scenarios."):args("+")
 buildCmd:option("--output", "Output path for the build result.")
 buildCmd:option("--crc", "Forge crc to use for the build.")
+buildCmd:flag("-p --parallel ", "Run map building process as parallel processes")
 buildCmd:action(function(args, name)
     flagsCheck(args)
     if (args.template) then
@@ -353,7 +354,7 @@ buildCmd:action(function(args, name)
     end
     dprint(args)
     if build("buildspec.yaml", args.command, args.verbose, args.release, args.output, args.scenario,
-             args.crc) then
+             args.crc, args.parallel) then
         os.exit(0)
     end
     os.exit(1)

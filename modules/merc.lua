@@ -62,7 +62,7 @@ local backends = {minizip = minizip, ["7z"] = sevenZip}
 ---@param unpackDir string Directory path to place output files
 ---@param backend? "minizip" | "unzip" | "7z" Backend to use for unpacking
 function merc.unpack(filepath, unpackDir, backend)
-    dprint("Unpacking " .. filepath .. "...")
+    cprint("Unpacking " .. filepath .. "...")
     local backend = backend or "minizip"
 
     local implementation = backends[backend]
@@ -227,83 +227,6 @@ function merc.template()
     return false
 end
 
---- Run multiple shell commands in parallel and wait for all to complete.
---- On Linux/macOS uses shell background jobs and the built-in `wait` builtin.
---- On Windows launches each command via `start /B` inside a temp batch file and
---- polls per-job completion marker files so the main process blocks until all
---- jobs finish or the optional timeout is reached.
----@param commands string[] List of shell commands to execute in parallel
----@param timeout? number Maximum seconds to wait on Windows (default 600)
----@return boolean success True when every command completed, false on timeout
-local function runParallel(commands, timeout)
-    if #commands == 0 then
-        return true
-    end
-    if #commands == 1 then
-        return run(commands[1]) ~= nil
-    end
-
-    if isHostWindows() then
-        timeout = timeout or 600
-        -- Build a batch file that starts every command in the background.
-        -- Each job appends a line to a unique marker file on completion so we
-        -- can poll for it without needing external utilities.
-        local markers = {}
-        local batLines = {"@echo off"}
-        for i, cmd in ipairs(commands) do
-            local marker = gpath(paths.mercuryTemp, "/pardone_" .. i .. ".tmp")
-            table.insert(markers, marker)
-            if exists(marker) then
-                delete(marker)
-            end
-            -- `type nul >` creates/truncates the marker file (cmd built-in, no extra exe)
-            table.insert(batLines,
-                         'start /B "" cmd /C "' .. cmd .. ' && type nul > "' .. marker .. '""')
-        end
-        local batPath = gpath(paths.mercuryTemp, "/parallel_run.bat")
-        writeFile(batPath, table.concat(batLines, "\r\n"))
-        os.execute('"' .. batPath .. '"')
-
-        -- Poll until every marker file is present or timeout is reached.
-        -- `ping -n 2 127.0.0.1` sleeps ~1 second without needing extra tools.
-        local elapsed = 0
-        local allDone = false
-        while elapsed < timeout do
-            allDone = true
-            for _, marker in ipairs(markers) do
-                if not exists(marker) then
-                    allDone = false
-                    break
-                end
-            end
-            if allDone then
-                break
-            end
-            os.execute("ping -n 2 127.0.0.1 > nul")
-            elapsed = elapsed + 1
-        end
-
-        -- Cleanup temp files regardless of outcome
-        for _, marker in ipairs(markers) do
-            if exists(marker) then
-                delete(marker)
-            end
-        end
-        delete(batPath)
-        return allDone
-    else
-        -- Linux/macOS: wrap every command in a subshell, fork all with `&`,
-        -- then use the shell built-in `wait` to block until every job exits.
-        local parts = {}
-        for _, cmd in ipairs(commands) do
-            table.insert(parts, "(" .. cmd .. ")")
-        end
-        local compound = table.concat(parts, " & ") .. "; wait"
-        local result = os.execute("sh -c " .. string.format("%q", compound))
-        return result and true or false
-    end
-end
-
 --- Compare two Mercury packages and create a diff package.
 --- xdelta3 diff generation for all changed binary files is performed in
 --- parallel to reduce wall-clock time on packages with many files.
@@ -382,8 +305,7 @@ function merc.diff(oldpackagePath, newPackagePath, diffPackagePath, backend)
                                    " has differences between packages, queuing xd3 diff.")
 
                         local diffFileFolderPath = path.dir(diffFilePath)
-                        if not exists(diffFileFolderPath) and
-                            not createFolder(diffFileFolderPath) then
+                        if not exists(diffFileFolderPath) and not createFolder(diffFileFolderPath) then
                             cprint("Error, at trying to create output diff file folder: " ..
                                        diffFileFolderPath)
                         end
@@ -396,8 +318,8 @@ function merc.diff(oldpackagePath, newPackagePath, diffPackagePath, backend)
                             dprint("Diff file already exists, skipping diff creation.")
                         else
                             local xd3Cmd = upath(constants.xd3CmdDiffLine:format(oldFilePath,
-                                                                                  newFilePath,
-                                                                                  diffFilePath))
+                                                                                 newFilePath,
+                                                                                 diffFilePath))
                             dprint("xd3Cmd: " .. xd3Cmd)
                             table.insert(diffTasks, {
                                 cmd = xd3Cmd,
@@ -443,8 +365,8 @@ function merc.diff(oldpackagePath, newPackagePath, diffPackagePath, backend)
             if exists(task.diffFilePath) then
                 dprint("diffFilePath: " .. task.diffFilePath)
                 dprint("diffExtractionPath: " .. diffExtractionPath)
-                local relativeFilePath =
-                    task.diffFilePath:replace(gpath(diffExtractionPath, "/"), "")
+                local relativeFilePath = task.diffFilePath:replace(gpath(diffExtractionPath, "/"),
+                                                                   "")
                 dprint("relative diffFilePath: " .. relativeFilePath)
                 table.insert(newManifest.updates, {
                     path = upath(task.newFile.path),
@@ -466,8 +388,7 @@ function merc.diff(oldpackagePath, newPackagePath, diffPackagePath, backend)
     for fileIndex, file in pairs(newManifest.files) do
         if exists(newExtractionPath .. "/" .. file.path) then
             createFolder(diffExtractionPath .. "/" .. path.dir(file.path))
-            copyFile(newExtractionPath .. "/" .. file.path,
-                     diffExtractionPath .. "/" .. file.path)
+            copyFile(newExtractionPath .. "/" .. file.path, diffExtractionPath .. "/" .. file.path)
         else
             cprint("Warning file \"" .. file.path .. "\" does not exist!")
             table.remove(newManifest.files, fileIndex)
